@@ -54,12 +54,10 @@
 //
 //
 
-`include "timescale.v"
 
 module aes_inv_sbox(a,d);
-input	[7:0]	a;
-output	[7:0]	d;
-reg	[7:0]	d;
+input	wire [7:0]	a;
+output reg	[7:0]	d;
 
 always @(a)
 	case(a)		// synopsys full_case parallel_case
