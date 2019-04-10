@@ -55,58 +55,59 @@
 //
 
 module aes_frcon(i, frcon);
-input	wire [3:0]	i;
-output reg [31:0]	frcon;
-always @(i) begin
-   $display("This shit changed!");
-   
-case(i)	// synopsys parallel_case
-   4'h0: frcon=32'h01_00_00_00;
-   4'h1: frcon=32'h02_00_00_00;
-   4'h2: frcon=32'h04_00_00_00;
-   4'h3: frcon=32'h08_00_00_00;
-   4'h4: frcon=32'h10_00_00_00;
-   4'h5: frcon=32'h20_00_00_00;
-   4'h6: frcon=32'h40_00_00_00;
-   4'h7: frcon=32'h80_00_00_00;
-   4'h8: frcon=32'h1b_00_00_00;
-   4'h9: frcon=32'h36_00_00_00;
-   default: frcon=32'h00_00_00_00;
-endcase // case (i)
-end
+  input	wire [3:0]	i;
+  output reg [31:0]	frcon;
+
+  always @(i) begin    
+    case(i)	// synopsys parallel_case
+      4'h0: frcon=32'h01_00_00_00;
+      4'h1: frcon=32'h02_00_00_00;
+      4'h2: frcon=32'h04_00_00_00;
+      4'h3: frcon=32'h08_00_00_00;
+      4'h4: frcon=32'h10_00_00_00;
+      4'h5: frcon=32'h20_00_00_00;
+      4'h6: frcon=32'h40_00_00_00;
+      4'h7: frcon=32'h80_00_00_00;
+      4'h8: frcon=32'h1b_00_00_00;
+      4'h9: frcon=32'h36_00_00_00;
+      default: frcon=32'h00_00_00_00;
+    endcase // case (i)
+  end
 endmodule
 
 
 module aes_rcon(clk, kld, out);
-input	wire	clk;
-input	wire	kld;
-output reg	[31:0]	out;
+  input	wire	clk;
+  input	wire	kld;
+  output reg	[31:0]	out;
 
-reg	[3:0]	rcnt;
-wire	[3:0]	rcnt_next;
+  reg	[3:0]	rcnt;
+  wire	[3:0]	rcnt_next;
 
-always @(posedge clk) begin
-	if(kld)		out <= 32'h01_00_00_00;  // #1 means delay by 1 unit
-	else begin
-    case(rcnt_next)	// synopsys parallel_case
-       4'h0: out<=32'h01_00_00_00;
-       4'h1: out<=32'h02_00_00_00;
-       4'h2: out<=32'h04_00_00_00;
-       4'h3: out<=32'h08_00_00_00;
-       4'h4: out<=32'h10_00_00_00;
-       4'h5: out<=32'h20_00_00_00;
-       4'h6: out<=32'h40_00_00_00;
-       4'h7: out<=32'h80_00_00_00;
-       4'h8: out<=32'h1b_00_00_00;
-       4'h9: out<=32'h36_00_00_00;
-       default: out<=32'h00_00_00_00;
-    endcase // case (rcnt_next)
-  end
-end   
+  always @(posedge clk) begin
+	  if(kld)		out <= 32'h01_00_00_00;  // #1 means delay by 1 unit
+	  else begin
+      case(rcnt_next)	// synopsys parallel_case
+        4'h0: out<=32'h01_00_00_00;
+        4'h1: out<=32'h02_00_00_00;
+        4'h2: out<=32'h04_00_00_00;
+        4'h3: out<=32'h08_00_00_00;
+        4'h4: out<=32'h10_00_00_00;
+        4'h5: out<=32'h20_00_00_00;
+        4'h6: out<=32'h40_00_00_00;
+        4'h7: out<=32'h80_00_00_00;
+        4'h8: out<=32'h1b_00_00_00;
+        4'h9: out<=32'h36_00_00_00;
+        default: out<=32'h00_00_00_00;
+      endcase // case (rcnt_next)
+    end
+  end   
 
-assign rcnt_next = rcnt + 4'h1;
-always @(posedge clk)
-	if(kld)		rcnt <= 4'h0;
-	else		rcnt <= rcnt_next;
+  assign rcnt_next = rcnt + 4'h1;
+
+  always @(posedge clk)
+	  if(kld)		rcnt <= 4'h0;
+	  else		rcnt <= rcnt_next;
+
 endmodule
 
