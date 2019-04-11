@@ -54,11 +54,6 @@
 //
 //
 
-include aes_mix_col.v;
-include aes_sbox.v;
-include aes_rcon.v;
-include aes_key_expand_128.v;
-
 module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
   input wire clk;
   input wire rst;
@@ -248,10 +243,6 @@ module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
   //
   // Modules
   //
-
-  // TODO: define your 4 new modules here
-  // so that you can do
-  // assign {sa00_mc, sa10_mc, sa20_mc, sa30_mc}  = sa0;
 
   aes_mix_col mc0(
                   .s0(sa00_sr),
