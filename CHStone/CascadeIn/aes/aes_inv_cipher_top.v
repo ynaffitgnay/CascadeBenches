@@ -53,90 +53,12 @@
 //
 //
 //
+include aes_pmul.v;
+include aes_inv_mix_col.v;
 include aes_inv_sbox.v;
 include aes_sbox.v;
 include aes_rcon.v;
 include aes_key_expand_128.v;
-
-// Some synthesis tools don't like xtime being called recursevly ...
-module aes_pmul#(parameter LEVEL = 0)(b, out_b);
-  input wire [7:0] b;
-  output reg [7:0] out_b;
-
-  reg[7:0] two;
-  reg[7:0] four;
-  reg[7:0] eight;
-
-  always @(b) begin
-    two = {b[6:0],1'b0}^(8'h1b&{8{b[7]}});
-    four = {two[6:0],1'b0}^(8'h1b&{8{two[7]}});
-    eight = {four[6:0],1'b0}^(8'h1b&{8{four[7]}});
-
-    case (LEVEL)
-      0: out_b = eight^two^b;    // b
-      1: out_b = eight^four^b;   // d
-      2: out_b = eight^b;        // 9
-      3: out_b = eight^four^two; // e
-    endcase // case (LEVEL)
-  end
-endmodule
-
-module aes_inv_mix_col(s0, s1, s2, s3, out_imc);
-  input	wire [7:0] s0;
-  input wire [7:0] s1;
-  input wire [7:0] s2;
-  input wire [7:0] s3;
-
-  output reg[31:0] out_imc;
-
-  reg [7:0] out_e_0;
-  reg [7:0] out_b_1;
-  reg [7:0] out_d_2;
-  reg [7:0] out_9_3;
-
-  reg [7:0] out_9_0;
-  reg [7:0] out_e_1;
-  reg [7:0] out_b_2;
-  reg [7:0] out_d_3;
-
-  reg [7:0] out_d_0;
-  reg [7:0] out_9_1;
-  reg [7:0] out_e_2;
-  reg [7:0] out_b_3;
-
-  reg [7:0] out_b_0;
-  reg [7:0] out_d_1;
-  reg [7:0] out_9_2;
-  reg [7:0] out_e_3;
-
-  aes_pmul#(3) pmul_e_0(s0, out_e_0);
-  aes_pmul#(0) pmul_b_1(s1, out_b_1);
-  aes_pmul#(1) pmul_d_2(s2, out_d_2);
-  aes_pmul#(2) pmul_9_3(s3, out_9_3);
-
-  aes_pmul#(2) pmul_9_0(s0, out_9_0);
-  aes_pmul#(3) pmul_e_1(s1, out_e_1);
-  aes_pmul#(0) pmul_b_2(s2, out_b_2);
-  aes_pmul#(1) pmul_d_3(s3, out_d_3);
-
-  aes_pmul#(1) pmul_d_0(s0, out_d_0);
-  aes_pmul#(2) pmul_9_1(s1, out_9_1);
-  aes_pmul#(3) pmul_e_2(s2, out_e_2);
-  aes_pmul#(0) pmul_b_3(s3, out_b_3);
-
-  aes_pmul#(0) pmul_b_0(s0, out_b_0);
-  aes_pmul#(1) pmul_d_1(s1, out_d_1);
-  aes_pmul#(2) pmul_9_2(s2, out_9_2);
-  aes_pmul#(3) pmul_e_3(s3, out_e_3);
-
-  always @(*) begin
-    out_imc[31:24]=out_e_0^out_b_1^out_d_2^out_9_3; 
-    out_imc[23:16]=out_9_0^out_e_1^out_b_2^out_d_3; 
-    out_imc[15:08]=out_d_0^out_9_1^out_e_2^out_b_3;
-    out_imc[07:00]=out_b_0^out_d_1^out_9_2^out_e_3;
-  end
-
-endmodule
 
 module aes_inv_cipher_top(clk, rst, kld, ld, done, key, text_in, text_out );
   input	wire	clk;
