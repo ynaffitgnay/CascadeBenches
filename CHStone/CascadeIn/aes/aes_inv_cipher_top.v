@@ -53,12 +53,6 @@
 //
 //
 //
-include aes_pmul.v;
-include aes_inv_mix_col.v;
-include aes_inv_sbox.v;
-include aes_sbox.v;
-include aes_rcon.v;
-include aes_key_expand_128.v;
 
 module aes_inv_cipher_top(clk, rst, kld, ld, done, key, text_in, text_out );
   input	wire	clk;
