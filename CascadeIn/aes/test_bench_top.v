@@ -68,7 +68,17 @@ include aes_cipher_top.v;
 include aes_inv_cipher_top.v;
 
 
-module test;
+module test(clk);
+  input wire clk;
+  reg rst;
+
+  reg[3:0] state;
+
+  reg[31:0] ctr;
+  reg ctr_rst = 0;
+
+  reg loops;  // count the number of loops
+
 
   reg	[383:0]	tv[512:0];	// Test vectors
   wire	[383:0]	tmp;
@@ -81,23 +91,21 @@ module test;
   wire		done, done2;
   integer		n, error_cnt;
 
+  // State machine parameters
+  parameter init = 4'd0;
+  parameter setr = 4'd1;
+  parameter start_tests = 4'd2;
+  parameter begin_loop = 4'd3;
+  parameter show_testA = 4'd4;
+  parameter show_testB = 4'd5;
+  parameter finish_tests = 4'd6;
+  parameter end_tb = 4'd7;
+
+
   initial begin
-	  $display("\n\n");
-	  $display("*****************************************************");
-	  $display("* AES Test bench ...");
-	  $display("*****************************************************");
-	  $display("\n");
-
-	  kld = 0;
-	  rst = 0;
-	  error_cnt = 0;
-	  repeat(4)	@(posedge clk);
-	  rst = 1;
-	  repeat(20)	@(posedge clk);
-
-	  $display("");
-	  $display("");
-	  $display("Started random test ...");
+    ctr = 0;
+    ctr_rst = 0;
+    state = init;
 
     tv[0]= 384'h00000000000000000000000000000000f34481ec3cc627bacd5dc3fb08f273e60336763e966d92595a567cc9ce537f5e;
     tv[1]= 384'h000000000000000000000000000000009798c4640bad75c7c3227db910174e72a9a1631bf4996954ebc093957b234589;
@@ -384,61 +392,131 @@ module test;
     tv[282]= 384'h00000000000000000000000000000000fffffffffffffffffffffffffffffffe5c005e72c1418c44f569f2ea33ba54f3;
     tv[283]= 384'h00000000000000000000000000000000ffffffffffffffffffffffffffffffff3f5b8cc9ea855a0afa7347d23e8d664e;
 
+    
 
-    for(n=0;n<284;n=n+1)
-    begin
-	    @(posedge clk);
-	    #1;
-	    kld = 1;
-	    @(posedge clk);
-	    #1;
-	    kld = 0;
-	    @(posedge clk);
-
-	    while(!done)	@(posedge clk);
-
-	    //$display("INFO: (a) Vector %0d: xpected %x, Got %x %t", n, ciph, text_out, $time);
-
-	    if(text_out != ciph | (|text_out)==1'bx)
-	    begin
-		    $display("ERROR: (a) Vector %0d mismatch. Expected %x, Got %x",
-			           n, ciph, text_out);
-		    error_cnt = error_cnt + 1;
-	    end
-
-
-	    while(!done2)	@(posedge clk);
-
-	    //$display("INFO: (b) Vector %0d: xpected %x, Got %x", n, plain, text_out2);
-
-	    if(text_out2 != plain | (|text_out2)==1'bx)
-	    begin
-		    $display("ERROR: (b) Vector %0d mismatch. Expected %x, Got %x",
-			           n, plain, text_out2);
-		    error_cnt = error_cnt + 1;
-	    end
-
-	    @(posedge clk);
-	    #1;
-    end
-
-
-	  $display("");
-	  $display("");
-	  $display("Test Done. Found %0d Errors.", error_cnt);
-	  $display("");
-	  $display("");
-	  repeat(10)	@(posedge clk);
-	  $finish;
   end
 
+  // Define state machine
+  always @(posedge clk) 
+    case(state)
+      init: begin
+
+        if (ctr <= 0) begin
+	        $display("*****************************************************");
+	        $display("* AES Test bench ...");
+	        $display("*****************************************************");
+        end
+
+      
+        //ctr = 0;  // DON'T DO THIS HERE!!
+	      kld <= 0;
+	      rst <= 0;
+	      error_cnt = 0;
+
+        if (ctr >= 3) begin
+          state <= setr;
+          ctr_rst <= 1;
+        end
+      end // case: init
+
+      setr: begin
+	      rst = 1;
+        if (ctr >= 19) begin
+          state <= start_tests;
+          ctr_rst <= 1;
+        end
+      end // case: setr
+      
+	    start_tests: begin
+        $display("start tests\n");
+
+        if (ctr <= 0) begin          
+	        $display("");
+	        $display("");
+	        $display("Started random test ...");
+        end
+
+        loops <= 0;  // initialize the number of loops
+
+        state <= begin_loop;
+        ctr_rst <= 1;
+      end // case: start_tests
+
+      /*
+      for(n=0;n<284;n=n+1)
+      begin
+	      @(posedge clk);
+	      #1;
+	      kld = 1;
+	      @(posedge clk);
+	      #1;
+	      kld = 0;
+	      @(posedge clk);
+
+	      while(!done)	@(posedge clk);
+
+	      //$display("INFO: (a) Vector %0d: xpected %x, Got %x %t", n, ciph, text_out, $time);
+
+	      if(text_out != ciph | (|text_out)==1'bx)
+	      begin
+		      $display("ERROR: (a) Vector %0d mismatch. Expected %x, Got %x",
+			             n, ciph, text_out);
+		      error_cnt = error_cnt + 1;
+	      end
+
+
+	      while(!done2)	@(posedge clk);
+
+	      //$display("INFO: (b) Vector %0d: xpected %x, Got %x", n, plain, text_out2);
+
+	      if(text_out2 != plain | (|text_out2)==1'bx)
+	      begin
+		      $display("ERROR: (b) Vector %0d mismatch. Expected %x, Got %x",
+			             n, plain, text_out2);
+		      error_cnt = error_cnt + 1;
+	      end
+
+	      @(posedge clk);
+	      #1;
+      end
+
+
+	    $display("");
+	    $display("");
+	    $display("Test Done. Found %0d Errors.", error_cnt);
+	    $display("");
+	    $display("");
+	    repeat(10)	@(posedge clk);
+*/
+      end_tb: begin
+	      $finish();
+      end
+      default: begin
+        // set default state to finish
+        state <= end_tb;
+      end
+
+    endcase // case (state)
+
+  // Counter
+  always@(posedge clk) begin
+    $display(ctr);
+
+    if (ctr_rst) begin
+      $display("ctr reset after: %d", ctr);
+      ctr <= 0;
+      ctr_rst <= 0;
+    end else ctr <= ctr + 1;
+    //if (ctr > 10) $finish();
+  end
+
+
   assign tmp = tv[n];
-  assign key     = kld ? tmp[383:256] : 128'hx;
-  assign text_in = kld ? tmp[255:128] : 128'hx;
+  assign key     = kld ? tmp[383:256] : 128'h00000000000000000000000000000000; // 128'hx;
+  assign text_in = kld ? tmp[255:128] : 128'h00000000000000000000000000000000; // 128'hx;
   assign plain   = tmp[255:128];
   assign ciph    = tmp[127:0];
 
-  always #5 clk = ~clk;
 
   aes_cipher_top u0(
 	                  .clk(		clk		),
@@ -464,3 +542,4 @@ module test;
 endmodule
 
 
+test main(clock.val);

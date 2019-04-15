@@ -107,6 +107,10 @@ module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
 	    else
 	      if(|dcnt)	dcnt <= dcnt - 4'h1;
 
+  //TODO: get rid
+  always@(posedge clk) $display("Done: %d", done);
+
+
   always @(posedge clk) done <= !(|dcnt[3:1]) & dcnt[0] & !ld;
   always @(posedge clk) if(ld) text_in_r <= text_in;
   always @(posedge clk) ld_r <= ld;
