@@ -74,12 +74,12 @@ module test(clk);
 
   reg[3:0] state;
 
-  reg[31:0] ctr;
+  reg[31:0] ctr; // Keep track of the current time
 
   reg loops;  // count the number of loops
 
 
-  reg	[383:0]	tv[248:0];	// Test vectors
+  reg	[383:0]	tv[512:0];	// Test vectors
   wire	[383:0]	tmp;
   reg		kld;
   wire	[127:0]	key, plain, ciph;
@@ -100,7 +100,9 @@ module test(clk);
   parameter finish_tests = 4'd6;
   parameter end_tb = 4'd7;
 
-  parameter NUM_TESTS = 248;//284
+  parameter NUM_TESTS = 249;//284
+  parameter NUM_TESTS_TO_RUN = 100000000000;
+
 
 
   initial begin
@@ -363,9 +365,9 @@ module test(clk);
     tv[246]= 384'h00000000000000000000000000000000ffffffffffffffffffffffe0000000007472f9a7988607ca79707795991035e6;
     tv[247]= 384'h00000000000000000000000000000000fffffffffffffffffffffff00000000056aff089878bf3352f8df172a3ae47d8;
     tv[248]= 384'h00000000000000000000000000000000fffffffffffffffffffffff80000000065c0526cbe40161b8019a2a3171abd23;
-/*   tv[249]= 384'h00000000000000000000000000000000fffffffffffffffffffffffc00000000377be0be33b4e3e310b4aabda173f84f;
-/*    tv[250]= 384'h00000000000000000000000000000000fffffffffffffffffffffffe000000009402e9aa6f69de6504da8d20c4fcaa2f;
 /*
+    tv[249]= 384'h00000000000000000000000000000000fffffffffffffffffffffffc00000000377be0be33b4e3e310b4aabda173f84f;    
+    tv[250]= 384'h00000000000000000000000000000000fffffffffffffffffffffffe000000009402e9aa6f69de6504da8d20c4fcaa2f;
     tv[251]= 384'h00000000000000000000000000000000ffffffffffffffffffffffff00000000123c1f4af313ad8c2ce648b2e71fb6e1;
     tv[252]= 384'h00000000000000000000000000000000ffffffffffffffffffffffff800000001ffc626d30203dcdb0019fb80f726cf4;
     tv[253]= 384'h00000000000000000000000000000000ffffffffffffffffffffffffc000000076da1fbe3a50728c50fd2e621b5ad885;
@@ -405,7 +407,6 @@ module test(clk);
   // Define state machine
   always @(posedge clk) begin
     // Counter
-    //$display(ctr);
     ctr <= ctr + 1;
 
     case(state)
@@ -451,72 +452,55 @@ module test(clk);
         ctr <= 0;
       end // case: start_tests
 
-      /*
-      for(n=0;n<NUM_TESTS;n=n+1)
-      begin
-      */
       begin_loop: begin
-        if (n >= NUM_TESTS) begin
+        if (n >= NUM_TESTS_TO_RUN) begin
           state <= end_tb;
           ctr <= 0;
         end else begin
-	        if (ctr == 1) kld = 1;
-          if (ctr == 2) kld = 0;
+	        if (ctr == 1) kld <= 1;
+          if (ctr == 2) kld <= 0;
           if (ctr > 2) state <= wait_cipher;
-          // don't reset counter here
         end // else: !if(n >= NUM_TESTS)
-
-	      //while(!done)	@(posedge clk);
       end // case: begin_loop
 
 
       wait_cipher: begin
-	      //$display("INFO: (a) Vector %0d: xpected %x, Got %x %t", n, ciph, text_out, $time);
-        //$display("testA:");
         if (done) begin
           $display("Vector #%d", n);
 
-          $display("Expected:  %h%h%h%h", 
-                   ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
-          $display("Got:       %h%h%h%h",
-                   text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
+          //$display("Expected:  %h%h%h%h", 
+          //         ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
+          //$display("Got:       %h%h%h%h",
+          //         text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
           if(text_out != ciph) begin
 		        $display("ERROR: (a) Vector %d mismatch.", n);
             $display("Expected:  %h%h%h%h", 
                      ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
             $display("Got:       %h%h%h%h",
                      text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
-		        error_cnt = error_cnt + 1;
+		        error_cnt <= error_cnt + 1;
 	        end
-          $display("cipher ctr: %d", ctr);
+          //$display("cipher ctr: %d", ctr);
 
           state <= wait_decipher;
         end
-	      
-
-
-	      //while(!done2)	@(posedge clk);
-        //if (done2) begin
-        //  state <= wait_decipher;
-        //  ctr <= 0;
-        //end
       end // case: wait_cipher
 
       wait_decipher: begin
         if (done2) begin
-          $display("Expected:  %h%h%h%h", 
-                   plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
-          $display("Got:       %h%h%h%h",
-                   text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
+          //$display("Expected:  %h%h%h%h", 
+          //         plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
+          //$display("Got:       %h%h%h%h",
+          //         text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
           if(text_out2 != plain) begin
 		        $display("ERROR: (a) Vector %d mismatch.", n);
             $display("Expected:  %h%h%h%h", 
                      plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
             $display("Got:       %h%h%h%h",
                      text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
-		        error_cnt = error_cnt + 1;
+		        error_cnt <= error_cnt + 1;
 	        end
-          $display("decipher ctr: %d", ctr);
+          //$display("decipher ctr: %d", ctr);
           ctr <= 0;
           n <= n + 1;
           state <= begin_loop;  // start loop over
@@ -524,32 +508,10 @@ module test(clk);
 
       end // case: wait_decipher
       
-/*
-
-	      //$display("INFO: (b) Vector %0d: xpected %x, Got %x", n, plain, text_out2);
-
-	      if(text_out2 != plain | (|text_out2)==1'bx)
-	      begin
-		      $display("ERROR: (b) Vector %0d mismatch. Expected %x, Got %x",
-			             n, plain, text_out2);
-		      error_cnt = error_cnt + 1;
-	      end
-
-	      @(posedge clk);
-	      #1;
-      end
-
-
-	    $display("");
-	    $display("");
-	    $display("Test Done. Found %0d Errors.", error_cnt);
-	    $display("");
-	    $display("");
-	    repeat(10)	@(posedge clk);
-*/
       end_tb: begin
 	      $finish();
       end
+
       default: begin
         // set default state to finish
         state <= end_tb;
@@ -560,32 +522,32 @@ module test(clk);
 
 
 
-  assign tmp = tv[n];
-  assign key     = kld ? tmp[383:256] : 128'h00000000000000000000000000000000; // 128'hx;
-  assign text_in = kld ? tmp[255:128] : 128'h00000000000000000000000000000000; // 128'hx;
+  assign tmp = tv[n % NUM_TESTS];
+  assign key     = kld ? tmp[383:256] : 128'h00000000000000000000000000000000; 
+  assign text_in = kld ? tmp[255:128] : 128'h00000000000000000000000000000000; 
   assign plain   = tmp[255:128];
   assign ciph    = tmp[127:0];
 
 
   aes_cipher_top u0(
-	                  .clk(		clk		),
-	                  .rst(		rst		),
-	                  .ld(		kld		),
-	                  .done(		done		),
-	                  .key(		key		),
-	                  .text_in(	text_in		),
-	                  .text_out(	text_out	)
+	                  .clk( clk ),
+	                  .rst( rst ),
+	                  .ld( kld ),
+	                  .done( done ),
+	                  .key( key ),
+	                  .text_in( text_in ),
+	                  .text_out( text_out )
 	                  );
 
   aes_inv_cipher_top u1(
-	                      .clk(		clk		),
-	                      .rst(		rst		),
-	                      .kld(		kld		),
-	                      .ld(		done		),
-	                      .done(		done2		),
-	                      .key(		key		),
-	                      .text_in(	text_out	),
-	                      .text_out(	text_out2	)
+	                      .clk( clk ),
+	                      .rst( rst ),
+	                      .kld( kld ),
+	                      .ld( done ),
+	                      .done( done2 ),
+	                      .key( key	),
+	                      .text_in( text_out ),
+	                      .text_out( text_out2	)
 	                      );
 
 endmodule
