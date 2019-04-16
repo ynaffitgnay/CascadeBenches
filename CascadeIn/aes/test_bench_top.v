@@ -100,7 +100,7 @@ module test(clk);
   parameter finish_tests = 4'd6;
   parameter end_tb = 4'd7;
 
-  parameter NUM_TESTS = 230;//284
+  parameter NUM_TESTS = 250;//284
 
 
   initial begin
