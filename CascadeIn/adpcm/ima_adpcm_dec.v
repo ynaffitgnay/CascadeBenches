@@ -102,7 +102,7 @@ module ima_adpcm_dec (
       // sign that predictor value is valid 
       predValid <= 1'b1;
     end else 
-                predValid <= 1'b0;
+      predValid <= 1'b0;
   end 
   // calculate the de-quantized difference value 
   assign dequantSamp = (inPCM[2] ? {1'b0, stepSize, 3'b0} : 19'b0) + 
@@ -120,15 +120,11 @@ module ima_adpcm_dec (
   assign preOutSamp = {predictorSamp[18], predictorSamp[18:3]} + predictorSamp[2];
 
   // output interface 
-  always @ (posedge clock or posedge reset)
-  begin 
-    if (reset)
-    begin 
+  always @ (posedge clock or posedge reset) begin 
+    if (reset) begin 
       outSamp <= 16'b0;
       outValid <= 1'b0;
-    end 
-    else if (predValid)
-    begin 
+    end else if (predValid) begin 
       // output is taken from the predictor output with saturation check 
       if (!preOutSamp[16] && preOutSamp[15])
         // positive saturation condition 
@@ -136,19 +132,17 @@ module ima_adpcm_dec (
       else if (preOutSamp[16] && !preOutSamp[15])
         // negative saturation condition 
         outSamp <= {1'b1, 15'b0};
-           else 
-             outSamp <= preOutSamp[15:0];
+      else 
+        outSamp <= preOutSamp[15:0];
       
       // sign output is valid 
       outValid <= 1'b1;
-    end
-         else 
-           outValid <= 1'b0;
+    end else 
+      outValid <= 1'b0;
   end 
 
   // quantizer index adaptation lookup table 
-  always @ (inPCM)
-  begin 
+  always @ (inPCM) begin 
     case (inPCM[2:0]) 
       3'd0:  stepDelta <= 5'd31;    // = -1 
       3'd1:  stepDelta <= 5'd31;    // = -1 
@@ -164,27 +158,24 @@ module ima_adpcm_dec (
   assign preStepIndex = {1'b0, stepIndex} + {{3{stepDelta[4]}}, stepDelta};
 
   // update the step index with saturation checking 
-  always @ (posedge clock or posedge reset)
-  begin 
+  always @ (posedge clock or posedge reset) begin 
     if (reset)
       stepIndex <= 7'b0;
     else if (inStateLoad)
       stepIndex <= inStepIndex;
-         else if (inValid) 
-         begin 
-           // check is the updated step value should be saturated 
-           if (preStepIndex[7])
-             stepIndex <= 7'd0;
-           else if (preStepIndex[6:0] > 7'd88)
-             stepIndex <= 7'd88;
-                else 
-                  stepIndex <= preStepIndex[6:0];
-         end 
+    else if (inValid) begin 
+      // check is the updated step value should be saturated 
+      if (preStepIndex[7])
+        stepIndex <= 7'd0;
+      else if (preStepIndex[6:0] > 7'd88)
+        stepIndex <= 7'd88;
+      else 
+        stepIndex <= preStepIndex[6:0];
+    end 
   end 
 
   // quantizer step size lookup table 
-  always @ (posedge clock)
-  begin 
+  always @ (posedge clock) begin 
     case (stepIndex) 
       7'd0:    stepSize <= 15'd7;
       7'd1:    stepSize <= 15'd8;
