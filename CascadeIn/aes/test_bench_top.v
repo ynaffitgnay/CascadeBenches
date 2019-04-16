@@ -79,7 +79,7 @@ module test(clk);
   reg loops;  // count the number of loops
 
 
-  reg	[383:0]	tv[249:0];	// Test vectors
+  reg	[383:0]	tv[248:0];	// Test vectors
   wire	[383:0]	tmp;
   reg		kld;
   wire	[127:0]	key, plain, ciph;
@@ -100,7 +100,7 @@ module test(clk);
   parameter finish_tests = 4'd6;
   parameter end_tb = 4'd7;
 
-  parameter NUM_TESTS = 250;//284
+  parameter NUM_TESTS = 248;//284
 
 
   initial begin
@@ -363,8 +363,8 @@ module test(clk);
     tv[246]= 384'h00000000000000000000000000000000ffffffffffffffffffffffe0000000007472f9a7988607ca79707795991035e6;
     tv[247]= 384'h00000000000000000000000000000000fffffffffffffffffffffff00000000056aff089878bf3352f8df172a3ae47d8;
     tv[248]= 384'h00000000000000000000000000000000fffffffffffffffffffffff80000000065c0526cbe40161b8019a2a3171abd23;
-/*    tv[249]= 384'h00000000000000000000000000000000fffffffffffffffffffffffc00000000377be0be33b4e3e310b4aabda173f84f;
-    tv[250]= 384'h00000000000000000000000000000000fffffffffffffffffffffffe000000009402e9aa6f69de6504da8d20c4fcaa2f;
+/*   tv[249]= 384'h00000000000000000000000000000000fffffffffffffffffffffffc00000000377be0be33b4e3e310b4aabda173f84f;
+/*    tv[250]= 384'h00000000000000000000000000000000fffffffffffffffffffffffe000000009402e9aa6f69de6504da8d20c4fcaa2f;
 /*
     tv[251]= 384'h00000000000000000000000000000000ffffffffffffffffffffffff00000000123c1f4af313ad8c2ce648b2e71fb6e1;
     tv[252]= 384'h00000000000000000000000000000000ffffffffffffffffffffffff800000001ffc626d30203dcdb0019fb80f726cf4;
