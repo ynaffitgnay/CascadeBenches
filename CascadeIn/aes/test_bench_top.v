@@ -79,16 +79,16 @@ module test(clk);
   reg loops;  // count the number of loops
 
 
-  reg	[383:0]	tv[512:0];	// Test vectors
-  wire	[383:0]	tmp;
-  reg		kld;
-  wire	[127:0]	key, plain, ciph;
-  wire	[127:0]	text_in;
-  wire	[127:0]	text_out;
-  wire	[127:0]	text_out2;
-  reg	[127:0]	text_exp;
-  wire		done, done2;
-  integer		n, error_cnt;
+  reg  [383:0]  tv[512:0];  // Test vectors
+  wire  [383:0]  tmp;
+  reg    kld;
+  wire  [127:0]  key, plain, ciph;
+  wire  [127:0]  text_in;
+  wire  [127:0]  text_out;
+  wire  [127:0]  text_out2;
+  reg  [127:0]  text_exp;
+  wire    done, done2;
+  integer    n, error_cnt;
 
   // State machine parameters
   parameter init = 4'd0;
@@ -110,8 +110,8 @@ module test(clk);
     state = init;
 
     kld = 0;
-	  rst = 0;
-	  error_cnt = 0;
+    rst = 0;
+    error_cnt = 0;
 
     $display("Setting test vectors");
 
@@ -413,14 +413,14 @@ module test(clk);
       init: begin
 
         if (ctr <= 0) begin
-	        $display("*****************************************************");
-	        $display("* AES Test bench ...");
-	        $display("*****************************************************");
+          $display("*****************************************************");
+          $display("* AES Test bench ...");
+          $display("*****************************************************");
         end
 
-	      kld <= 0;
-	      rst <= 0;
-	      error_cnt <= 0;
+        kld <= 0;
+        rst <= 0;
+        error_cnt <= 0;
         n <= 0;
 
 
@@ -431,18 +431,18 @@ module test(clk);
       end // case: init
 
       setr: begin
-	      rst <= 1;
+        rst <= 1;
         if (ctr >= 19) begin
           state <= start_tests;
           ctr <= 0;
         end
       end // case: setr
       
-	    start_tests: begin
+      start_tests: begin
         if (ctr < 1) begin          
-	        $display("");
-	        $display("");
-	        $display("Started random test ...");
+          $display("");
+          $display("");
+          $display("Started random test ...");
         end
 
 
@@ -457,7 +457,7 @@ module test(clk);
           state <= end_tb;
           ctr <= 0;
         end else begin
-	        if (ctr == 1) kld <= 1;
+          if (ctr == 1) kld <= 1;
           if (ctr == 2) kld <= 0;
           if (ctr > 2) state <= wait_cipher;
         end // else: !if(n >= NUM_TESTS)
@@ -473,13 +473,13 @@ module test(clk);
           //$display("Got:       %h%h%h%h",
           //         text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
           if(text_out != ciph) begin
-		        $display("ERROR: (a) Vector %d mismatch.", n);
+            $display("ERROR: (a) Vector %d mismatch.", n);
             $display("Expected:  %h%h%h%h", 
                      ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
             $display("Got:       %h%h%h%h",
                      text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
-		        error_cnt <= error_cnt + 1;
-	        end
+            error_cnt <= error_cnt + 1;
+          end
           //$display("cipher ctr: %d", ctr);
 
           state <= wait_decipher;
@@ -493,13 +493,13 @@ module test(clk);
           //$display("Got:       %h%h%h%h",
           //         text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
           if(text_out2 != plain) begin
-		        $display("ERROR: (a) Vector %d mismatch.", n);
+            $display("ERROR: (a) Vector %d mismatch.", n);
             $display("Expected:  %h%h%h%h", 
                      plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
             $display("Got:       %h%h%h%h",
                      text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
-		        error_cnt <= error_cnt + 1;
-	        end
+            error_cnt <= error_cnt + 1;
+          end
           //$display("decipher ctr: %d", ctr);
           ctr <= 0;
           n <= n + 1;
@@ -509,7 +509,7 @@ module test(clk);
       end // case: wait_decipher
       
       end_tb: begin
-	      $finish();
+        $finish();
       end
 
       default: begin
@@ -530,25 +530,25 @@ module test(clk);
 
 
   aes_cipher_top u0(
-	                  .clk( clk ),
-	                  .rst( rst ),
-	                  .ld( kld ),
-	                  .done( done ),
-	                  .key( key ),
-	                  .text_in( text_in ),
-	                  .text_out( text_out )
-	                  );
+                    .clk( clk ),
+                    .rst( rst ),
+                    .ld( kld ),
+                    .done( done ),
+                    .key( key ),
+                    .text_in( text_in ),
+                    .text_out( text_out )
+                    );
 
   aes_inv_cipher_top u1(
-	                      .clk( clk ),
-	                      .rst( rst ),
-	                      .kld( kld ),
-	                      .ld( done ),
-	                      .done( done2 ),
-	                      .key( key	),
-	                      .text_in( text_out ),
-	                      .text_out( text_out2	)
-	                      );
+                        .clk( clk ),
+                        .rst( rst ),
+                        .kld( kld ),
+                        .ld( done ),
+                        .done( done2 ),
+                        .key( key  ),
+                        .text_in( text_out ),
+                        .text_out( text_out2  )
+                        );
 
 endmodule
 
