@@ -110,10 +110,10 @@ module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
   //TODO: get rid
   //always@(posedge clk) $display("Done: %d", done);
 
-  always@(posedge clk) $display("text_in:   %h%h%h%h", 
-                                text_in[127:96], text_in[95:64], text_in[63:32], text_in[31:0]);
-  always@(posedge clk) $display("text_out:  %h%h%h%h", 
-                                text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
+  //always@(posedge clk) $display("text_in:   %h%h%h%h", 
+  //                              text_in[127:96], text_in[95:64], text_in[63:32], text_in[31:0]);
+  //always@(posedge clk) $display("text_out:  %h%h%h%h", 
+  //                              text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
 
 
   always @(posedge clk) done <= !(|dcnt[3:1]) & dcnt[0] & !ld;
