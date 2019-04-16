@@ -75,12 +75,12 @@ module test(clk);
   reg[3:0] state;
 
   reg[31:0] ctr;
-  reg ctr_rst = 0;
 
   reg loops;  // count the number of loops
 
 
-  reg	[383:0]	tv[512:0];	// Test vectors
+  reg	[383:0]	tv[6:0];
+//[512:0];	// Test vectors
   wire	[383:0]	tmp;
   reg		kld;
   wire	[127:0]	key, plain, ciph;
@@ -101,15 +101,24 @@ module test(clk);
   parameter finish_tests = 4'd6;
   parameter end_tb = 4'd7;
 
+  parameter NUM_TESTS = 3; //284
+
 
   initial begin
     ctr = 0;
-    ctr_rst = 0;
     state = init;
+
+    kld = 0;
+	  rst = 0;
+	  error_cnt = 0;
+
+    $display("Setting test vectors");
+
 
     tv[0]= 384'h00000000000000000000000000000000f34481ec3cc627bacd5dc3fb08f273e60336763e966d92595a567cc9ce537f5e;
     tv[1]= 384'h000000000000000000000000000000009798c4640bad75c7c3227db910174e72a9a1631bf4996954ebc093957b234589;
     tv[2]= 384'h0000000000000000000000000000000096ab5c2ff612d9dfaae8c31f30c42168ff4f8391a6a40ca5b25d23bedd44a597;
+/*
     tv[3]= 384'h000000000000000000000000000000006a118a874519e64e9963798a503f1d35dc43be40be0e53712f7e2bf5ca707209;
     tv[4]= 384'h00000000000000000000000000000000cb9fceec81286ca3e989bd979b0cb28492beedab1895a94faa69b632e5cc47ce;
     tv[5]= 384'h00000000000000000000000000000000b26aeb1874e47ca8358ff22378f09144459264f4798f6a78bacb89c15ed3d601;
@@ -391,13 +400,16 @@ module test(clk);
     tv[281]= 384'h00000000000000000000000000000000fffffffffffffffffffffffffffffffc39bde67d5c8ed8a8b1c37eb8fa9f5ac0;
     tv[282]= 384'h00000000000000000000000000000000fffffffffffffffffffffffffffffffe5c005e72c1418c44f569f2ea33ba54f3;
     tv[283]= 384'h00000000000000000000000000000000ffffffffffffffffffffffffffffffff3f5b8cc9ea855a0afa7347d23e8d664e;
-
-    
+    */
 
   end
 
   // Define state machine
-  always @(posedge clk) 
+  always @(posedge clk) begin
+    // Counter
+    //$display(ctr);
+    ctr <= ctr + 1;
+
     case(state)
       init: begin
 
@@ -407,65 +419,83 @@ module test(clk);
 	        $display("*****************************************************");
         end
 
-      
-        //ctr = 0;  // DON'T DO THIS HERE!!
 	      kld <= 0;
 	      rst <= 0;
-	      error_cnt = 0;
+	      error_cnt <= 0;
+        n <= 0;
+
 
         if (ctr >= 3) begin
           state <= setr;
-          ctr_rst <= 1;
+          ctr <= 0;
         end
       end // case: init
 
       setr: begin
-	      rst = 1;
+	      rst <= 1;
         if (ctr >= 19) begin
           state <= start_tests;
-          ctr_rst <= 1;
+          ctr <= 0;
         end
       end // case: setr
       
 	    start_tests: begin
-        $display("start tests\n");
-
-        if (ctr <= 0) begin          
+        if (ctr < 1) begin          
 	        $display("");
 	        $display("");
 	        $display("Started random test ...");
         end
 
+
         loops <= 0;  // initialize the number of loops
 
         state <= begin_loop;
-        ctr_rst <= 1;
+        ctr <= 0;
       end // case: start_tests
 
       /*
-      for(n=0;n<284;n=n+1)
+      for(n=0;n<NUM_TESTS;n=n+1)
       begin
-	      @(posedge clk);
-	      #1;
-	      kld = 1;
-	      @(posedge clk);
-	      #1;
-	      kld = 0;
-	      @(posedge clk);
+      */
+      begin_loop: begin
+        if (n >= NUM_TESTS) begin
+          state <= end_tb;
+          ctr <= 0;
+        end else begin
+	        if (ctr == 1) kld = 1;
+          if (ctr == 2) kld = 0;
 
-	      while(!done)	@(posedge clk);
+          if (done) begin
+            state <= show_testA;
+            ctr <= 0;
+          end
+        end // else: !if(n >= NUM_TESTS)
 
+	      //while(!done)	@(posedge clk);
+      end // case: begin_loop
+
+
+      show_testA: begin
 	      //$display("INFO: (a) Vector %0d: xpected %x, Got %x %t", n, ciph, text_out, $time);
+        $display("testA:");
 
-	      if(text_out != ciph | (|text_out)==1'bx)
-	      begin
-		      $display("ERROR: (a) Vector %0d mismatch. Expected %x, Got %x",
-			             n, ciph, text_out);
+	      if(text_out != ciph) begin
+		      $display("ERROR: (a) Vector %d mismatch.", n);
+          $display("Expected:  %h%h%h%h", 
+                   ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
+          $display("Got:       %h%h%h%h",
+                   text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
 		      error_cnt = error_cnt + 1;
 	      end
 
 
-	      while(!done2)	@(posedge clk);
+	      //while(!done2)	@(posedge clk);
+        if (done2) begin
+          state <= show_testB;
+          ctr <= 0;
+        end
+      end // case: show_testA
+/*
 
 	      //$display("INFO: (b) Vector %0d: xpected %x, Got %x", n, plain, text_out2);
 
@@ -497,18 +527,8 @@ module test(clk);
       end
 
     endcase // case (state)
+  end // always @ (posedge clk)
 
-  // Counter
-  always@(posedge clk) begin
-    $display(ctr);
-
-    if (ctr_rst) begin
-      $display("ctr reset after: %d", ctr);
-      ctr <= 0;
-      ctr_rst <= 0;
-    end else ctr <= ctr + 1;
-    //if (ctr > 10) $finish();
-  end
 
 
   assign tmp = tv[n];
