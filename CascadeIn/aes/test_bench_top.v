@@ -113,7 +113,7 @@ module test(clk);
 	  rst = 0;
 	  error_cnt = 0;
 
-    $display("Setting test vectors");
+    //$display("Setting test vectors");
 
 
     tv[0]= 384'h00000000000000000000000000000000f34481ec3cc627bacd5dc3fb08f273e60336763e966d92595a567cc9ce537f5e;
@@ -412,11 +412,11 @@ module test(clk);
     case(state)
       init: begin
 
-        if (ctr <= 0) begin
-	        $display("*****************************************************");
-	        $display("* AES Test bench ...");
-	        $display("*****************************************************");
-        end
+        //if (ctr <= 0) begin
+	      //  $display("*****************************************************");
+	      //  $display("* AES Test bench ...");
+	      //  $display("*****************************************************");
+        //end
 
 	      kld <= 0;
 	      rst <= 0;
@@ -439,11 +439,11 @@ module test(clk);
       end // case: setr
       
 	    start_tests: begin
-        if (ctr < 1) begin          
-	        $display("");
-	        $display("");
-	        $display("Started random test ...");
-        end
+        //if (ctr <= 0) begin          
+	      //  $display("");
+	      //  $display("");
+	      //  $display("Started random test ...");
+        //end
 
 
         loops <= 0;  // initialize the number of loops
@@ -466,18 +466,18 @@ module test(clk);
 
       wait_cipher: begin
         if (done) begin
-          $display("Vector #%d", n);
+          //$display("Vector #%d", n);
 
           //$display("Expected:  %h%h%h%h", 
           //         ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
           //$display("Got:       %h%h%h%h",
           //         text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
           if(text_out != ciph) begin
-		        $display("ERROR: (a) Vector %d mismatch.", n);
-            $display("Expected:  %h%h%h%h", 
-                     ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
-            $display("Got:       %h%h%h%h",
-                     text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
+		        //$display("ERROR: (a) Vector %d mismatch.", n);
+            //$display("Expected:  %h%h%h%h", 
+            //         ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
+            //$display("Got:       %h%h%h%h",
+            //         text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
 		        error_cnt <= error_cnt + 1;
 	        end
           //$display("cipher ctr: %d", ctr);
@@ -493,11 +493,11 @@ module test(clk);
           //$display("Got:       %h%h%h%h",
           //         text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
           if(text_out2 != plain) begin
-		        $display("ERROR: (a) Vector %d mismatch.", n);
-            $display("Expected:  %h%h%h%h", 
-                     plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
-            $display("Got:       %h%h%h%h",
-                     text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
+		        //$display("ERROR: (a) Vector %d mismatch.", n);
+            //$display("Expected:  %h%h%h%h", 
+            //         plain[127:96], plain[95:64], plain[63:32], plain[31:0]);
+            //$display("Got:       %h%h%h%h",
+            //         text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
 		        error_cnt <= error_cnt + 1;
 	        end
           //$display("decipher ctr: %d", ctr);
