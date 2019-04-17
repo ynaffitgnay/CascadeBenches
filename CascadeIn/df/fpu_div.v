@@ -37,16 +37,16 @@
 
 module fpu_div( clk, rst, enable, opa, opb, sign, mantissa_7,
 exponent_out);
-input		clk;
-input		rst;
-input		enable;
-input	[63:0]	opa;
-input	[63:0]	opb;
-output		sign;
-output	[55:0] mantissa_7;
+input    clk;
+input    rst;
+input    enable;
+input  [63:0]  opa;
+input  [63:0]  opb;
+output    sign;
+output  [55:0] mantissa_7;
 output  [11:0] exponent_out;
 
-parameter	preset  = 53;
+parameter  preset  = 53;
 
 reg [53:0] dividend_reg;
 reg [53:0] divisor_reg;
@@ -57,11 +57,11 @@ reg enable_reg_b;
 reg enable_reg_c;
 reg enable_reg_d;
 reg enable_reg_e;
-reg [5:0] 	dividend_shift;
-reg [5:0] 	dividend_shift_2;
-reg [5:0] 	divisor_shift;
-reg [5:0] 	divisor_shift_2;
-reg [5:0] 	count_out;
+reg [5:0]   dividend_shift;
+reg [5:0]   dividend_shift_2;
+reg [5:0]   divisor_shift;
+reg [5:0]   divisor_shift_2;
+reg [5:0]   count_out;
 reg [11:0]  exponent_out;
 
 
@@ -70,23 +70,23 @@ reg [51:0] mantissa_a;
 reg [51:0] mantissa_b;
 wire [10:0] expon_a = opa[62:52];
 wire [10:0] expon_b = opb[62:52];
-wire	a_is_norm = |expon_a;
-wire	b_is_norm = |expon_b;
-wire	a_is_zero = !(|opa[62:0]); 
+wire  a_is_norm = |expon_a;
+wire  b_is_norm = |expon_b;
+wire  a_is_zero = !(|opa[62:0]); 
 wire [11:0] exponent_a = { 1'b0, expon_a};
 wire [11:0] exponent_b = { 1'b0, expon_b};
 reg [51:0] dividend_a;
 reg [51:0] dividend_a_shifted;
 wire [52:0] dividend_denorm = { dividend_a_shifted, 1'b0};
-wire [53:0]	dividend_1 = a_is_norm ? { 2'b01, dividend_a } : { 1'b0, dividend_denorm};
+wire [53:0]  dividend_1 = a_is_norm ? { 2'b01, dividend_a } : { 1'b0, dividend_denorm};
 reg [51:0] divisor_b;
 reg [51:0] divisor_b_shifted;
 wire [52:0] divisor_denorm = { divisor_b_shifted, 1'b0};
-wire [53:0]	divisor_1 = b_is_norm ? { 2'b01, divisor_b } : { 1'b0, divisor_denorm};
+wire [53:0]  divisor_1 = b_is_norm ? { 2'b01, divisor_b } : { 1'b0, divisor_denorm};
 wire [5:0] count_index = count_out;
 wire count_nonzero = !(count_index == 0);
 reg [53:0] quotient;
-reg	[53:0] quotient_out;
+reg  [53:0] quotient_out;
 reg [53:0] remainder;
 reg [53:0] remainder_out;
 reg remainder_msb;
@@ -125,171 +125,171 @@ wire [55:0] remainder_3 = { remainder_msb , remainder_out[52:0], 2'b0 };
 wire [55:0] remainder_4 = quotient_msb ? remainder_2 : remainder_3;
 wire [55:0] remainder_5 = (expon_final_4 == 1) ? remainder_2 : remainder_4;
 wire [55:0] remainder_6 = expon_final_4_et0 ? remainder_1 : remainder_5;
-wire	m_norm = |expon_final_5;
-wire	rem_lsb = |remainder_6[54:0];	
+wire  m_norm = |expon_final_5;
+wire  rem_lsb = |remainder_6[54:0];  
 wire [55:0] mantissa_7 = { 1'b0, m_norm, mantissa_6, remainder_6[55], rem_lsb };
 
 always @ (posedge clk)
 begin
-	if (rst)
-		exponent_out <= 0;
-	else 
-		exponent_out <= a_is_zero ? 12'b0 : expon_final_5; 
+  if (rst)
+    exponent_out <= 0;
+  else 
+    exponent_out <= a_is_zero ? 12'b0 : expon_final_5; 
 end
 
 always @ (posedge clk)
 begin
-	if (rst)
-		count_out <= 0;
-	else if (enable_reg) 
-		count_out <= preset;
-	else if (count_nonzero)
-		count_out <= count_out - 1; 
+  if (rst)
+    count_out <= 0;
+  else if (enable_reg) 
+    count_out <= preset;
+  else if (count_nonzero)
+    count_out <= count_out - 1; 
 end
 
 always @ (posedge clk)
 begin
-	if (rst) begin
-		quotient_out <= 0;
-		remainder_out <= 0;
-		end
-	else begin
-		quotient_out <= quotient;
-		remainder_out <= remainder;
-		end
+  if (rst) begin
+    quotient_out <= 0;
+    remainder_out <= 0;
+    end
+  else begin
+    quotient_out <= quotient;
+    remainder_out <= remainder;
+    end
 end
 
 
 always @ (posedge clk)
 begin
-	if (rst) 
-		quotient <= 0;
-	else if (count_nonzero_reg)
-		quotient[count_index] <= !(divisor_reg > dividend_reg);  
+  if (rst) 
+    quotient <= 0;
+  else if (count_nonzero_reg)
+    quotient[count_index] <= !(divisor_reg > dividend_reg);  
 end
 
 always @ (posedge clk)
 begin
-	if (rst) begin
-		remainder <= 0;
-		remainder_msb <= 0;
-		end  
-	else if (!count_nonzero_reg & count_nonzero_reg_2) begin	  
-	    remainder <= dividend_reg;
-		remainder_msb <= (divisor_reg > dividend_reg) ? 0 : 1;
-		end
+  if (rst) begin
+    remainder <= 0;
+    remainder_msb <= 0;
+    end  
+  else if (!count_nonzero_reg & count_nonzero_reg_2) begin    
+      remainder <= dividend_reg;
+    remainder_msb <= (divisor_reg > dividend_reg) ? 0 : 1;
+    end
 end
 
 always @ (posedge clk)
 begin
-	if (rst) begin
-		dividend_reg <= 0;
-		divisor_reg <= 0;
-		end
-	else if (enable_reg_e) begin
-		dividend_reg <= dividend_1;
-		divisor_reg <= divisor_1;
-		end
-	else if (count_nonzero_reg)
-		dividend_reg <= (divisor_reg > dividend_reg) ? dividend_reg << 1 : 
-						(dividend_reg - divisor_reg) << 1; 
-		// divisor doesn't change for the divide
+  if (rst) begin
+    dividend_reg <= 0;
+    divisor_reg <= 0;
+    end
+  else if (enable_reg_e) begin
+    dividend_reg <= dividend_1;
+    divisor_reg <= divisor_1;
+    end
+  else if (count_nonzero_reg)
+    dividend_reg <= (divisor_reg > dividend_reg) ? dividend_reg << 1 : 
+            (dividend_reg - divisor_reg) << 1; 
+    // divisor doesn't change for the divide
 end
 
 always @ (posedge clk)
 begin
-	if (rst) begin
-		expon_term  <= 0;
- 		expon_uf_1 <= 0;
+  if (rst) begin
+    expon_term  <= 0;
+     expon_uf_1 <= 0;
         expon_uf_term_1 <= 0;
         expon_final_1 <= 0;
         expon_final_2 <= 0;
         expon_shift_a <= 0;
         expon_shift_b <= 0;
- 		expon_uf_2 <= 0;
+     expon_uf_2 <= 0;
         expon_uf_term_2 <= 0;
         expon_uf_term_3 <= 0;
- 		expon_uf_gt_maxshift <= 0;
+     expon_uf_gt_maxshift <= 0;
         expon_uf_term_4 <= 0;
         expon_final_3 <= 0;
         expon_final_4 <= 0;
- 		expon_final_4_et0 <= 0;
- 		expon_final_4_term <= 0;
+     expon_final_4_et0 <= 0;
+     expon_final_4_term <= 0;
         expon_final_5 <= 0;
         mantissa_a <= 0;
-		mantissa_b <= 0;
-		dividend_a <= 0;
-		divisor_b <= 0;
-		dividend_shift_2 <= 0;
-		divisor_shift_2 <= 0;
-		remainder_shift_term <= 0;
-		remainder_b <= 0;
-		dividend_a_shifted <= 0;
-		divisor_b_shifted <=  0;
-		mantissa_1 <= 0;
-		end
-	else if (enable_reg_2) begin
-		expon_term  <= exponent_a + 1023;
- 		expon_uf_1 <= exponent_b > expon_term;
+    mantissa_b <= 0;
+    dividend_a <= 0;
+    divisor_b <= 0;
+    dividend_shift_2 <= 0;
+    divisor_shift_2 <= 0;
+    remainder_shift_term <= 0;
+    remainder_b <= 0;
+    dividend_a_shifted <= 0;
+    divisor_b_shifted <=  0;
+    mantissa_1 <= 0;
+    end
+  else if (enable_reg_2) begin
+    expon_term  <= exponent_a + 1023;
+     expon_uf_1 <= exponent_b > expon_term;
         expon_uf_term_1 <= expon_uf_1 ? (exponent_b - expon_term) : 0;
         expon_final_1 <= expon_term - exponent_b;
         expon_final_2 <= expon_uf_1 ? 0 : expon_final_1;
         expon_shift_a <= a_is_norm ? 0 : dividend_shift_2;
         expon_shift_b <= b_is_norm ? 0 : divisor_shift_2;
- 		expon_uf_2 <= expon_shift_a > expon_final_2;
+     expon_uf_2 <= expon_shift_a > expon_final_2;
         expon_uf_term_2 <= expon_uf_2 ? (expon_shift_a - expon_final_2) : 0;
         expon_uf_term_3 <= expon_uf_term_2 + expon_uf_term_1;
- 		expon_uf_gt_maxshift <= (expon_uf_term_3 > 51);
+     expon_uf_gt_maxshift <= (expon_uf_term_3 > 51);
         expon_uf_term_4 <= expon_uf_gt_maxshift ? 52 : expon_uf_term_3;
         expon_final_3 <= expon_uf_2 ? 0 : (expon_final_2 - expon_shift_a);
         expon_final_4 <= expon_final_3 + expon_shift_b;
- 		expon_final_4_et0 <= (expon_final_4 == 0);
- 		expon_final_4_term <= expon_final_4_et0 ? 0 : 1;
+     expon_final_4_et0 <= (expon_final_4 == 0);
+     expon_final_4_term <= expon_final_4_et0 ? 0 : 1;
         expon_final_5 <= quotient_msb ? expon_final_4 : expon_final_4 - expon_final_4_term;
-		mantissa_a <= opa[51:0];
-		mantissa_b <= opb[51:0];
-		dividend_a <= mantissa_a;
-		divisor_b <= mantissa_b;
-		dividend_shift_2 <= dividend_shift;
-		divisor_shift_2 <= divisor_shift;
-		remainder_shift_term <= 52 - expon_uf_term_4;
-		remainder_b <= remainder_a << remainder_shift_term;
-		dividend_a_shifted <= dividend_a << dividend_shift_2;
-		divisor_b_shifted <= divisor_b << divisor_shift_2;
-		mantissa_1 <= quotient_out[53:2] >> expon_uf_term_4;
-		end
+    mantissa_a <= opa[51:0];
+    mantissa_b <= opb[51:0];
+    dividend_a <= mantissa_a;
+    divisor_b <= mantissa_b;
+    dividend_shift_2 <= dividend_shift;
+    divisor_shift_2 <= divisor_shift;
+    remainder_shift_term <= 52 - expon_uf_term_4;
+    remainder_b <= remainder_a << remainder_shift_term;
+    dividend_a_shifted <= dividend_a << dividend_shift_2;
+    divisor_b_shifted <= divisor_b << divisor_shift_2;
+    mantissa_1 <= quotient_out[53:2] >> expon_uf_term_4;
+    end
 end
 
 always @ (posedge clk)
 begin
-	if (rst) begin
-		count_nonzero_reg <= 0;	
-		count_nonzero_reg_2 <= 0;
-		enable_reg <= 0;
-		enable_reg_a <= 0;
-		enable_reg_b <= 0;
-		enable_reg_c <= 0;
-		enable_reg_d <= 0;
-		enable_reg_e <= 0;
-		end
-	else begin
-		count_nonzero_reg <= count_nonzero;	 
-		count_nonzero_reg_2 <= count_nonzero_reg;
-		enable_reg <= enable_reg_e;
-		enable_reg_a <= enable;
-		enable_reg_b <= enable_reg_a;
-		enable_reg_c <= enable_reg_b;
-		enable_reg_d <= enable_reg_c;
-		enable_reg_e <= enable_reg_d;
-		end
+  if (rst) begin
+    count_nonzero_reg <= 0;  
+    count_nonzero_reg_2 <= 0;
+    enable_reg <= 0;
+    enable_reg_a <= 0;
+    enable_reg_b <= 0;
+    enable_reg_c <= 0;
+    enable_reg_d <= 0;
+    enable_reg_e <= 0;
+    end
+  else begin
+    count_nonzero_reg <= count_nonzero;   
+    count_nonzero_reg_2 <= count_nonzero_reg;
+    enable_reg <= enable_reg_e;
+    enable_reg_a <= enable;
+    enable_reg_b <= enable_reg_a;
+    enable_reg_c <= enable_reg_b;
+    enable_reg_d <= enable_reg_c;
+    enable_reg_e <= enable_reg_d;
+    end
 end
 
 always @ (posedge clk)
 begin
-	if (rst) 
-		enable_reg_2 <= 0;
-	else if (enable)
-		enable_reg_2 <= 1;
+  if (rst) 
+    enable_reg_2 <= 0;
+  else if (enable)
+    enable_reg_2 <= 1;
 end
 
 
@@ -303,7 +303,7 @@ always @(dividend_a)
     52'b000001??????????????????????????????????????????????: dividend_shift <= 5;
     52'b0000001?????????????????????????????????????????????: dividend_shift <= 6;
     52'b00000001????????????????????????????????????????????: dividend_shift <= 7;
-	52'b000000001???????????????????????????????????????????: dividend_shift <= 8;
+  52'b000000001???????????????????????????????????????????: dividend_shift <= 8;
     52'b0000000001??????????????????????????????????????????: dividend_shift <= 9;
     52'b00000000001?????????????????????????????????????????: dividend_shift <= 10;
     52'b000000000001????????????????????????????????????????: dividend_shift <= 11;
@@ -361,7 +361,7 @@ always @(divisor_b)
     52'b000001??????????????????????????????????????????????: divisor_shift <= 5;
     52'b0000001?????????????????????????????????????????????: divisor_shift <= 6;
     52'b00000001????????????????????????????????????????????: divisor_shift <= 7;
-	52'b000000001???????????????????????????????????????????: divisor_shift <= 8;
+  52'b000000001???????????????????????????????????????????: divisor_shift <= 8;
     52'b0000000001??????????????????????????????????????????: divisor_shift <= 9;
     52'b00000000001?????????????????????????????????????????: divisor_shift <= 10;
     52'b000000000001????????????????????????????????????????: divisor_shift <= 11;
