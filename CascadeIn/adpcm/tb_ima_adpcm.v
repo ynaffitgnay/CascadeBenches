@@ -30,13 +30,13 @@
 // 
 //---------------------------------------------------------------------------------------
 
-`timescale 1ns / 1ns
+include ima_adpcm_enc.v;
+include ima_adpcm_dec.v;
 
 module test;
 //---------------------------------------------------------------------------------------
 // internal signal  
-reg clock;        // global clock 
-reg reset;        // global reset 
+reg rst;        // global reset 
 reg [15:0] inSamp;    // encoder input sample 
 reg inValid;      // encoder input valid flag 
 wire inReady;      // encoder input ready indication  
@@ -65,8 +65,8 @@ reg [31:0] dispCount;
 initial
 begin
   clock = 0;
-  reset = 1;
-  #40 reset = 0;
+  rst = 1;
+  #40 rst = 0;
 end 
 
 // clock generator - 50MHz clock 
@@ -100,7 +100,7 @@ begin
   infid = $fopen(`IN_FILE, "rb");
   
   // wait for reset release
-  while (reset) @(posedge clock);
+  while (rst) @(posedge clock);
   repeat (50) @(posedge clock);
 
   // read input samples file 
@@ -144,7 +144,7 @@ begin
   encfid = $fopen(`ENC_FILE, "rb");
 
   // wait for reset release
-  while (reset) @(posedge clock);
+  while (rst) @(posedge clock);
     
   // encoder output compare loop 
   enctmp = $fgetc(encfid);
@@ -193,7 +193,7 @@ begin
   decfid = $fopen(`DEC_FILE, "rb");
 
   // wait for reset release
-  while (reset) @(posedge clock);
+  while (rst) @(posedge clock);
 
   // display simulation progress bar title 
   $write("Simulation progress: ");
@@ -252,7 +252,7 @@ end
 ima_adpcm_enc enc
 (
   .clock(clock), 
-  .reset(reset), 
+  .reset(rst), 
   .inSamp(inSamp), 
   .inValid(inValid),
   .inReady(inReady),
@@ -266,7 +266,7 @@ ima_adpcm_enc enc
 ima_adpcm_dec dec 
 (
   .clock(clock), 
-  .reset(reset), 
+  .reset(rst), 
   .inPCM(encPcm), 
   .inValid(encValid),
   .inReady(decReady),
