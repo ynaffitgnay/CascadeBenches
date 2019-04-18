@@ -100,7 +100,7 @@ module test(clk);
   parameter finish_tests = 4'd6;
   parameter end_tb = 4'd7;
 
-  parameter NUM_TESTS = 249;//284
+  parameter NUM_TESTS = 284;
   parameter NUM_TESTS_TO_RUN = 100000000000;
 
 
@@ -466,7 +466,7 @@ module test(clk);
         if (done) begin
           //$display("Vector #%d", n);
 
-          //$display("Expected:  %h%h%h%h", 
+          //$display("Expected:  %h%h%h%h",
           //         ciph[127:96], ciph[95:64], ciph[63:32], ciph[31:0]);
           //$display("Got:       %h%h%h%h",
           //         text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
