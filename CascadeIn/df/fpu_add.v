@@ -32,8 +32,6 @@
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 
-`timescale 1ns / 100ps
-
 module fpu_add( clk, rst, enable, opa, opb, sign, sum_2, exponent_2);
 input    clk;
 input    rst;
