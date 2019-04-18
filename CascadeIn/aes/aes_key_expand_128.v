@@ -52,7 +52,7 @@
 //
 //
 //
-//
+// Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
 module aes_key_expand_128(clk, kld, key, wo_0, wo_1, wo_2, wo_3);
   input	wire	clk;

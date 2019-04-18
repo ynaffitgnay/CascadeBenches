@@ -52,7 +52,7 @@
 //
 //
 //
-//
+// Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
 
 module aes_inv_sbox(a,d);

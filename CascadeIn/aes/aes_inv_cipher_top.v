@@ -52,7 +52,7 @@
 //
 //
 //
-//
+// Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
 module aes_inv_cipher_top(clk, rst, kld, ld, done, key, text_in, text_out );
   input	wire	clk;
