@@ -34,7 +34,17 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_add( clk, rst, enable, opa, opb, sign, sum_2, exponent_2);
+module fpu_add( 
+                clk, 
+                rst, 
+                enable, 
+                opa, 
+                opb, 
+                sign, 
+                sum_2, 
+                exponent_2
+                );
+
   input wire clk;
   input wire rst;
   input wire enable;

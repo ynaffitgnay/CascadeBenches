@@ -48,7 +48,8 @@ Rounding Modes (rmode):
 2 = round_up
 3 = round_down  */
 
-module fpu( clk, 
+module fpu( 
+            clk, 
             rst, 
             enable, 
             rmode, 
@@ -61,7 +62,9 @@ module fpu( clk,
             overflow, 
             inexact, 
             exception,
-            invalid);
+            invalid
+            );
+
   input wire clk;
   input wire rst;
   input wire enable;
@@ -103,7 +106,8 @@ module fpu( clk,
   wire sub_enable_1;
   reg sub_enable; 
   reg mul_enable; 
-  reg div_enable; 
+  reg div_enable;
+  reg except_enable;
   wire [55:0] sum_out;
   wire [55:0] diff_out;
   reg [55:0] addsub_out;

@@ -34,7 +34,17 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_mul( clk, rst, enable, opa, opb, sign, product_7, exponent_5);
+module fpu_mul( 
+                clk, 
+                rst, 
+                enable, 
+                opa, 
+                opb, 
+                sign, 
+                product_7, 
+                exponent_5
+                );
+
   parameter WIDTH = 106;
   parameter WIDTH_LOG = 7;
 
@@ -213,7 +223,7 @@ module fpu_mul( clk, rst, enable, opa, opb, sign, product_7, exponent_5);
     end
   end // always @ (posedge clk)
 
-  always @(*) product_shift <= msb ? (105 - msb) : (diff ? 105 : 106);
+  always @(*) product_shift <= msb ? (105 - msb) : (product ? 105 : 106);
 
   fpu_pri_encoder fe(product, msb);
 

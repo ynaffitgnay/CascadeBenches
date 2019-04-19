@@ -34,7 +34,8 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_round( clk, 
+module fpu_round( 
+                  clk, 
                   rst, 
                   enable, 
                   round_mode, 
@@ -42,7 +43,9 @@ module fpu_round( clk,
                   mantissa_term, 
                   exponent_term, 
                   round_out, 
-                  exponent_final);
+                  exponent_final
+                  );
+
   input wire clk;
   input wire rst;
   input wire enable;

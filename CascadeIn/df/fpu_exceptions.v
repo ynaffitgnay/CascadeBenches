@@ -34,7 +34,8 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_exceptions( clk, 
+module fpu_exceptions( 
+                       clk, 
                        rst, 
                        enable,
                        rmode, 
@@ -50,7 +51,9 @@ module fpu_exceptions( clk,
                        overflow, 
                        inexact, 
                        exception, 
-                       invalid);
+                       invalid
+                       );
+
   input wire clk;
   input wire rst;
   input wire enable;

@@ -34,8 +34,16 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_div( clk, rst, enable, opa, opb, sign, mantissa_7,
-                exponent_out);
+module fpu_div( 
+                clk, 
+                rst, 
+                enable, 
+                opa, 
+                opb, 
+                sign, 
+                mantissa_7,
+                exponent_out
+                );
 
   parameter WIDTH = 52;
   parameter WIDTH_LOG = 6;

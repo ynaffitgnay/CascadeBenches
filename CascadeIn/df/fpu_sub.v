@@ -34,7 +34,18 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_sub( clk, rst, enable, opa, opb, fpu_op, sign, diff_2, exponent_2);
+module fpu_sub( 
+                clk, 
+                rst, 
+                enable, 
+                opa, 
+                opb, 
+                fpu_op, 
+                sign, 
+                diff_2, 
+                exponent_2
+                );
+
   parameter WIDTH = 56;
   parameter WIDTH_LOG = 6;
 
