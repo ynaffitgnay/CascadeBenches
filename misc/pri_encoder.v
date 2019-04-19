@@ -12,7 +12,7 @@ module pri_encoder( clk );
     state <= (state + 1) % 56;
     ctr <= ctr + 1;
 
-    if (ctr >= 5) $finish();
+    if (ctr >= 57) $finish();
 
 
     case(state)  
@@ -80,7 +80,7 @@ module pri_encoder( clk );
   end // always @ (posedge clk)
 
 
-  parameter WIDTH = 56;
+  parameter WIDTH = 55;
   parameter WIDTH_LOG = 6;
 
   wire [WIDTH_LOG - 1:0] msb;
@@ -89,21 +89,26 @@ module pri_encoder( clk );
 
   for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
     wire [WIDTH - 1:0] oi;
+    wire msbi;
 
-    assign oi = diff;
 
-    initial $display("w: %d, i: %d", (WIDTH_LOG - 1 - i), i);
+    //assign oi = diff;
+
+    //initial $display("w: %d, i: %d", (WIDTH_LOG - 1 - i), i);
 
     if (i == 0)
       assign oi = diff;
     else
-      assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1) - 1):(WIDTH_LOG - 1 - i)] = msb[(WIDTH_LOG - 1 - i) + 1] ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
+      assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:0] = ORS[i - 1].msbi ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
     
-    always @(oi) $display("oi: %d, |oi: %d", oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))], |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))]);
+    //always @(oi) $display("oi: %d, |oi: %d", oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))], |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))]);
 
+  
     // TODO: CASCADE HATES THIS
-    //assign msb[(WIDTH_LOG - 1 - i)] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-    assign msb[WIDTH_LOG - 1 - i] = |diff;
+    //assign msb[(WIDTH_LOG - 1 - i)] = 
+  assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
+  assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
+
     
   end
 
