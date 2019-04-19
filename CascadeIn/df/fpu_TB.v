@@ -32,7 +32,7 @@
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 
-`timescale 1ps / 1ps
+// Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
 module fpu_tb;
 
