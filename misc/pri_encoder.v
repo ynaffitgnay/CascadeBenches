@@ -9,15 +9,21 @@ module pri_encoder( clk );
   reg [54:0] diff = 0;
   
   always @(posedge clk) begin
-    state <= (state + 1) % 56;
+    state <= (state + 1) % 5;//56;
     ctr <= ctr + 1;
 
-    if (ctr >= 57) $finish();
+    if (ctr >= 10) $finish();
 
 
     case(state)  
-      0: diff <= 55'b1111111111111111111111111111111111111111111111111111111; 
-      1: diff <= 55'b0111111111111111111111111111111111111111111111111111111; 
+      //0: diff <= 55'b1111111111111111111111111111111111111111111111111111111;
+      //1: diff <= 55'b1000000000000000000000000000000000000000000000000000000;
+      0: diff <= 55'b0000000000000000000000000000000000000000000000000000001;
+      1: diff <= 55'b0000000000000000000000000000000000000000000000000000010;
+      2: diff <= 55'b0000000000000000000000000000000000000000000000000100000;
+      3: diff <= 55'b0000111111111111111111111111111111111111111111111111111;
+      default: diff <= 55'b0000000000000000000000000000000000000000000000000000000;
+/*    1: diff <= 55'b0111111111111111111111111111111111111111111111111111111; 
       2: diff <= 55'b0011111111111111111111111111111111111111111111111111111; 
       3: diff <= 55'b0001111111111111111111111111111111111111111111111111111; 
       4: diff <= 55'b0000111111111111111111111111111111111111111111111111111; 
@@ -72,15 +78,15 @@ module pri_encoder( clk );
       53: diff <= 55'b0000000000000000000000000000000000000000000000000000011;
       54: diff <= 55'b0000000000000000000000000000000000000000000000000000001;
       55: diff <= 55'b0000000000000000000000000000000000000000000000000000000;
+ */
     endcase    
 
-    $display("state: %d, diff: %d", state, diff);
-    $display("msb: %d", msb);
+    $display("state: %d, diff: %d, msb: %d", state, diff, msb);
 
   end // always @ (posedge clk)
 
 
-  parameter WIDTH = 55;
+  parameter WIDTH = 56;
   parameter WIDTH_LOG = 6;
 
   wire [WIDTH_LOG - 1:0] msb;
@@ -91,24 +97,13 @@ module pri_encoder( clk );
     wire [WIDTH - 1:0] oi;
     wire msbi;
 
-
-    //assign oi = diff;
-
-    //initial $display("w: %d, i: %d", (WIDTH_LOG - 1 - i), i);
-
     if (i == 0)
       assign oi = diff;
     else
       assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:0] = ORS[i - 1].msbi ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
-    
-    //always @(oi) $display("oi: %d, |oi: %d", oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))], |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))]);
 
-  
-    // TODO: CASCADE HATES THIS
-    //assign msb[(WIDTH_LOG - 1 - i)] = 
-  assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-  assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-
+    assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
+    assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
     
   end
 
