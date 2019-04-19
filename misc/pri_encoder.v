@@ -1,3 +1,4 @@
+include fpu_pri_encoder.v;
 
 module pri_encoder( clk );
   input wire clk;
@@ -9,7 +10,7 @@ module pri_encoder( clk );
   reg [105:0] diff = 0;
   
   always @(posedge clk) begin
-    state <= (state + 1) % 2;
+    state <= (state + 1) % 56;
     ctr <= ctr + 1;
 
     if (ctr >= 57) $finish();
@@ -21,10 +22,9 @@ module pri_encoder( clk );
       //1: diff <= 55'b0000000000000000000000000000000000000000000000000000010;
       //2: diff <= 55'b0000000000000000000000000000000000000000000000000100000;
       //3: diff <= 55'b0000111111111111111111111111111111111111111111111111111;
-      0: diff <= 106'b1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
-      default: diff <= 55'b0000000000000000000000000000000000000000000000000001000;
+      //0: diff <= 106'b1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000;
+      //default: diff <= 55'b0000000000000000000000000000000000000000000000000001000;
       
-/*
       0: diff <= 55'b1111111111111111111111111111111111111111111111111111111;
       1: diff <= 55'b0111111111111111111111111111111111111111111111111111111; 
       2: diff <= 55'b0011111111111111111111111111111111111111111111111111111; 
@@ -81,7 +81,7 @@ module pri_encoder( clk );
       53: diff <= 55'b0000000000000000000000000000000000000000000000000000011;
       54: diff <= 55'b0000000000000000000000000000000000000000000000000000001;
       55: diff <= 55'b0000000000000000000000000000000000000000000000000000000;
-*/ 
+ 
     endcase    
 
     $display("state: %d, diff: %d, msb: %d, diff_shift: %d", state, diff, msb, diff_shift);
@@ -93,28 +93,30 @@ module pri_encoder( clk );
     diff_shift <= msb ? (54 - msb) : (diff ? 54 : 55);
   end
 
+  fpu_pri_encoder pri_en(diff, msb);
 
 
-  parameter WIDTH = 106;
+
+  //parameter WIDTH = 106;
   parameter WIDTH_LOG = 7;
-
+  //
   wire [WIDTH_LOG - 1:0] msb;
-
-  genvar i;
-
-  for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
-    wire [WIDTH - 1:0] oi;
-    wire msbi;
-
-    if (i == 0)
-      assign oi = diff;
-    else
-      assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:0] = ORS[i - 1].msbi ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
-
-    assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-    assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-    
-  end
+  //
+  //genvar i;
+  //
+  //for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
+  //  wire [WIDTH - 1:0] oi;
+  //  wire msbi;
+  //
+  //  if (i == 0)
+  //    assign oi = diff;
+  //  else
+  //    assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:0] = ORS[i - 1].msbi ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
+  //
+  //  assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
+  //  assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
+  //  
+  //end
 
 endmodule // pri_encoder
 

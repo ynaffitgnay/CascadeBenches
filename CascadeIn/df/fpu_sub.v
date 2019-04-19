@@ -157,20 +157,6 @@ module fpu_sub( clk, rst, enable, opa, opb, fpu_op, sign, diff_2, exponent_2);
   always @(*) diff_shift <= msb ? (54 - msb) : (diff ? 54 : 55);
 
 
-  genvar i;
-
-  for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
-    wire [WIDTH - 1:0] oi;
-    wire msbi;
-
-    if (i == 0)
-      assign oi = diff;
-    else
-      assign oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:0] = ORS[i - 1].msbi ? ORS[i - 1].oi[2 * (1 << ((WIDTH_LOG - 1 - i) + 1)) - 1:(1 << ((WIDTH_LOG - 1 - i) + 1))] : ORS[i - 1].oi[(1 << ((WIDTH_LOG - 1 - i) + 1)) - 1 : 0];
-
-    assign msbi = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-    assign msb[WIDTH_LOG - 1 - i] = |oi[2 * (1 << (WIDTH_LOG - 1 - i)) - 1: (1 << (WIDTH_LOG - 1 - i))];
-    
-  end
+  fpu_pri_encoder#(.WIDTH( WIDTH ), .WIDTH_LOG( WIDTH_LOG )) fe(diff, msb);
 
 endmodule

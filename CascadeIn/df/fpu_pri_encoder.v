@@ -1,6 +1,6 @@
 module fpu_pri_encoder#(
-                        parameter WIDTH = 55, 
-                        parameter WIDTH_LOG = 6                 
+                        parameter WIDTH = 106, 
+                        parameter WIDTH_LOG = 7                 
                         )(
                           value,
                           msb
