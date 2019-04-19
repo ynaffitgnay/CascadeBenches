@@ -8,18 +8,13 @@ module hang_on_ternary( clk );
 
   genvar i;
 
-  for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
+  for (i = 1; i < WIDTH_LOG; i = i + 1) begin : ORS
     wire [WIDTH - 1:0] oi;
 
-    if (i == 0)
-      assign oi = 0;
-    else
-      assign oi = msb[i - 1] ? 0 : 1;
-
+    assign oi = msb[i - 1] ? 0 : 1;
     assign msb[i] = |oi;
     
-  end
-
+  end 
 endmodule // hang_on_ternary
 
 
