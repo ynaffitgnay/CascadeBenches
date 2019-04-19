@@ -40,14 +40,14 @@ module fpu_div( clk, rst, enable, opa, opb, sign, mantissa_7,
   parameter WIDTH = 52;
   parameter WIDTH_LOG = 6;
 
-  input    clk;
-  input    rst;
-  input    enable;
-  input  [63:0]  opa;
-  input  [63:0]  opb;
-  output    sign;
-  output  [55:0] mantissa_7;
-  output  [11:0] exponent_out;
+  input wire clk;
+  input wire rst;
+  input wire enable;
+  input wire [63:0] opa;
+  input wire [63:0] opb;
+  output wire sign;
+  output wire [55:0] mantissa_7;
+  output reg [11:0] exponent_out;
 
   parameter  preset  = 53;
 
@@ -65,10 +65,9 @@ module fpu_div( clk, rst, enable, opa, opb, sign, mantissa_7,
   reg [5:0]   divisor_shift;
   reg [5:0]   divisor_shift_2;
   reg [5:0]   count_out;
-  reg [11:0]  exponent_out;
 
 
-  wire   sign = opa[63] ^ opb[63];
+  
   reg [51:0] mantissa_a;
   reg [51:0] mantissa_b;
   wire [10:0] expon_a = opa[62:52];
@@ -130,11 +129,12 @@ module fpu_div( clk, rst, enable, opa, opb, sign, mantissa_7,
   wire [55:0] remainder_6 = expon_final_4_et0 ? remainder_1 : remainder_5;
   wire  m_norm = |expon_final_5;
   wire  rem_lsb = |remainder_6[54:0];  
-  wire [55:0] mantissa_7 = { 1'b0, m_norm, mantissa_6, remainder_6[55], rem_lsb };
 
   wire [WIDTH_LOG - 1:0] msb_A;
   wire [WIDTH_LOG - 1:0] msb_B;
 
+  assign sign = opa[63] ^ opb[63];
+  assign mantissa_7 = { 1'b0, m_norm, mantissa_6, remainder_6[55], rem_lsb };
 
   always @ (posedge clk)
   begin
