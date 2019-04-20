@@ -227,6 +227,94 @@ module fpu_tb( clk );
         $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
+    //inputA:2.1000000000e-308
+    //inputB:2.0000000000e-308
+    enable <= 1'b1;
+    opa <= 64'b0000000000001111000110011100001001100010100111001100111101010011;
+    opb <= 64'b0000000000001110011000011010110011110000001100111101000110100100;
+    fpu_op <= 3'b000;  // addition
+    rmode <= 2'b10;
+    #20000;
+    enable <= 1'b0;
+    #800000;
+    //Output:4.100000000000000e-308
+    if (out==64'h001d7b6f52d0a0f7)
+      $display("Answer is correct %h%h", out[63:32], out[31:0]);
+
+      else
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+
+
+    //inputA:5.0000000000e-308
+    //inputB:2.0000000000e-312
+    enable <= 1'b1;
+    opa <= 64'b0000000000100001111110100001100000101100010000001100011000001101;
+    opb <= 64'b0000000000000000000000000101111001000000001110101001001111110110;
+    fpu_op <= 3'b000;  // addition
+    rmode <= 2'b10;
+    #20000;
+    enable <= 1'b0;
+    #800000;
+    //Output:5.000199999999999e-308
+    if (out==64'h0021fa474c5e1008)
+      $display("Answer is correct %h%h", out[63:32], out[31:0]);
+
+      else
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+
+
+    //inputA:3.9800000000e+000
+    //inputB:3.7700000000e+000
+    enable <= 1'b1;
+    opa <= 64'b0100000000001111110101110000101000111101011100001010001111010111;
+    opb <= 64'b0100000000001110001010001111010111000010100011110101110000101001;
+    fpu_op <= 3'b000;  // addition
+    rmode <= 2'b10;
+    #20000;
+    enable <= 1'b0;
+    #800000;
+    //Output:7.750000000000000e+000
+    if (out==64'h401f000000000000)
+      $display("Answer is correct %h%h", out[63:32], out[31:0]);
+
+      else
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+
+
+    //inputA:4.4000000000e+001
+    //inputB:7.9000000000e-002
+    enable <= 1'b1;
+    opa <= 64'b0100000001000110000000000000000000000000000000000000000000000000;
+    opb <= 64'b0011111110110100001110010101100000010000011000100100110111010011;
+    fpu_op <= 3'b000;
+    rmode <= 2'b00;
+    #20000;
+    enable <= 1'b0;
+    #800000;
+    //Output:4.407900000000000e+001
+    if (out==64'h40460a1cac083127)
+      $display("Answer is correct %h%h", out[63:32], out[31:0]);
+
+      else
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+
+
+    //inputA:3.0000000000e-310
+    //inputB:4.0000000000e-304
+    enable <= 1'b1;
+    opa <= 64'b0000000000000000001101110011100110100010010100101011001010000001;
+    opb <= 64'b0000000011110001100011100011101110011011001101110100000101101001;
+    fpu_op <= 3'b000;  // add
+    rmode <= 2'b10;
+    #20000;
+    enable <= 1'b0;
+    #800000;
+    //Output:4.000003000000000e-304
+    if (out==64'h00f18e3c781dcab4)
+      $display("Answer is correct %h%h", out[63:32], out[31:0]);
+
+      else
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
 
@@ -692,76 +780,8 @@ if (ctr == 248)
         $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
-    //inputA:2.1000000000e-308
-    //inputB:2.0000000000e-308
-    enable <= 1'b1;
-    opa <= 64'b0000000000001111000110011100001001100010100111001100111101010011;
-    opb <= 64'b0000000000001110011000011010110011110000001100111101000110100100;
-    fpu_op <= 3'b000;  // addition
-    rmode <= 2'b10;
-    #20000;
-    enable <= 1'b0;
-    #800000;
-    //Output:4.100000000000000e-308
-    if (out==64'h001d7b6f52d0a0f7)
-      $display("Answer is correct %h%h", out[63:32], out[31:0]);
-
-      else
-        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
-    //inputA:5.0000000000e-308
-    //inputB:2.0000000000e-312
-    enable <= 1'b1;
-    opa <= 64'b0000000000100001111110100001100000101100010000001100011000001101;
-    opb <= 64'b0000000000000000000000000101111001000000001110101001001111110110;
-    fpu_op <= 3'b000;  // addition
-    rmode <= 2'b10;
-    #20000;
-    enable <= 1'b0;
-    #800000;
-    //Output:5.000199999999999e-308
-    if (out==64'h0021fa474c5e1008)
-      $display("Answer is correct %h%h", out[63:32], out[31:0]);
-
-      else
-        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
-
-
-    //inputA:3.9800000000e+000
-    //inputB:3.7700000000e+000
-    enable <= 1'b1;
-    opa <= 64'b0100000000001111110101110000101000111101011100001010001111010111;
-    opb <= 64'b0100000000001110001010001111010111000010100011110101110000101001;
-    fpu_op <= 3'b000;  // addition
-    rmode <= 2'b10;
-    #20000;
-    enable <= 1'b0;
-    #800000;
-    //Output:7.750000000000000e+000
-    if (out==64'h401f000000000000)
-      $display("Answer is correct %h%h", out[63:32], out[31:0]);
-
-      else
-        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
-
-
-    //inputA:4.4000000000e+001
-    //inputB:7.9000000000e-002
-    enable <= 1'b1;
-    opa <= 64'b0100000001000110000000000000000000000000000000000000000000000000;
-    opb <= 64'b0011111110110100001110010101100000010000011000100100110111010011;
-    fpu_op <= 3'b000;
-    rmode <= 2'b00;
-    #20000;
-    enable <= 1'b0;
-    #800000;
-    //Output:4.407900000000000e+001
-    if (out==64'h40460a1cac083127)
-      $display("Answer is correct %h%h", out[63:32], out[31:0]);
-
-      else
-        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
     //inputA:5.0000000000e-311
@@ -941,23 +961,6 @@ if (ctr == 248)
       else
         $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
-
-    //inputA:3.0000000000e-310
-    //inputB:4.0000000000e-304
-    enable <= 1'b1;
-    opa <= 64'b0000000000000000001101110011100110100010010100101011001010000001;
-    opb <= 64'b0000000011110001100011100011101110011011001101110100000101101001;
-    fpu_op <= 3'b000;  // add
-    rmode <= 2'b10;
-    #20000;
-    enable <= 1'b0;
-    #800000;
-    //Output:4.000003000000000e-304
-    if (out==64'h00f18e3c781dcab4)
-      $display("Answer is correct %h%h", out[63:32], out[31:0]);
-
-      else
-        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
     //inputA:3.5000000000e-313
