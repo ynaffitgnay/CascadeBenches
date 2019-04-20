@@ -32,49 +32,55 @@
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 
-`timescale 1ns / 100ps
+// Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-module fpu_add( clk, rst, enable, opa, opb, sign, sum_2, exponent_2);
-input    clk;
-input    rst;
-input    enable;
-input  [63:0]  opa, opb;
-output    sign;
-output  [55:0]  sum_2;
-output  [10:0]  exponent_2;
+module fpu_add( 
+                clk, 
+                rst, 
+                enable, 
+                opa, 
+                opb, 
+                sign, 
+                sum_2, 
+                exponent_2
+                );
 
-reg   sign;
-reg   [10:0] exponent_a;
-reg   [10:0] exponent_b;
-reg   [51:0] mantissa_a;
-reg   [51:0] mantissa_b;
-reg   expa_gt_expb;
-reg   [10:0] exponent_small;
-reg   [10:0] exponent_large;
-reg   [51:0] mantissa_small;
-reg   [51:0] mantissa_large;
-reg   small_is_denorm;
-reg   large_is_denorm;
-reg   large_norm_small_denorm;
-reg   [10:0] exponent_diff;
-reg   [55:0] large_add;
-reg   [55:0] small_add;
-reg   [55:0] small_shift;
-wire   small_shift_nonzero = |small_shift[55:0];
-wire  small_is_nonzero = (exponent_small > 0) | |mantissa_small[51:0]; 
-wire   small_fraction_enable = small_is_nonzero & !small_shift_nonzero;
-wire   [55:0] small_shift_2 = { 55'b0, 1'b1 };
-reg   [55:0] small_shift_3;
-reg   [55:0] sum;
-wire   sum_overflow = sum[55]; // sum[55] will be 0 if there was no carry from adding the 2 numbers
-reg   [55:0] sum_2;
-reg   [10:0] exponent;
-wire   sum_leading_one = sum_2[54]; // this is where the leading one resides, unless denorm
-reg   denorm_to_norm;
-reg   [10:0] exponent_2;
+  input wire clk;
+  input wire rst;
+  input wire enable;
+  input wire [63:0] opa, opb;
+  output reg sign;
+  output reg [55:0] sum_2;
+  output reg [10:0] exponent_2;
 
-always @(posedge clk) 
-  begin
+  reg   [10:0] exponent_a;
+  reg   [10:0] exponent_b;
+  reg   [51:0] mantissa_a;
+  reg   [51:0] mantissa_b;
+  reg   expa_gt_expb;
+  reg   [10:0] exponent_small;
+  reg   [10:0] exponent_large;
+  reg   [51:0] mantissa_small;
+  reg   [51:0] mantissa_large;
+  reg   small_is_denorm;
+  reg   large_is_denorm;
+  reg   large_norm_small_denorm;
+  reg   [10:0] exponent_diff;
+  reg   [55:0] large_add;
+  reg   [55:0] small_add;
+  reg   [55:0] small_shift;
+  wire   small_shift_nonzero = |small_shift[55:0];
+  wire  small_is_nonzero = (exponent_small > 0) | |mantissa_small[51:0]; 
+  wire   small_fraction_enable = small_is_nonzero & !small_shift_nonzero;
+  wire   [55:0] small_shift_2 = { 55'b0, 1'b1 };
+  reg   [55:0] small_shift_3;
+  reg   [55:0] sum;
+  wire   sum_overflow = sum[55]; // sum[55] will be 0 if there was no carry from adding the 2 numbers
+  reg   [10:0] exponent;
+  wire   sum_leading_one = sum_2[54]; // this is where the leading one resides, unless denorm
+  reg   denorm_to_norm;
+
+  always @(posedge clk) begin
     if (rst) begin
       sign <= 0;
       exponent_a <= 0;
@@ -126,5 +132,4 @@ always @(posedge clk)
       exponent_2 <= denorm_to_norm ? exponent + 1 : exponent;
     end
   end
-
 endmodule
