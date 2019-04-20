@@ -63,7 +63,7 @@ module fpu_tb( clk );
   reg [31:0] ctr;
   reg [31:0] test_ctr;
 
-  parameter TESTS_TO_RUN = 10;
+  parameter TESTS_TO_RUN = 100000000000;
 
 
   fpu UUT (
@@ -100,7 +100,7 @@ module fpu_tb( clk );
     
     if (ctr == 0)
       rst <= 1'b1;
-    if (ctr == 2) begin
+    else if (ctr == 2) begin
       rst <= 1'b0;     
 
       /******************************* ADDITION ******************************/      
@@ -114,11 +114,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000001000001000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 2)
+    end // else if (ctr == 2)
     
-    if (ctr == 4) enable <= 1'b0;
+    else if (ctr == 4) enable <= 1'b0;
 
-    if (ctr == 29) begin
+    else if (ctr == 29) begin
       //Output:3.422700000000000e+001
       if (out==64'h40411d0e56041894)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -133,11 +133,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000000110101000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b00;
-    end // if (ctr == 29)
+    end // else if (ctr == 29)
 
-    if (ctr == 31) enable <= 1'b0;
+    else if (ctr == 31) enable <= 1'b0;
 
-    if (ctr == 56) begin
+    else if (ctr == 56) begin
       //Output:-8.820000000000000e+002
       if (out==64'hc08b900000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -152,11 +152,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000110010100111110111111101110110011110001111011001;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 56)
+    end // else if (ctr == 56)
 
-    if (ctr == 58) enable <= 1'b0;
+    else if (ctr == 58) enable <= 1'b0;
 
-    if (ctr == 83) begin
+    else if (ctr == 83) begin
       //Output:9.999999999999969e-311
       if (out==64'h000012688b70e62b)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -171,11 +171,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001000001110110011001100110011001100110011001100110011010;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b00;
-    end // if (ctr == 83)
+    end // else if (ctr == 83)
 
-    if (ctr == 85) enable <= 1'b0;
+    else if (ctr == 85) enable <= 1'b0;
 
-    if (ctr == 110) begin
+    else if (ctr == 110) begin
       //Output:-7.630000000000001e+001
       if (out==64'hc053133333333334)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -190,11 +190,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001110101100000000000000000000000000000000000000000000000;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 110)
+    end // else if (ctr == 110)
 
-    if (ctr == 112) enable <= 1'b0;
+    else if (ctr == 112) enable <= 1'b0;
 
-    if (ctr == 137) begin
+    else if (ctr == 137) begin
       //Output:1.000000000000000e+000
       if (out==64'h3ff0000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -209,11 +209,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b00;
-    end // if (ctr == 137)
+    end // else if (ctr == 137)
 
-    if (ctr == 139) enable <= 1'b0;
+    else if (ctr == 139) enable <= 1'b0;
 
-    if (ctr == 164) begin
+    else if (ctr == 164) begin
       //Output:1.999999999999895e-311
       if (out==64'h000003ae8249c7a2)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -229,11 +229,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000001110011000011010110011110000001100111101000110100100;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 164)
+    end // else if (ctr == 164)
 
-    if (ctr == 166) enable <= 1'b0;
+    else if (ctr == 166) enable <= 1'b0;
 
-    if (ctr == 191) begin
+    else if (ctr == 191) begin
       //Output:4.100000000000000e-308
       if (out==64'h001d7b6f52d0a0f7)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -249,11 +249,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000001110011000011010110011110000001100111101000110100100;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 191)
+    end // else if (ctr == 191)
 
-    if (ctr == 193) enable <= 1'b0;
+    else if (ctr == 193) enable <= 1'b0;
 
-    if (ctr == 218) begin
+    else if (ctr == 218) begin
       //Output:4.100000000000000e-308
       if (out==64'h001d7b6f52d0a0f7)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -269,11 +269,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000000000000101111001000000001110101001001111110110;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 218)
+    end // else if (ctr == 218)
 
-    if (ctr == 220) enable <= 1'b0;
+    else if (ctr == 220) enable <= 1'b0;
 
-    if (ctr == 245) begin
+    else if (ctr == 245) begin
       //Output:5.000199999999999e-308
       if (out==64'h0021fa474c5e1008)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -289,11 +289,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000000001110001010001111010111000010100011110101110000101001;
       fpu_op <= 3'b000;  // addition
       rmode <= 2'b10;
-    end // if (ctr == 245)
+    end // else if (ctr == 245)
 
-    if (ctr == 247) enable <= 1'b0;
+    else if (ctr == 247) enable <= 1'b0;
 
-    if (ctr == 272) begin
+    else if (ctr == 272) begin
       //Output:7.750000000000000e+000
       if (out==64'h401f000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -309,11 +309,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111110110100001110010101100000010000011000100100110111010011;
       fpu_op <= 3'b000;
       rmode <= 2'b00;
-    end // if (ctr == 272)
+    end // else if (ctr == 272)
 
-    if (ctr == 274) enable <= 1'b0;
+    else if (ctr == 274) enable <= 1'b0;
 
-    if (ctr == 299) begin
+    else if (ctr == 299) begin
       //Output:4.407900000000000e+001
       if (out==64'h40460a1cac083127)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -329,11 +329,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000011110001100011100011101110011011001101110100000101101001;
       fpu_op <= 3'b000;  // add
       rmode <= 2'b10;
-    end // if (ctr == 299)
+    end // else if (ctr == 299)
 
-    if (ctr == 301) enable <= 1'b0;
+    else if (ctr == 301) enable <= 1'b0;
 
-    if (ctr == 326) begin
+    else if (ctr == 326) begin
       //Output:4.000003000000000e-304
       if (out==64'h00f18e3c781dcab4)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -354,10 +354,10 @@ module fpu_tb( clk );
       opb <= 64'b0100000001010000010000000000000000000000000000000000000000000000;
       fpu_op <= 3'b001;  // subtraction
       rmode <= 2'b00;
-    end // if (ctr == 326)
-    if (ctr == 328) enable <= 1'b0;
+    end // else if (ctr == 326)
+    else if (ctr == 328) enable <= 1'b0;
 
-    if (ctr == 354) begin
+    else if (ctr == 354) begin
       //Output:4.000000000000000e+002
       if (out==64'h4079000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -373,11 +373,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001000000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b001;  // subtraction
       rmode <= 2'b11;
-    end // if (ctr == 354)
+    end // else if (ctr == 354)
 
-    if (ctr == 356) enable <= 1'b0;
+    else if (ctr == 356) enable <= 1'b0;
 
-    if (ctr == 382) begin
+    else if (ctr == 382) begin
       //Output:-1.300000000000000e+001
       if (out==64'hc02a000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -393,11 +393,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001000000110011001100110011001100110011001100110011001101;
       fpu_op <= 3'b001;  // subtraction
       rmode <= 2'b11;
-    end // if (ctr == 382)
+    end // else if (ctr == 382)
 
-    if (ctr == 384) enable <= 1'b0;
+    else if (ctr == 384) enable <= 1'b0;
 
-    if (ctr == 410) begin
+    else if (ctr == 410) begin
       //Output:4.355500000000000e+002
       if (out==64'h407b38cccccccccc)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -413,11 +413,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000000110111100110011001100110011001100110011001100110011010;
       fpu_op <= 3'b001;  // subtraction
       rmode <= 2'b10;
-    end // if (ctr == 410)
+    end // else if (ctr == 410)
 
-    if (ctr == 412) enable <= 1'b0;
+    else if (ctr == 412) enable <= 1'b0;
 
-    if (ctr == 438) begin
+    else if (ctr == 438) begin
       //Output:4.897540000000000e+004
       if (out==64'h40e7e9eccccccccd)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -433,11 +433,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001000110100000000000000000000000000000000000000000000000;
       fpu_op <= 3'b001;  // subtraction
       rmode <= 2'b11;
-    end // if (ctr == 438)
+    end // else if (ctr == 438)
     
-    if (ctr == 440) enable <= 1'b0;
+    else if (ctr == 440) enable <= 1'b0;
 
-    if (ctr == 466) begin
+    else if (ctr == 466) begin
       //Output:6.877000000000000e+001
       if (out==64'h40513147ae147ae1)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -454,11 +454,11 @@ module fpu_tb( clk );
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b10;
 
-    end // if (ctr == 466)
+    end // else if (ctr == 466)
 
-    if (ctr == 468) enable <= 1'b0;
+    else if (ctr == 468) enable <= 1'b0;
 
-    if (ctr == 494) begin
+    else if (ctr == 494) begin
       //Output:9.999999776482582e-003
       if (out==64'h3f847ae140000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -474,11 +474,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000000100010000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b10;
-    end // if (ctr == 494)
+    end // else if (ctr == 494)
 
-    if (ctr == 496) enable <= 1'b0;
+    else if (ctr == 496) enable <= 1'b0;
 
-    if (ctr == 522) begin
+    else if (ctr == 522) begin
       //Output:-1.300000000000000e+001
       if (out==64'hc02a000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -495,11 +495,11 @@ module fpu_tb( clk );
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b10;
 
-    end // if (ctr == 522)
+    end // else if (ctr == 522)
 
-    if (ctr == 524) enable <= 1'b0;
+    else if (ctr == 524) enable <= 1'b0;
 
-    if (ctr == 550) begin
+    else if (ctr == 550) begin
       //Output:3.967430000000001e+001
       if (out==64'h4043d64f765fd8af)
         $display("answer is correct %h%h", out[63:32], out[31:0]);
@@ -515,11 +515,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111110110001111010111000010100011110101110000101000111101100;
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b00;
-    end // if (ctr == 550)
+    end // else if (ctr == 550)
 
-    if (ctr == 552) enable <= 1'b0;
+    else if (ctr == 552) enable <= 1'b0;
 
-    if (ctr == 578) begin
+    else if (ctr == 578) begin
       //output:2.230000000000000e+000
       if (out==64'h4001d70a3d70a3d7)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -535,11 +535,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000000000000000000000000000001111011100010010101101;
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b00;
-    end // if (ctr == 578)
+    end // else if (ctr == 578)
 
-    if (ctr == 580) enable <= 1'b0;
+    else if (ctr == 580) enable <= 1'b0;
 
-    if (ctr == 606) begin
+    else if (ctr == 606) begin
       //Output:1.799999970587486e-316
       if (out==64'h00000000022bea15)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -555,11 +555,11 @@ module fpu_tb( clk );
       opb <= 64'b1000000000000000000000000000000000000010011010011010111011000010;
       fpu_op <= 3'b001; // sub
       rmode <= 2'b10;
-    end // if (ctr == 606)
+    end // else if (ctr == 606)
 
-    if (ctr == 608) enable <= 1'b0;
+    else if (ctr == 608) enable <= 1'b0;
 
-    if (ctr == 634) begin
+    else if (ctr == 634) begin
       //Output:2.199999993695311e-315
       if (out==64'h000000001a8a825c)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -576,11 +576,11 @@ module fpu_tb( clk );
       fpu_op <= 3'b001;  // sub
       rmode <= 2'b10;
 
-    end // if (ctr == 634)
+    end // else if (ctr == 634)
 
-    if (ctr == 636) enable <= 1'b0;
+    else if (ctr == 636) enable <= 1'b0;
 
-    if (ctr == 662) begin
+    else if (ctr == 662) begin
       //Output:4.000000000000000e+000
       if (out==64'h4010000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -602,12 +602,12 @@ module fpu_tb( clk );
       fpu_op <= 3'b010;  // mul
       rmode <= 2'b10;
 
-    end // if (ctr == 662)
+    end // else if (ctr == 662)
 
-    if (ctr == 664) enable <= 1'b0;
+    else if (ctr == 664) enable <= 1'b0;
 
     // #800000;  // 80 cycles
-    if (ctr == 693) begin
+    else if (ctr == 693) begin
       //Output:9.000000000000022e-311
       if (out==64'h000010914a4c025a)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -623,12 +623,12 @@ module fpu_tb( clk );
       opb <= 64'b0100000001101001000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b010;  // multiplication
       rmode <= 2'b00;
-    end // if (ctr == 693)
+    end // else if (ctr == 693)
 
-    if (ctr == 695) enable <= 1'b0;
+    else if (ctr == 695) enable <= 1'b0;
 
 
-    if (ctr == 724) begin
+    else if (ctr == 724) begin
       //Output:-1.900000000000000e+004
       if (out==64'hc0d28e0000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -644,11 +644,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111110010100011110101110000101000111101011100001010001111011;
       fpu_op <= 3'b010;  // multiplication
       rmode <= 2'b10;
-    end // if (ctr == 724)
+    end // else if (ctr == 724)
 
-    if (ctr == 726) enable <= 1'b0;
+    else if (ctr == 726) enable <= 1'b0;
 
-    if (ctr == 755) begin
+    else if (ctr == 755) begin
       //Output:4.715400000000001e+000
       if (out==64'h4012dc91d14e3bce)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -664,11 +664,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000001111110100110011001100110011001100110011001100110011010;
       fpu_op <= 3'b010;  // multiplication
       rmode <= 2'b11;
-    end // if (ctr == 755)
+    end // else if (ctr == 755)
     
-    if (ctr == 757) enable <= 1'b0;
+    else if (ctr == 757) enable <= 1'b0;
 
-    if (ctr == 786) begin
+    else if (ctr == 786) begin
       //Output:-2.335392000000000e+005
       if (out==64'hc10c82199999999a)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -684,11 +684,11 @@ module fpu_tb( clk );
       opb <= 64'b0100101010000011001111100111000010011110001011100011000100101101;
       fpu_op <= 3'b010;  // mult
       rmode <= 2'b10;
-    end // if (ctr == 786)
+    end // else if (ctr == 786)
 
-    if (ctr == 788) enable <= 1'b0;
+    else if (ctr == 788) enable <= 1'b0;
 
-    if (ctr == 817) begin
+    else if (ctr == 817) begin
       //Output:0.000000000000000e+000
       if (out==64'h0000000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -704,11 +704,11 @@ module fpu_tb( clk );
       opb <= 64'b0100001000000000110000111000100011010000000000000000000000000000;
       fpu_op <= 3'b010;  // mult
       rmode <= 2'b10;
-    end // if (ctr == 817)
+    end // else if (ctr == 817)
 
-    if (ctr == 819) enable <= 1'b0;
+    else if (ctr == 819) enable <= 1'b0;
 
-    if (ctr == 848) begin 
+    else if (ctr == 848) begin 
       //Output:4.499999999999764e-301
       if (out==64'h01934982fc467380)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -724,11 +724,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111001010101011110011000111011100010001100001000110000111010;
       fpu_op <= 3'b010;  // mult
       rmode <= 2'b11;
-    end // if (ctr == 848)
+    end // else if (ctr == 848)
 
-    if (ctr == 850) enable <= 1'b0;
+    else if (ctr == 850) enable <= 1'b0;
 
-    if (ctr == 879) begin 
+    else if (ctr == 879) begin 
       //Output:-8.000000000007485e-313
       if (out==64'h80000025b34aa196)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -744,11 +744,11 @@ module fpu_tb( clk );
       opb <= 64'b0011110101110001100101111001100110000001001011011110101000010001;
       fpu_op <= 3'b010;  // mult
       rmode <= 2'b00;
-    end // if (ctr == 879)
+    end // else if (ctr == 879)
 
-    if (ctr == 881) enable <= 1'b0;
+    else if (ctr == 881) enable <= 1'b0;
 
-    if (ctr == 910) begin
+    else if (ctr == 910) begin
       //Output:2.999966601548049e-320
       if (out==64'h00000000000017b8)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -768,11 +768,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000111000101011011100001111111000010111110001111001101011001;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;  // round up
-    end // if (ctr == 910)
+    end // else if (ctr == 910)
 
-    if (ctr == 912) enable <= 1'b0;
+    else if (ctr == 912) enable <= 1'b0;
 
-    if (ctr == 988) begin
+    else if (ctr == 988) begin
       //Output:4.249999999722977e-015
       if (out==64'h3cf323ea98d06fb6) 
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -787,11 +787,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000001001100000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;
-    end // if (ctr == 988)
+    end // else if (ctr == 988)
 
-    if (ctr == 990) enable <= 1'b0;
+    else if (ctr == 990) enable <= 1'b0;
 
-    if (ctr == 1066) begin
+    else if (ctr == 1066) begin
       //Output:3.982142857142857e+000
       if (out==64'h400fdb6db6db6db7)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -807,11 +807,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001111100101100000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;
-    end // if (ctr == 1066)
+    end // else if (ctr == 1066)
 
-    if (ctr == 1068) enable <= 1'b0;
+    else if (ctr == 1068) enable <= 1'b0;
 
-    if (ctr == 1144) begin
+    else if (ctr == 1144) begin
       //Output:-9.912854030501089e-001
       if (out==64'hbfefb89c2a6346d5)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -827,11 +827,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000001101001000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;
-    end // if (ctr == 1144)
+    end // else if (ctr == 1144)
 
-    if (ctr == 1146) enable <= 1'b0;
+    else if (ctr == 1146) enable <= 1'b0;
 
-    if (ctr == 1222) begin
+    else if (ctr == 1222) begin
       //Output:2.000000000000000e-202
       if (out==64'h160f5a549627a36c)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -848,11 +848,11 @@ module fpu_tb( clk );
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;
 
-    end // if (ctr == 1222)
+    end // else if (ctr == 1222)
 
-    if (ctr == 1224) enable <= 1'b0;
+    else if (ctr == 1224) enable <= 1'b0;
 
-    if (ctr == 1300) begin
+    else if (ctr == 1300) begin
       //Output:2.000000000000000e+018
       if (out==64'h43bbc16d674ec800)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -868,11 +868,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000000000100000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b11;
-    end // if (ctr == 1300)
+    end // else if (ctr == 1300)
 
-    if (ctr == 1302) enable <= 1'b0;
+    else if (ctr == 1302) enable <= 1'b0;
 
-    if (ctr == 1378) begin
+    else if (ctr == 1378) begin
       //Output:2.000000000000000e+000
       if (out==64'h4000000000000000)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -888,11 +888,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111111110000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b10;
-    end // if (ctr == 1378)
+    end // else if (ctr == 1378)
 
-    if (ctr == 1380) enable <= 1'b0;
+    else if (ctr == 1380) enable <= 1'b0;
 
-    if (ctr == 1456) begin
+    else if (ctr == 1456) begin
       //Output:9.999999999984653e-313
       if (out==64'h0000002f201d49fb)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -908,11 +908,11 @@ module fpu_tb( clk );
       opb <= 64'b0101011100010011111101011000110101000011010010100010101110101110;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b10;
-    end // if (ctr == 1456)
+    end // else if (ctr == 1456)
 
-    if (ctr == 1458) enable <= 1'b0;
+    else if (ctr == 1458) enable <= 1'b0;
 
-    if (ctr == 1534) begin
+    else if (ctr == 1534) begin
       //Output:1.333333333333758e-311
       if (out==64'h0000027456dbda6d)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -928,11 +928,11 @@ module fpu_tb( clk );
       opb <= 64'b0010101101011011111111110010111011100100100011100000010100110000;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b11;
-    end // if (ctr == 1534)
+    end // else if (ctr == 1534)
 
-    if (ctr == 1536) enable <= 1'b0;
+    else if (ctr == 1536) enable <= 1'b0;
 
-    if (ctr == 1612) begin
+    else if (ctr == 1612) begin
 
       //Output:8.749999999999972e-211
       if (out==64'h14526914eebbd470)
@@ -949,11 +949,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000001011100000010101011100100110100011111101101011;
       fpu_op <= 3'b011;  // division
       rmode <= 2'b00;
-    end // if (ctr == 1612)
+    end // else if (ctr == 1612)
 
-    if (ctr == 1614) enable <= 1'b0;
+    else if (ctr == 1614) enable <= 1'b0;
 
-    if (ctr == 1690) begin
+    else if (ctr == 1690) begin
       //Output:5.599999999999383e-002
       if (out==64'h3facac083126e600)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -968,11 +968,11 @@ module fpu_tb( clk );
       opb <= 64'b0000000000000000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b10;
-    end // if (ctr == 1690)
+    end // else if (ctr == 1690)
 
-    if (ctr == 1692) enable <= 1'b0;
+    else if (ctr == 1692) enable <= 1'b0;
 
-    if (ctr == 1768) begin
+    else if (ctr == 1768) begin
       //Output:-1.#INF00000000000e+000
       if (out==64'hffefffffffffffff)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -988,11 +988,11 @@ module fpu_tb( clk );
       opb <= 64'b1100000001010001010000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b00;
-    end // if (ctr == 1768)
+    end // else if (ctr == 1768)
 
-    if (ctr == 1770) enable <= 1'b0;
+    else if (ctr == 1770) enable <= 1'b0;
 
-    if (ctr == 1846) begin
+    else if (ctr == 1846) begin
       //Output:6.608695652173914e-001
       if (out==64'h3fe525d7ee30f953)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1008,11 +1008,11 @@ module fpu_tb( clk );
       opb <= 64'b0011111110011011101001011110001101010011111101111100111011011001;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b00;
-    end // if (ctr == 1846)
+    end // else if (ctr == 1846)
 
-    if (ctr == 1848) enable <= 1'b0;
+    else if (ctr == 1848) enable <= 1'b0;
 
-    if (ctr == 1924) begin
+    else if (ctr == 1924) begin
       //Output:-2.218518518518519e+004
       if (out==64'hc0d5aa4bda12f685)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1028,11 +1028,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000011110001000101110000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b00;
-    end // if (ctr == 1924)
+    end // else if (ctr == 1924)
 
-    if (ctr == 1926) enable <= 1'b0;
+    else if (ctr == 1926) enable <= 1'b0;
 
-    if (ctr == 2002) begin
+    else if (ctr == 2002) begin
       //Output:4.999998683134458e-318
       if (out==64'h00000000000f712b)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1048,11 +1048,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000010100000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b11;
-    end // if (ctr == 2002)
+    end // else if (ctr == 2002)
 
-    if (ctr == 2004) enable <= 1'b0;
+    else if (ctr == 2004) enable <= 1'b0;
 
-    if (ctr == 2080) begin
+    else if (ctr == 2080) begin
       //Output:-2.490234375000003e-309
       if (out==64'h8001ca69686873bb)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1068,11 +1068,11 @@ module fpu_tb( clk );
       opb <= 64'b0100000010010000000000000000000000000000000000000000000000000000;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b11;
-    end // if (ctr == 2080)
+    end // else if (ctr == 2080)
 
-    if (ctr == 2082) enable <= 1'b0;
+    else if (ctr == 2082) enable <= 1'b0;
 
-    if (ctr == 2158) begin
+    else if (ctr == 2158) begin
       //Output:-1.464843750000000e-308
       if (out==64'h800a888a29edf40c)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1088,11 +1088,11 @@ module fpu_tb( clk );
       opb <= 64'b1110100101100000101110001110000010101100101011000100111010101111;
       fpu_op <= 3'b011;  // div
       rmode <= 2'b00;
-    end // if (ctr == 2158)
+    end // else if (ctr == 2158)
 
-    if (ctr == 2160) enable <= 1'b0;
+    else if (ctr == 2160) enable <= 1'b0;
 
-    if (ctr == 2236) begin
+    else if (ctr == 2236) begin
 
       //Output:8.500000000000000e-144
       if (out==64'h223a88ecc2ac8317)
@@ -1110,11 +1110,11 @@ module fpu_tb( clk );
       fpu_op <= 3'b011;  // div
       rmode <= 2'b00;
 
-    end // if (ctr == 2236)
+    end // else if (ctr == 2236)
 
-    if (ctr == 2238) enable <= 1'b0;
+    else if (ctr == 2238) enable <= 1'b0;
 
-    if (ctr == 2314) begin
+    else if (ctr == 2314) begin
       //Output:5.866842281071894e-005
       if (out==64'h3f0ec257a882625f)
         $display("Answer is correct %h%h", out[63:32], out[31:0]);
@@ -1124,9 +1124,9 @@ module fpu_tb( clk );
 
     end
 
-    if (ctr > 2400) begin
+    else if (ctr > 2400) begin
       test_ctr <= test_ctr + 1;
-      ctr <= 0;
+      ctr <= 0;  // reset ctr for another iteration through tests
       $display(test_ctr);
     end
 
