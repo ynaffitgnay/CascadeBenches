@@ -144,8 +144,7 @@ module fpu_div(
   assign sign = opa[63] ^ opb[63];
   assign mantissa_7 = { 1'b0, m_norm, mantissa_6, remainder_6[55], rem_lsb };
 
-  always @ (posedge clk)
-  begin
+  always @ (posedge clk) begin
     if (rst)
       exponent_out <= 0;
     else 
