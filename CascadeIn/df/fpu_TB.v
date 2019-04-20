@@ -61,7 +61,10 @@ module fpu_tb( clk );
   wire invalid;
 
   reg [31:0] ctr;
-  reg [31:0] test_start_ctr;
+  reg [31:0] test_ctr;
+
+  parameter TESTS_TO_RUN = 10;
+
 
   fpu UUT (
            .clk(clk),
@@ -82,12 +85,19 @@ module fpu_tb( clk );
   initial begin
     ctr <= 0;
     rst <= 0;
-    test_start_ctr <= 0;
+    test_ctr <= 0;
 
   end
 
   always @(posedge clk) begin
     ctr <= ctr + 1;
+
+    if (test_ctr >= TESTS_TO_RUN) begin
+      $display("Finished tests");
+      $finish();
+    end
+
+    
     if (ctr == 0)
       rst <= 1'b1;
     if (ctr == 2) begin
@@ -1115,8 +1125,9 @@ module fpu_tb( clk );
     end
 
     if (ctr > 2400) begin
-      $display("Bye bye bby");
-      $finish();
+      test_ctr <= test_ctr + 1;
+      ctr <= 0;
+      $display(test_ctr);
     end
 
   end // always @ (posedge clk)
