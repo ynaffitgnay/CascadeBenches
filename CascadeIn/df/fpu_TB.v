@@ -120,11 +120,12 @@ module fpu_tb( clk );
 
     else if (ctr == 29) begin
       //Output:3.422700000000000e+001
+      /*
       if (out==64'h40411d0e56041894)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
-
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
       //inputA:-9.0300000000e+002
       //inputB:2.1000000000e+001
@@ -139,10 +140,11 @@ module fpu_tb( clk );
 
     else if (ctr == 56) begin
       //Output:-8.820000000000000e+002
+      /*
       if (out==64'hc08b900000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
 
 
       //inputA:-1.0000000000e-309
@@ -158,10 +160,12 @@ module fpu_tb( clk );
 
     else if (ctr == 83) begin
       //Output:9.999999999999969e-311
+      /*
       if (out==64'h000012688b70e62b)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.0600000000e+001
@@ -177,10 +181,12 @@ module fpu_tb( clk );
 
     else if (ctr == 110) begin
       //Output:-7.630000000000001e+001
+      /*
       if (out==64'hc053133333333334)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.4500000000e+002
@@ -196,10 +202,12 @@ module fpu_tb( clk );
 
     else if (ctr == 137) begin
       //Output:1.000000000000000e+000
+      /*
       if (out==64'h3ff0000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:2.0000000000e-311
@@ -215,11 +223,13 @@ module fpu_tb( clk );
 
     else if (ctr == 164) begin
       //Output:1.999999999999895e-311
+      /*
       if (out==64'h000003ae8249c7a2)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:2.1000000000e-308
@@ -235,11 +245,13 @@ module fpu_tb( clk );
 
     else if (ctr == 191) begin
       //Output:4.100000000000000e-308
+      /*
       if (out==64'h001d7b6f52d0a0f7)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:2.1000000000e-308
@@ -255,11 +267,13 @@ module fpu_tb( clk );
 
     else if (ctr == 218) begin
       //Output:4.100000000000000e-308
+      /*
       if (out==64'h001d7b6f52d0a0f7)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:5.0000000000e-308
@@ -275,11 +289,13 @@ module fpu_tb( clk );
 
     else if (ctr == 245) begin
       //Output:5.000199999999999e-308
+      /*
       if (out==64'h0021fa474c5e1008)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.9800000000e+000
@@ -295,11 +311,13 @@ module fpu_tb( clk );
 
     else if (ctr == 272) begin
       //Output:7.750000000000000e+000
+      /*
       if (out==64'h401f000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.4000000000e+001
@@ -315,11 +333,13 @@ module fpu_tb( clk );
 
     else if (ctr == 299) begin
       //Output:4.407900000000000e+001
+      /*
       if (out==64'h40460a1cac083127)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.0000000000e-310
@@ -335,11 +355,13 @@ module fpu_tb( clk );
 
     else if (ctr == 326) begin
       //Output:4.000003000000000e-304
+      /*
       if (out==64'h00f18e3c781dcab4)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       /******************************* SUBTRACTION ******************************/      
@@ -359,11 +381,13 @@ module fpu_tb( clk );
 
     else if (ctr == 354) begin
       //Output:4.000000000000000e+002
+      /*
       if (out==64'h4079000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.5000000000e+001
@@ -379,11 +403,13 @@ module fpu_tb( clk );
 
     else if (ctr == 382) begin
       //Output:-1.300000000000000e+001
+      /*
       if (out==64'hc02a000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.0195000000e+002
@@ -399,11 +425,13 @@ module fpu_tb( clk );
 
     else if (ctr == 410) begin
       //Output:4.355500000000000e+002
+      /*
       if (out==64'h407b38cccccccccc)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.8999000000e+004
@@ -419,11 +447,13 @@ module fpu_tb( clk );
 
     else if (ctr == 438) begin
       //Output:4.897540000000000e+004
+      /*
       if (out==64'h40e7e9eccccccccd)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:2.3770000000e+001
@@ -439,11 +469,13 @@ module fpu_tb( clk );
 
     else if (ctr == 466) begin
       //Output:6.877000000000000e+001
+      /*
       if (out==64'h40513147ae147ae1)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:5.6999990000e+006
@@ -460,11 +492,13 @@ module fpu_tb( clk );
 
     else if (ctr == 494) begin
       //Output:9.999999776482582e-003
+      /*
       if (out==64'h3f847ae140000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.0000000000e+000
@@ -480,11 +514,13 @@ module fpu_tb( clk );
 
     else if (ctr == 522) begin
       //Output:-1.300000000000000e+001
+      /*
       if (out==64'hc02a000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.9700000000e+001
@@ -501,11 +537,13 @@ module fpu_tb( clk );
 
     else if (ctr == 550) begin
       //Output:3.967430000000001e+001
+      /*
       if (out==64'h4043d64f765fd8af)
-        //$display("answer is correct %h%h", out[63:32], out[31:0]);
+        $display("answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputa:2.3000000000e+000
@@ -521,11 +559,13 @@ module fpu_tb( clk );
 
     else if (ctr == 578) begin
       //output:2.230000000000000e+000
+      /*
       if (out==64'h4001d70a3d70a3d7)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:1.9999999673e-316
@@ -541,11 +581,13 @@ module fpu_tb( clk );
 
     else if (ctr == 606) begin
       //Output:1.799999970587486e-316
+      /*
       if (out==64'h00000000022bea15)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:1.9999999970e-315
@@ -561,11 +603,13 @@ module fpu_tb( clk );
 
     else if (ctr == 634) begin
       //Output:2.199999993695311e-315
+      /*
       if (out==64'h000000001a8a825c)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.0000000000e+000
@@ -582,11 +626,13 @@ module fpu_tb( clk );
 
     else if (ctr == 662) begin
       //Output:4.000000000000000e+000
+      /*
       if (out==64'h4010000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       /******************************* MULTIPLICATION ******************************/      
@@ -609,11 +655,13 @@ module fpu_tb( clk );
     // #800000;  // 80 cycles
     else if (ctr == 693) begin
       //Output:9.000000000000022e-311
+      /*
       if (out==64'h000010914a4c025a)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-9.5000000000e+001
@@ -630,11 +678,13 @@ module fpu_tb( clk );
 
     else if (ctr == 724) begin
       //Output:-1.900000000000000e+004
+      /*
       if (out==64'hc0d28e0000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:2.3577000000e+002
@@ -650,11 +700,13 @@ module fpu_tb( clk );
 
     else if (ctr == 755) begin
       //Output:4.715400000000001e+000
+      /*
       if (out==64'h4012dc91d14e3bce)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.7700000000e+002
@@ -670,11 +722,13 @@ module fpu_tb( clk );
 
     else if (ctr == 786) begin
       //Output:-2.335392000000000e+005
+      /*
       if (out==64'hc10c82199999999a)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:0.0000000000e+000
@@ -690,11 +744,13 @@ module fpu_tb( clk );
 
     else if (ctr == 817) begin
       //Output:0.000000000000000e+000
+      /*
       if (out==64'h0000000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:5.0000000000e-311
@@ -710,11 +766,13 @@ module fpu_tb( clk );
 
     else if (ctr == 848) begin 
       //Output:4.499999999999764e-301
+      /*
       if (out==64'h01934982fc467380)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.0000000000e-305
@@ -730,11 +788,13 @@ module fpu_tb( clk );
 
     else if (ctr == 879) begin 
       //Output:-8.000000000007485e-313
+      /*
       if (out==64'h80000025b34aa196)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.0000000000e-308
@@ -750,11 +810,13 @@ module fpu_tb( clk );
 
     else if (ctr == 910) begin
       //Output:2.999966601548049e-320
+      /*
       if (out==64'h00000000000017b8)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       /******************************* MULTIPLICATION ******************************/      
@@ -774,11 +836,13 @@ module fpu_tb( clk );
 
     else if (ctr == 988) begin
       //Output:4.249999999722977e-015
+      /*
       if (out==64'h3cf323ea98d06fb6) 
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
       //inputA:2.2300000000e+002
       //inputB:5.6000000000e+001
@@ -793,11 +857,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1066) begin
       //Output:3.982142857142857e+000
+      /*
       if (out==64'h400fdb6db6db6db7)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.5500000000e+002
@@ -813,11 +879,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1144) begin
       //Output:-9.912854030501089e-001
+      /*
       if (out==64'hbfefb89c2a6346d5)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.0000000000e-200
@@ -833,11 +901,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1222) begin
       //Output:2.000000000000000e-202
+      /*
       if (out==64'h160f5a549627a36c)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.0000000000e+020
@@ -854,11 +924,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1300) begin
       //Output:2.000000000000000e+018
+      /*
       if (out==64'h43bbc16d674ec800)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:5.0000000000e+000
@@ -874,11 +946,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1378) begin
       //Output:2.000000000000000e+000
+      /*
       if (out==64'h4000000000000000)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:1.0000000000e-312
@@ -894,11 +968,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1456) begin
       //Output:9.999999999984653e-313
+      /*
       if (out==64'h0000002f201d49fb)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:4.0000000000e-200
@@ -914,11 +990,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1534) begin
       //Output:1.333333333333758e-311
+      /*
       if (out==64'h0000027456dbda6d)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:7.0000000000e-310
@@ -935,11 +1013,13 @@ module fpu_tb( clk );
     else if (ctr == 1612) begin
 
       //Output:8.749999999999972e-211
+      /*
       if (out==64'h14526914eebbd470)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:1.4000000000e-311
@@ -955,11 +1035,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1690) begin
       //Output:5.599999999999383e-002
+      /*
       if (out==64'h3facac083126e600)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
       //inputA:-6.7000000000e+001
       //inputB:0.0000000000e+000
@@ -974,11 +1056,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1768) begin
       //Output:-1.#INF00000000000e+000
+      /*
       if (out==64'hffefffffffffffff)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-4.5600000000e+001
@@ -994,11 +1078,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1846) begin
       //Output:6.608695652173914e-001
+      /*
       if (out==64'h3fe525d7ee30f953)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-5.9900000000e+002
@@ -1014,11 +1100,13 @@ module fpu_tb( clk );
 
     else if (ctr == 1924) begin
       //Output:-2.218518518518519e+004
+      /*
       if (out==64'hc0d5aa4bda12f685)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:3.5000000000e-313
@@ -1034,11 +1122,13 @@ module fpu_tb( clk );
 
     else if (ctr == 2002) begin
       //Output:4.999998683134458e-318
+      /*
       if (out==64'h00000000000f712b)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-5.1000000000e-306
@@ -1054,11 +1144,13 @@ module fpu_tb( clk );
 
     else if (ctr == 2080) begin
       //Output:-2.490234375000003e-309
+      /*
       if (out==64'h8001ca69686873bb)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-1.5000000000e-305
@@ -1074,11 +1166,13 @@ module fpu_tb( clk );
 
     else if (ctr == 2158) begin
       //Output:-1.464843750000000e-308
+      /*
       if (out==64'h800a888a29edf40c)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:-3.4000000000e+056
@@ -1095,11 +1189,13 @@ module fpu_tb( clk );
     else if (ctr == 2236) begin
 
       //Output:8.500000000000000e-144
+      /*
       if (out==64'h223a88ecc2ac8317)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
 
       //inputA:1.3559000000e-001
@@ -1116,11 +1212,13 @@ module fpu_tb( clk );
 
     else if (ctr == 2314) begin
       //Output:5.866842281071894e-005
+      /*
       if (out==64'h3f0ec257a882625f)
-        //$display("Answer is correct %h%h", out[63:32], out[31:0]);
+        $display("Answer is correct %h%h", out[63:32], out[31:0]);
 
       else
-        //$display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+        $display("Error! out is incorrect %h%h", out[63:32], out[31:0]);
+      */
 
     end
 
