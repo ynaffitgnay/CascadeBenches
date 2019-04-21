@@ -12,7 +12,7 @@ module fpu_pri_encoder#(
   genvar i;
 
   for (i = 0; i < WIDTH_LOG; i = i + 1) begin : ORS
-    wire [WIDTH - 1:0] oi;
+    wire [(1 << WIDTH_LOG) - 1:0] oi;
     wire msbi;
 
     if (i == 0)
