@@ -479,7 +479,7 @@ module test(clk);
                      text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
             error_cnt <= error_cnt + 1;
           end
-          //$display("cipher ctr: %d", ctr);
+          $display("cipher ctr: %d", ctr);
 
           state <= wait_decipher;
         end
@@ -499,7 +499,7 @@ module test(clk);
                      text_out2[127:96], text_out2[95:64], text_out2[63:32], text_out2[31:0]);
             error_cnt <= error_cnt + 1;
           end
-          //$display("decipher ctr: %d", ctr);
+          $display("decipher ctr: %d", ctr);
           ctr <= 0;
           n <= n + 1;
           state <= begin_loop;  // start loop over
