@@ -120,7 +120,7 @@ module ima_adpcm_dec (
   assign preOutSamp = {predictorSamp[18], predictorSamp[18:3]} + predictorSamp[2];
 
   // output interface 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock or posedge reset) begin
     if (reset) begin 
       outSamp <= 16'b0;
       outValid <= 1'b0;

@@ -49,8 +49,8 @@ module test(clk);
   wire decValid;      // decoder output valid flag 
   integer sampCount, encCount, decCount;
   //stream infid, encfid, decfid;
-  reg [7:0] intmp, dectmp;
-  reg [3:0] enctmp, encExpVal;
+  reg [7:0] intmp, enctmp, dectmp;
+  reg [3:0] encExpVal;
   reg [15:0] decExpVal;
   reg [31:0] dispCount;
 
@@ -71,6 +71,16 @@ module test(clk);
   reg[31:0] eCtr;
   reg[31:0] dCtr;
 
+  reg[BUFFER_SIZE - 1:0] inBuf, encBuf, outBuf;
+  reg[31:0] inBytesRead, encBytesRead, decBytesRead;
+
+  reg[4:0] inBufIdx, encBufIdx, decBufIdx;
+
+
+  parameter BUFFER_BYTES = 4;
+
+  parameter BUFFER_SIZE = (1 << BUFFER_BYTES);
+  
 
   parameter main0 = 0;
   parameter main1 = 1;
@@ -103,12 +113,16 @@ module test(clk);
   parameter dec5 = 5;
   parameter dec6 = 6;
 
-  parameter TESTS_TO_RUN = 10;
+  parameter TESTS_TO_RUN = 1;
 
 
   stream infid = $fopen("test_in.bin");
   stream encfid = $fopen("test_enc.bin");
   stream decfid = $fopen("test_dec.bin");
+
+  //assign inBufIdx = BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
+  //assign encBufIdx = BUFFER_SIZE - ((encBytesRead % BUFFER_BYTES) * 8) - 1;
+  //assign decBufIdx = BUFFER_SIZE - ((decBytesRead % BUFFER_BYTES) * 8) - 1;
 
   
   initial begin
@@ -121,12 +135,17 @@ module test(clk);
 
     iCtr = 0;
     inState = 0;
+    inBytesRead = 0;
 
     eCtr = 0;
     encState = 0;
+    encBytesRead = 0;
+
 
     dCtr = 0;
     decState = 0;
+    decBytesRead = 0;
+
     $display("Done initializing");
 
   end
@@ -141,6 +160,9 @@ module test(clk);
   // global signals generation
   always @(posedge clk) begin
     mCtr <= mCtr + 1;
+
+    //$display("intmp: %h, enctmp: %h, dectmp: %h", intmp, enctmp, dectmp);
+
 
     if (testCount >= TESTS_TO_RUN) $finish(1);
 
@@ -162,7 +184,7 @@ module test(clk);
       end
 
       main1: begin
-        $display("In main1 (should only display once)");
+        //$display("In main1 (should only display once)");
 
         rst <= 0;
         
@@ -202,6 +224,7 @@ module test(clk);
         inValid <= 1'b0;
         // clear samples counter 
         sampCount <= 0;
+        inBytesRead <= 0;
 
         // binary input file 
         if (iCtr == 0) $seek(infid, 0);
@@ -218,11 +241,17 @@ module test(clk);
 
       in2: begin
         if (iCtr >= 50) begin
-          $display("Getting input");
+          $display("Getting input byte");
 
           // read input samples file 
-          $get(infid, intmp);
+          $get(infid, inBuf);
           //intmp = $fgetc(infid);
+
+          inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
+
+          intmp <= inBuf[inBufIdx:inBufIdx - 7];
+          inBytesRead <= inBytesRead + 1;
+
 
           iCtr <= 0;
           inState <= in3;
@@ -241,23 +270,51 @@ module test(clk);
           inState <= in5;
         end
 
-        if (iCtr == 0) begin
-          // read the next character to form the new input sample 
-          // Note that first byte is used as the low byte of the sample 
-          inSamp[7:0] <= intmp;
-          //inSamp[15:8] <= $fgetc(infid);
-          $get(infid, inReg);
-          inSamp[15:8] <= inReg;
-        end
+        else begin
+          if (iCtr == 0) begin
+            inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
+            $display("inBufIdx: %d", inBufIdx);
 
-        // sign input sample is valid 
-        inValid <= 1'b1;
+            // read the next character to form the new input sample 
+            // Note that first byte is used as the low byte of the sample 
+            inSamp[7:0] <= intmp;
+            //bytes_read <= bytes_read + 1;
+            //$display("bytes_read: %d", bytes_read);
 
-        // @(posedge clock);
-        if (iCtr >= 1) begin
-          iCtr <= 0;
-          inState <= in4;
-        end
+            inReg <= inBuf[inBufIdx - 8:inBufIdx - 15];
+
+            //inSamp[15:8] <= $fgetc(infid);
+            //$get(infid, inReg);
+            inSamp[15:8] <= inReg;
+
+            inBytesRead <= inBytesRead + 1;
+
+            $display("inBytesRead: %d", inBytesRead);
+
+            if ((inBytesRead % BUFFER_BYTES) == 0) begin
+              $display("Reading more bytes");
+
+              $get(infid, inBuf);
+            end
+
+
+          end
+
+          //$display("inSamp: %h", inSamp);
+
+          //inSamp <= 16'h0000;
+
+
+
+          // sign input sample is valid 
+            inValid <= 1'b1;
+
+          // @(posedge clock);
+          if (iCtr >= 1) begin
+            iCtr <= 0;
+            inState <= in4;
+          end
+        end // else: !if($eof(infid))
 
       end // case: in3
 
@@ -274,7 +331,14 @@ module test(clk);
         if (inReady) begin
           // read next character from the input file 
           //intmp = $fgetc(infid);
-          $get(infid, intmp);
+
+          inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
+          $display("inBufIdx: %d", inBufIdx);
+          //$get(infid, intmp);
+          intmp <= inBuf[inBufIdx:inBufIdx - 7];
+
+          inBytesRead <= inBytesRead + 1;
+
           iCtr <= 0;
           inState <= in3;
         end
@@ -288,7 +352,6 @@ module test(clk);
 
         if (iCtr >= 1) begin
           $display("Closing input file");
-
           // close input file 
           //$fclose(infid);
 
@@ -340,8 +403,8 @@ module test(clk);
       // wait for reset release
       //while (rst) @(posedge clock);
     
-    // encoder output compare loop 
-    //enctmp = $fgetc(encfid);
+      // encoder output compare loop 
+      //enctmp = $fgetc(encfid);
       enc2: begin
         if ($eof(encfid)) begin
           $display("Reached eof of encryption file");
@@ -349,21 +412,22 @@ module test(clk);
           encState <= enc4;
         end
 
-        //while (enctmp != `EOF)  // can put this into a state machine
-        //begin 
-        // assign the expected value to a register with the same width 
-        encExpVal <= enctmp;
-      
-        // wait for encoder output valid 
-        //while (!encValid)
-        //  @(posedge clock);
-        if (encValid) begin
-          eCtr <= 0;
-          encState <= enc3;
-        end
-      end // case: enc2
-
+        else begin
+          //while (enctmp != `EOF)  // can put this into a state machine
+          //begin 
+          // assign the expected value to a register with the same width 
+          encExpVal <= enctmp;
           
+          // wait for encoder output valid 
+          //while (!encValid)
+          //  @(posedge clock);
+          if (encValid) begin
+            eCtr <= 0;
+            encState <= enc3;
+          end
+        end // else: !if($eof(encfid))
+        
+      end // case: enc2  
 
       enc3: begin
         // compare the encoded value with the value read from the input file 
@@ -378,20 +442,26 @@ module test(clk);
           // wait for a few clock cycles before ending simulation 
           //repeat (20) @(posedge clock);
           if (eCtr >= 20) $finish();
-        end 
-      
-        // update the encoded sample counter 
-        else if (eCtr == 0) encCount <= encCount + 1;
-        // delay for a clock cycle after comparison 
-        //@(posedge clock);
+        end // if (encPcm != encExpVal)
 
-        else if (eCtr >= 1) begin
-          // read next char from input file 
-          //enctmp = $fgetc(encfid);
-          $get(encfid, enctmp);
-          eCtr <= 0;
-          encState <= enc2;
-        end
+        else begin
+      
+          // update the encoded sample counter 
+          if (eCtr == 0) encCount <= encCount + 1;
+          // delay for a clock cycle after comparison 
+          //@(posedge clock);
+
+          if (eCtr >= 1) begin
+            // read next char from input file 
+            //enctmp = $fgetc(encfid);
+            $display("encoder output correct!!!!!!!!!!");
+
+            $get(encfid, enctmp);
+            eCtr <= 0;
+            encState <= enc2;
+
+          end
+        end // else: !if(encPcm != encExpVal)
       end // case: enc3
 
       enc4: begin
@@ -459,28 +529,30 @@ module test(clk);
           $display("Reached eof of dec file");
           dCtr <= 0;
           decState <= dec4;
-        end  
-    
-        //while (dectmp != `EOF)
-        //begin 
-        // read the next char to form the expected 16 bit sample value
-        
-        if (dCtr == 0) begin  
-          decExpVal[7:0] <= dectmp;
-
-          $get(decfid, decReg);
-          //decExpVal[15:8] <= $fgetc(decfid);
-          decExpVal[15:8] <= decReg;
         end
 
-        // wait for decoder output valid 
-        //while (!decValid)
-        //  @(posedge clock);
-        
-        if (decValid) begin
-          dCtr <= 0;
-          decState <= dec3;
-        end
+        else begin    
+          //while (dectmp != `EOF)
+          //begin 
+          // read the next char to form the expected 16 bit sample value
+          
+          if (dCtr == 0) begin  
+            decExpVal[7:0] <= dectmp;
+
+            $get(decfid, decReg);
+            //decExpVal[15:8] <= $fgetc(decfid);
+            decExpVal[15:8] <= decReg;
+          end
+
+          // wait for decoder output valid 
+          //while (!decValid)
+          //  @(posedge clock);
+          
+          if (decValid) begin
+            dCtr <= 0;
+            decState <= dec3;
+          end
+        end // else: !if($eof(decfid))
 
       end // case: dec2
 
@@ -499,27 +571,30 @@ module test(clk);
           //$finish
           if (dCtr >= 20) $finish();
 
-        end 
-        // delay for a clock cycle after comparison 
-        //@(posedge clock);
-        // update the decoded sample counter 
-        else if (dCtr >= 1) begin
-          decCount <= decCount + 1;
-
-          //
-          //// check if simulation progress should be displayed
-          //if (dispCount[31:13] != (decCount >> 13))
-          //  $write(".");
-          // update the display counter 
-          //dispCount = decCount;
+        end // if (decSamp != decExpVal)
         
-          // read next char from input file 
-          //dectmp = $fgetc(decfid);
-          $get(decfid, dectmp);
+        else begin
+          // delay for a clock cycle after comparison 
+          //@(posedge clock);
+          // update the decoded sample counter 
+          if (dCtr >= 1) begin
+            decCount <= decCount + 1;
 
-          dCtr <= 0;
-          decState <= dec2;
-        end // if (dCtr >= 1)
+            //
+            //// check if simulation progress should be displayed
+            //if (dispCount[31:13] != (decCount >> 13))
+            //  $write(".");
+            // update the display counter 
+            //dispCount = decCount;
+            
+            // read next char from input file 
+            //dectmp = $fgetc(decfid);
+            $get(decfid, dectmp);
+
+            dCtr <= 0;
+            decState <= dec2;
+          end // if (dCtr >= 1)
+        end // else: !if(decSamp != decExpVal)
       end // case: dec3
 
       dec4: begin
@@ -566,7 +641,7 @@ module test(clk);
     (
      .clock(clk), 
      .reset(rst), 
-     .inPCM(encPcm), 
+     .inPCM(encExpVal),//inPCM(encPcm), 
      .inValid(encValid),
      .inReady(decReady),
      .inPredictSamp(16'b0), 
