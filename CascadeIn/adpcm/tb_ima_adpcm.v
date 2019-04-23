@@ -49,8 +49,8 @@ module test(clk);
   wire decValid;      // decoder output valid flag 
   integer sampCount, encCount, decCount;
   //stream infid, encfid, decfid;
-  reg [7:0] intmp, enctmp, dectmp;
-  reg [3:0] encExpVal;
+  reg [7:0] intmp, dectmp;
+  reg [3:0] enctmp, encExpVal;
   reg [15:0] decExpVal;
   reg [31:0] dispCount;
 
@@ -58,7 +58,7 @@ module test(clk);
 
   reg[31:0] testCount;
 
-  reg[7:0] inReg, encReg, decReg;
+  reg[7:0] inReg, decReg;
 
   
   reg[3:0] mainState;
@@ -107,6 +107,9 @@ module test(clk);
 
 
   stream infid = $fopen("test_in.bin");
+  stream encfid = $fopen("test_enc.bin");
+  stream decfid = $fopen("test_dec.bin");
+
   
   initial begin
     $display("Initializing");
@@ -118,11 +121,6 @@ module test(clk);
 
     iCtr = 0;
     inState = 0;
-
-    //$get(infid, intmp);  // TODO: probably get rid of this
-    //if ($eof(infid)) $display("infid eof");
-
-
 
     eCtr = 0;
     encState = 0;
@@ -194,7 +192,7 @@ module test(clk);
 
     case (inState)
       in0: begin
-        @(posedge clk);
+        //@(posedge clk);
         iCtr <= 0;
       end
 
@@ -273,14 +271,6 @@ module test(clk);
         //while (!inReady)
         //  @(posedge clock);
 
-        $display("Should finish");
-
-
-        $finish();  // TODO: get rid of this
-
-        $display("Why am i not finished?");
-
-
         if (inReady) begin
           // read next character from the input file 
           //intmp = $fgetc(infid);
@@ -319,115 +309,241 @@ module test(clk);
   // the ADPCM coded samples file. 
   //initial 
   //begin
-  /*
   always @(posedge clk) begin
-    // clear encoded sample value 
-    encCount = 0;
-    // open input file 
-    encfid = $fopen(`ENC_FILE, "rb");
+    eCtr <= eCtr + 1;
+    if (rst) encState <= enc1;
 
-    // wait for reset release
-    while (rst) @(posedge clock);
+    case(encState)
+      enc0: begin
+        eCtr <= 0;
+      end
+
+      enc1: begin
+        // clear encoded sample value 
+        encCount <= 0;
+        
+        // open input file 
+        //encfid = $fopen(`ENC_FILE, "rb");
+        if (eCtr == 0) $seek(encfid, 0);
+
+        if (!rst) begin
+          $display("getting first enc byte");
+
+          $get(encfid, enctmp);
+
+          eCtr <= 0;
+          encState <= enc2;
+        end
+      end // case: enc1
+      
+
+      // wait for reset release
+      //while (rst) @(posedge clock);
     
     // encoder output compare loop 
-    enctmp = $fgetc(encfid);
-    while (enctmp != `EOF)  // can put this into a state machine
-    begin 
-      // assign the expected value to a register with the same width 
-      encExpVal = enctmp;
+    //enctmp = $fgetc(encfid);
+      enc2: begin
+        if ($eof(encfid)) begin
+          $display("Reached eof of encryption file");
+          eCtr <= 0;
+          encState <= enc4;
+        end
+
+        //while (enctmp != `EOF)  // can put this into a state machine
+        //begin 
+        // assign the expected value to a register with the same width 
+        encExpVal <= enctmp;
       
-      // wait for encoder output valid 
-      while (!encValid)
-        @(posedge clock);
+        // wait for encoder output valid 
+        //while (!encValid)
+        //  @(posedge clock);
+        if (encValid) begin
+          eCtr <= 0;
+          encState <= enc3;
+        end
+      end // case: enc2
+
+          
+
+      enc3: begin
+        // compare the encoded value with the value read from the input file 
+        if (encPcm != encExpVal) begin 
+          // announce error detection and exit simulation
+          if (eCtr == 0) begin
+            $display(" Error!");
+            $display("Error found in encoder output index %d.", encCount+1);
+            $display("   (expected value 'h%h, got value 'h%h)", encExpVal, encPcm);
+          end
+
+          // wait for a few clock cycles before ending simulation 
+          //repeat (20) @(posedge clock);
+          if (eCtr >= 20) $finish();
+        end 
       
-      // compare the encoded value with the value read from the input file 
-      if (encPcm != encExpVal)
-      begin 
-        // announce error detection and exit simulation 
-        $display(" Error!");
-        $display("Error found in encoder output index %0d.", encCount+1);
-        $display("   (expected value 'h%x, got value 'h%x)", encExpVal, encPcm);
-        // wait for a few clock cycles before ending simulation 
-        repeat (20) @(posedge clock);
-        $finish;
-      end 
-      
-      // update the encoded sample counter 
-      encCount = encCount + 1;
-      // delay for a clock cycle after comparison 
-      @(posedge clock);
-      
-      // read next char from input file 
-      enctmp = $fgetc(encfid);
-    end 
-    
-    // close input file 
-    $fclose(encfid);
-  end 
+        // update the encoded sample counter 
+        else if (eCtr == 0) encCount <= encCount + 1;
+        // delay for a clock cycle after comparison 
+        //@(posedge clock);
+
+        else if (eCtr >= 1) begin
+          // read next char from input file 
+          //enctmp = $fgetc(encfid);
+          $get(encfid, enctmp);
+          eCtr <= 0;
+          encState <= enc2;
+        end
+      end // case: enc3
+
+      enc4: begin
+        if (iCtr >= 1) begin
+          $display("Would close input file here");
+          // close input file 
+          //$fclose(encfid);
+          
+          encDone <= 1;
+
+          eCtr <= 0;
+          encState <= enc0;
+
+        end
+      end
+
+      default: encState <= enc0;
+
+    endcase // case (encState)
+   
+  end // always @ (posedge clk)
+
 
   // decoder output checker - the decoder output is compared to the value read from 
   // the ADPCM decoded samples file. 
-  initial 
-  begin 
-    // clear decoded sample value 
-    decCount = 0;
-    dispCount = 0;
-    // open input file 
-    decfid = $fopen(`DEC_FILE, "rb");
+  //initial 
+  //begin
+  always @(posedge clk) begin
+    dCtr <= dCtr + 1;
 
-    // wait for reset release
-    while (rst) @(posedge clock);
+    if (rst) decState <= dec1;
 
-    // display simulation progress bar title 
-    $write("Simulation progress: ");
+    case (decState)
+      dec0: begin
+        dCtr <= 0;
+      end
+
+      dec1: begin        
+        // clear decoded sample value 
+        decCount <= 0;
+        dispCount <= 0;
+        // open input file 
+        //decfid = $fopen(`DEC_FILE, "rb");
+        if (dCtr == 0) $seek(decfid, 0);
+        
+        // wait for reset release
+        //while (rst) @(posedge clock);
+
+        if (!rst) begin
+          $display("Grabbing first dec byte");
+          // decoder output compare loop
+          
+          //dectmp = $fgetc(decfid);
+          $get(decfid, dectmp);
+
+          dCtr <= 0;
+          decState <= dec2;
+        end
+      end // case: dec1
+
+      dec2: begin
+        // display simulation progress bar title 
+        //$write("Simulation progress: ");
+        if ($eof(decfid)) begin
+          $display("Reached eof of dec file");
+          dCtr <= 0;
+          decState <= dec4;
+        end  
     
-    // decoder output compare loop 
-    dectmp = $fgetc(decfid);
-    while (dectmp != `EOF)
-    begin 
-      // read the next char to form the expected 16 bit sample value 
-      decExpVal[7:0] = dectmp;
-      decExpVal[15:8] = $fgetc(decfid);
+        //while (dectmp != `EOF)
+        //begin 
+        // read the next char to form the expected 16 bit sample value
+        
+        if (dCtr == 0) begin  
+          decExpVal[7:0] <= dectmp;
+
+          $get(decfid, decReg);
+          //decExpVal[15:8] <= $fgetc(decfid);
+          decExpVal[15:8] <= decReg;
+        end
+
+        // wait for decoder output valid 
+        //while (!decValid)
+        //  @(posedge clock);
+        
+        if (decValid) begin
+          dCtr <= 0;
+          decState <= dec3;
+        end
+
+      end // case: dec2
+
+      dec3: begin        
+        // compare the decoded value with the value read from the input file 
+        if (decSamp != decExpVal) begin
+          if (dCtr == 0) begin
+            // announce error detection and exit simulation 
+            $display(" Error!");
+            $display("Error found in decoder output index %d.", decCount+1);
+            $display("   (expected value 'h%h, got value 'h%h)", decExpVal, decSamp);
+          end
+
+          // wait for a few clock cycles before ending simulation 
+          //repeat (20) @(posedge clock);
+          //$finish
+          if (dCtr >= 20) $finish();
+
+        end 
+        // delay for a clock cycle after comparison 
+        //@(posedge clock);
+        // update the decoded sample counter 
+        else if (dCtr >= 1) begin
+          decCount <= decCount + 1;
+
+          //
+          //// check if simulation progress should be displayed
+          //if (dispCount[31:13] != (decCount >> 13))
+          //  $write(".");
+          // update the display counter 
+          //dispCount = decCount;
+        
+          // read next char from input file 
+          //dectmp = $fgetc(decfid);
+          $get(decfid, dectmp);
+
+          dCtr <= 0;
+          decState <= dec2;
+        end // if (dCtr >= 1)
+      end // case: dec3
+
+      dec4: begin
+        //$display("Would close decfile here");
+        // close input file 
+        //$fclose(decfid);
+
+        // when decoder output is done announce simulation was successful 
+        $display(" Done");
+        $display("Simulation ended successfully after %0d samples", decCount);
+        //$finish;
+        decDone <= 1;
+
+        dCtr <= 0;
+        decState <= 0;
+      end // case: dec4
+
+      default: decState <= dec0;
+
+    endcase // case (decState)
+  end // always @ (posedge clk)
+
       
-      // wait for decoder output valid 
-      while (!decValid)
-        @(posedge clock);
-      
-      // compare the decoded value with the value read from the input file 
-      if (decSamp != decExpVal)
-      begin 
-        // announce error detection and exit simulation 
-        $display(" Error!");
-        $display("Error found in decoder output index %0d.", decCount+1);
-        $display("   (expected value 'h%x, got value 'h%x)", decExpVal, decSamp);
-        // wait for a few clock cycles before ending simulation 
-        repeat (20) @(posedge clock);
-        $finish;
-      end 
-      // delay for a clock cycle after comparison 
-      @(posedge clock);
-      
-      // update the decoded sample counter 
-      decCount = decCount + 1;
-      
-      // check if simulation progress should be displayed
-      if (dispCount[31:13] != (decCount >> 13))
-        $write(".");
-      // update the display counter 
-      dispCount = decCount;
-      
-      // read next char from input file 
-      dectmp = $fgetc(decfid);
-    end 
     
-    // close input file 
-    $fclose(decfid);
-    
-    // when decoder output is done announce simulation was successful 
-    $display(" Done");
-    $display("Simulation ended successfully after %0d samples", decCount);
-    $finish;
-  end 
 /* */
   //------------------------------------------------------------------
   // device under test 
