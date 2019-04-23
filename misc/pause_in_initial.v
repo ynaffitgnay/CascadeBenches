@@ -5,15 +5,21 @@ module pause_in_initial(clk, rst);
 
 
   initial begin
+    $display("Another initial block");
+  end
+
+  initial begin
     ctr = 0;
 
     $display("Start");
     $display("rst: %d", rst);
 
-    while(!rst) begin
-      $display("rst: %d", rst);
-      @(posedge clk);
-    end
+
+    // this while loop doesn't appear to change
+    //while(!rst) begin
+    //  $display("rst: %d", rst);
+    //  @(posedge clk);
+    //end
 
 
     repeat(10) begin 
@@ -23,7 +29,8 @@ module pause_in_initial(clk, rst);
     $display("End");
     $finish();
 
-  end
+  end // initial begin
+
 
   always @(posedge clk) begin
     ctr = ctr + 1;

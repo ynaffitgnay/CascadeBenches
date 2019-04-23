@@ -33,251 +33,433 @@
 include ima_adpcm_enc.v;
 include ima_adpcm_dec.v;
 
-module test;
-//---------------------------------------------------------------------------------------
-// internal signal  
-reg rst;        // global reset 
-reg [15:0] inSamp;    // encoder input sample 
-reg inValid;      // encoder input valid flag 
-wire inReady;      // encoder input ready indication  
-wire [3:0] encPcm;    // encoder encoded output value 
-wire encValid;      // encoder output valid flag 
-wire [15:0] decSamp;  // decoder output sample value 
-wire decValid;      // decoder output valid flag 
-integer sampCount, encCount, decCount;
-integer infid, encfid, decfid;
-integer intmp, enctmp, dectmp;
-reg [3:0] encExpVal;
-reg [15:0] decExpVal;
-reg [31:0] dispCount;
+module test(clk);
+  input wire clk;
 
+  //---------------------------------------------------------------------------------------
+  // internal signal  
+  reg rst;        // global reset 
+  reg [15:0] inSamp;    // encoder input sample 
+  reg inValid;      // encoder input valid flag 
+  wire inReady;      // encoder input ready indication 
+  wire [3:0] encPcm;    // encoder encoded output value 
+  wire encValid;      // encoder output valid flag
+  wire decReady;     // decoder ready for input indication
+  wire [15:0] decSamp;  // decoder output sample value 
+  wire decValid;      // decoder output valid flag 
+  integer sampCount, encCount, decCount;
+  //stream infid, encfid, decfid;
+  reg [7:0] intmp, enctmp, dectmp;
+  reg [3:0] encExpVal;
+  reg [15:0] decExpVal;
+  reg [31:0] dispCount;
 
-// global definitions 
-//`define EOF        -1
+  reg inDone, encDone, decDone;
 
-// file names 
-//`define IN_FILE    "../../../scilab/test_in.bin"
-//j`define ENC_FILE  "../../../scilab/test_enc.bin"
-//`define DEC_FILE  "../../../scilab/test_dec.bin"
+  reg[31:0] testCount;
 
-//---------------------------------------------------------------------------------------
-// test bench implementation 
-// global signals generation  
-initial
-begin
-  //clock = 0;
-  rst = 1;
-  #40 rst = 0;  // 2 clock cycles
-end 
+  reg[7:0] inReg, encReg, decReg;
 
-// clock generator - 50MHz clock 
-//always 
-//begin 
-//  #10 clock = 0;
-//  #10 clock = 1;
-//end 
-
-// test bench dump variables 
-initial 
-begin 
-  $display("");
-  $display("IMA ADPCM encoder & decoder simulation");
-  $display("--------------------------------------");
-  //$dumpfile("test.vcd");
-  //$dumpvars(0, test);
-end 
-
-stream infid = $fopen("test_in.bin");
-
-//------------------------------------------------------------------
-// encoder input samples read process 
-initial 
-begin 
-  // clear encoder input signal 
-  inSamp = 16'b0;
-  inValid = 1'b0;
-  // clear samples counter 
-  sampCount = 0;
   
-  // binary input file 
-  //infid = $fopen("test_in.bin");
-  
-  // wait for reset release
-  while (rst) @(posedge clock);
-  repeat (50) @(posedge clock);  // 50 cycles
+  reg[3:0] mainState;
+  reg[3:0] inState;
+  reg[3:0] encState;
+  reg[3:0] decState;
 
-  // read input samples file 
-  intmp = $fgetc(infid);
-  while (intmp != `EOF)
-  begin 
-    // read the next character to form the new input sample 
-    // Note that first byte is used as the low byte of the sample 
-    inSamp[7:0] <= intmp;
-    inSamp[15:8] <= $fgetc(infid);
-    // sign input sample is valid 
-    inValid <= 1'b1;
-    @(posedge clock);
-    
-    // update the sample counter 
-    sampCount = sampCount + 1;
-    
-    // wait for encoder input ready assertion to confirm the new sample was read
-    // by the encoder.
-    while (!inReady)
-      @(posedge clock);
-    
-    // read next character from the input file 
-    intmp = $fgetc(infid);
+  reg[31:0] mCtr;
+  reg[31:0] iCtr;
+  reg[31:0] eCtr;
+  reg[31:0] dCtr;
+
+
+  parameter main0 = 0;
+  parameter main1 = 1;
+  parameter main2 = 2;
+
+
+  parameter in0 = 0;
+  parameter in1 = 1;
+  parameter in2 = 2;
+  parameter in3 = 3;
+  parameter in4 = 4;
+  parameter in5 = 5;
+  parameter in6 = 6;
+
+
+  parameter enc0 = 0;
+  parameter enc1 = 1;
+  parameter enc2 = 2;
+  parameter enc3 = 3;
+  parameter enc4 = 4;
+  parameter enc5 = 5;
+  parameter enc6 = 6;
+
+
+  parameter dec0 = 0;
+  parameter dec1 = 1;
+  parameter dec2 = 2;
+  parameter dec3 = 3;
+  parameter dec4 = 4;
+  parameter dec5 = 5;
+  parameter dec6 = 6;
+
+  parameter TESTS_TO_RUN = 10;
+
+
+  stream infid = $fopen("test_in.bin");
+  
+  initial begin
+    $display("Initializing");
+
+    testCount = 0;
+
+    mCtr = 0;
+    mainState = 0;
+
+    iCtr = 0;
+    inState = 0;
+
+    //$get(infid, intmp);  // TODO: probably get rid of this
+    //if ($eof(infid)) $display("infid eof");
+
+
+
+    eCtr = 0;
+    encState = 0;
+
+    dCtr = 0;
+    decState = 0;
+    $display("Done initializing");
+
+  end
+
+  // file names 
+  //`define IN_FILE    "../../../scilab/test_in.bin"
+  //`define ENC_FILE  "../../../scilab/test_enc.bin"
+  //`define DEC_FILE  "../../../scilab/test_dec.bin"
+
+  //---------------------------------------------------------------------------------------
+  // test bench implementation 
+  // global signals generation
+  always @(posedge clk) begin
+    mCtr <= mCtr + 1;
+
+    if (testCount >= TESTS_TO_RUN) $finish(1);
+
+    case (mainState)
+      main0: begin
+        rst <= 1;
+
+        inDone <= 0;
+        encDone <= 0;
+        decDone <= 0;
+
+        if (mCtr >= 2) begin
+          $display("");
+          $display("IMA ADPCM encoder & decoder simulation");
+          $display("--------------------------------------");
+          mCtr <= 0;
+          mainState <= main1;
+        end
+      end
+
+      main1: begin
+        $display("In main1 (should only display once)");
+
+        rst <= 0;
+        
+        mCtr <= 0;
+        mainState <= main2;
+      end // case: main1
+
+      main2: begin
+        if (inDone && encDone && decDone) begin
+          $display("Test %d done!. Count: %d", testCount , mCtr);
+
+          testCount <= testCount + 1;
+          mCtr <= 0;
+          mainState <= main0;
+        end
+      end
+         
+    endcase // case (mainState)        
   end 
-  // sign input is not valid 
-  inValid <= 1'b0;
-  @(posedge clock);
-  
-  // close input file 
-  $fclose(infid);
-end 
 
-// encoder output checker - the encoder output is compared to the value read from 
-// the ADPCM coded samples file. 
-initial 
-begin 
-  // clear encoded sample value 
-  encCount = 0;
-  // open input file 
-  encfid = $fopen(`ENC_FILE, "rb");
 
-  // wait for reset release
-  while (rst) @(posedge clock);
+  //------------------------------------------------------------------
+  // encoder input samples read process 
+  always @(posedge clk) begin
+    iCtr <= iCtr + 1;
+    if (rst) inState <= in1;
+
+    case (inState)
+      in0: begin
+        @(posedge clk);
+        iCtr <= 0;
+      end
+
+      in1: begin
+        // clear encoder input signal 
+        inSamp <= 16'b0;
+        inValid <= 1'b0;
+        // clear samples counter 
+        sampCount <= 0;
+
+        // binary input file 
+        if (iCtr == 0) $seek(infid, 0);
+
+        if (!rst) begin
+          iCtr <= 0;
+          inState <= in2;
+        end
+      end // case: in1
+      
+      // wait for reset release
+      //while (rst) @(posedge clock);
+      //repeat (50) @(posedge clock);  // 50 cycles
+
+      in2: begin
+        if (iCtr >= 50) begin
+          $display("Getting input");
+
+          // read input samples file 
+          $get(infid, intmp);
+          //intmp = $fgetc(infid);
+
+          iCtr <= 0;
+          inState <= in3;
+        end
+      end // case: in2
+
+      in3: begin
+        //while (intmp != `EOF)
+        //begin
+
+        // Stop looping through inputs if eof
+        if ($eof(infid)) begin
+          $display("Reached eof");
+
+          iCtr <= 0;
+          inState <= in5;
+        end
+
+        if (iCtr == 0) begin
+          // read the next character to form the new input sample 
+          // Note that first byte is used as the low byte of the sample 
+          inSamp[7:0] <= intmp;
+          //inSamp[15:8] <= $fgetc(infid);
+          $get(infid, inReg);
+          inSamp[15:8] <= inReg;
+        end
+
+        // sign input sample is valid 
+        inValid <= 1'b1;
+
+        // @(posedge clock);
+        if (iCtr >= 1) begin
+          iCtr <= 0;
+          inState <= in4;
+        end
+
+      end // case: in3
+
+
+      in4: begin
+        // update the sample counter 
+        if (iCtr == 0) sampCount <= sampCount + 1;
+
+        // wait for encoder input ready assertion to confirm the new sample was read
+        // by the encoder.
+        //while (!inReady)
+        //  @(posedge clock);
+
+        $display("Should finish");
+
+
+        $finish();  // TODO: get rid of this
+
+        $display("Why am i not finished?");
+
+
+        if (inReady) begin
+          // read next character from the input file 
+          //intmp = $fgetc(infid);
+          $get(infid, intmp);
+          iCtr <= 0;
+          inState <= in3;
+        end
+
+      end // case: in4
+
+      in5: begin
+        // sign input is not valid 
+        inValid <= 1'b0;
+        //@(posedge clock);
+
+        if (iCtr >= 1) begin
+          $display("Closing input file");
+
+          // close input file 
+          //$fclose(infid);
+
+          inDone <= 1;
+
+          iCtr <= 0;
+          inState <= in0;
+        end
+      end // case: in5
+      
+      default: inState <= in0;
+    endcase // case (inState)
+
+  end // always @ (posedge clk)
+
+
+  // encoder output checker - the encoder output is compared to the value read from 
+  // the ADPCM coded samples file. 
+  //initial 
+  //begin
+  /*
+  always @(posedge clk) begin
+    // clear encoded sample value 
+    encCount = 0;
+    // open input file 
+    encfid = $fopen(`ENC_FILE, "rb");
+
+    // wait for reset release
+    while (rst) @(posedge clock);
     
-  // encoder output compare loop 
-  enctmp = $fgetc(encfid);
-  while (enctmp != `EOF)
-  begin 
-    // assign the expected value to a register with the same width 
-    encExpVal = enctmp;
-    
-    // wait for encoder output valid 
-    while (!encValid)
-      @(posedge clock);
-    
-    // compare the encoded value with the value read from the input file 
-    if (encPcm != encExpVal)
-    begin 
-      // announce error detection and exit simulation 
-      $display(" Error!");
-      $display("Error found in encoder output index %0d.", encCount+1);
-      $display("   (expected value 'h%x, got value 'h%x)", encExpVal, encPcm);
-      // wait for a few clock cycles before ending simulation 
-      repeat (20) @(posedge clock);
-      $finish;
-    end 
-    
-    // update the encoded sample counter 
-    encCount = encCount + 1;
-    // delay for a clock cycle after comparison 
-    @(posedge clock);
-    
-    // read next char from input file 
+    // encoder output compare loop 
     enctmp = $fgetc(encfid);
-  end 
-  
-  // close input file 
-  $fclose(encfid);
-end 
-
-// decoder output checker - the decoder output is compared to the value read from 
-// the ADPCM decoded samples file. 
-initial 
-begin 
-  // clear decoded sample value 
-  decCount = 0;
-  dispCount = 0;
-  // open input file 
-  decfid = $fopen(`DEC_FILE, "rb");
-
-  // wait for reset release
-  while (rst) @(posedge clock);
-
-  // display simulation progress bar title 
-  $write("Simulation progress: ");
-    
-  // decoder output compare loop 
-  dectmp = $fgetc(decfid);
-  while (dectmp != `EOF)
-  begin 
-    // read the next char to form the expected 16 bit sample value 
-    decExpVal[7:0] = dectmp;
-    decExpVal[15:8] = $fgetc(decfid);
-    
-    // wait for decoder output valid 
-    while (!decValid)
-      @(posedge clock);
-    
-    // compare the decoded value with the value read from the input file 
-    if (decSamp != decExpVal)
+    while (enctmp != `EOF)  // can put this into a state machine
     begin 
-      // announce error detection and exit simulation 
-      $display(" Error!");
-      $display("Error found in decoder output index %0d.", decCount+1);
-      $display("   (expected value 'h%x, got value 'h%x)", decExpVal, decSamp);
-      // wait for a few clock cycles before ending simulation 
-      repeat (20) @(posedge clock);
-      $finish;
+      // assign the expected value to a register with the same width 
+      encExpVal = enctmp;
+      
+      // wait for encoder output valid 
+      while (!encValid)
+        @(posedge clock);
+      
+      // compare the encoded value with the value read from the input file 
+      if (encPcm != encExpVal)
+      begin 
+        // announce error detection and exit simulation 
+        $display(" Error!");
+        $display("Error found in encoder output index %0d.", encCount+1);
+        $display("   (expected value 'h%x, got value 'h%x)", encExpVal, encPcm);
+        // wait for a few clock cycles before ending simulation 
+        repeat (20) @(posedge clock);
+        $finish;
+      end 
+      
+      // update the encoded sample counter 
+      encCount = encCount + 1;
+      // delay for a clock cycle after comparison 
+      @(posedge clock);
+      
+      // read next char from input file 
+      enctmp = $fgetc(encfid);
     end 
-    // delay for a clock cycle after comparison 
-    @(posedge clock);
     
-    // update the decoded sample counter 
-    decCount = decCount + 1;
-    
-    // check if simulation progress should be displayed
-    if (dispCount[31:13] != (decCount >> 13))
-      $write(".");
-    // update the display counter 
-    dispCount = decCount;
-    
-    // read next char from input file 
-    dectmp = $fgetc(decfid);
+    // close input file 
+    $fclose(encfid);
   end 
-  
-  // close input file 
-  $fclose(decfid);
-  
-  // when decoder output is done announce simulation was successful 
-  $display(" Done");
-  $display("Simulation ended successfully after %0d samples", decCount);
-  $finish;
-end 
 
-//------------------------------------------------------------------
-// device under test 
-// Encoder instance 
-ima_adpcm_enc enc
-(
-  .clock(clock), 
-  .reset(rst), 
-  .inSamp(inSamp), 
-  .inValid(inValid),
-  .inReady(inReady),
-  .outPCM(encPcm), 
-  .outValid(encValid), 
-  .outPredictSamp(/* not used */), 
-  .outStepIndex(/* not used */) 
-);
+  // decoder output checker - the decoder output is compared to the value read from 
+  // the ADPCM decoded samples file. 
+  initial 
+  begin 
+    // clear decoded sample value 
+    decCount = 0;
+    dispCount = 0;
+    // open input file 
+    decfid = $fopen(`DEC_FILE, "rb");
 
-// Decoder instance 
-ima_adpcm_dec dec 
-(
-  .clock(clock), 
-  .reset(rst), 
-  .inPCM(encPcm), 
-  .inValid(encValid),
-  .inReady(decReady),
-  .inPredictSamp(16'b0), 
-  .inStepIndex(7'b0), 
-  .inStateLoad(1'b0), 
-  .outSamp(decSamp), 
-  .outValid(decValid) 
-);
+    // wait for reset release
+    while (rst) @(posedge clock);
+
+    // display simulation progress bar title 
+    $write("Simulation progress: ");
+    
+    // decoder output compare loop 
+    dectmp = $fgetc(decfid);
+    while (dectmp != `EOF)
+    begin 
+      // read the next char to form the expected 16 bit sample value 
+      decExpVal[7:0] = dectmp;
+      decExpVal[15:8] = $fgetc(decfid);
+      
+      // wait for decoder output valid 
+      while (!decValid)
+        @(posedge clock);
+      
+      // compare the decoded value with the value read from the input file 
+      if (decSamp != decExpVal)
+      begin 
+        // announce error detection and exit simulation 
+        $display(" Error!");
+        $display("Error found in decoder output index %0d.", decCount+1);
+        $display("   (expected value 'h%x, got value 'h%x)", decExpVal, decSamp);
+        // wait for a few clock cycles before ending simulation 
+        repeat (20) @(posedge clock);
+        $finish;
+      end 
+      // delay for a clock cycle after comparison 
+      @(posedge clock);
+      
+      // update the decoded sample counter 
+      decCount = decCount + 1;
+      
+      // check if simulation progress should be displayed
+      if (dispCount[31:13] != (decCount >> 13))
+        $write(".");
+      // update the display counter 
+      dispCount = decCount;
+      
+      // read next char from input file 
+      dectmp = $fgetc(decfid);
+    end 
+    
+    // close input file 
+    $fclose(decfid);
+    
+    // when decoder output is done announce simulation was successful 
+    $display(" Done");
+    $display("Simulation ended successfully after %0d samples", decCount);
+    $finish;
+  end 
+/* */
+  //------------------------------------------------------------------
+  // device under test 
+  // Encoder instance 
+  ima_adpcm_enc enc
+    (
+     .clock(clk), 
+     .reset(rst), 
+     .inSamp(inSamp), 
+     .inValid(inValid),
+     .inReady(inReady),
+     .outPCM(encPcm), 
+     .outValid(encValid), 
+     .outPredictSamp(/* not used */), 
+     .outStepIndex(/* not used */) 
+     );
+
+  // Decoder instance 
+  ima_adpcm_dec dec 
+    (
+     .clock(clk), 
+     .reset(rst), 
+     .inPCM(encPcm), 
+     .inValid(encValid),
+     .inReady(decReady),
+     .inPredictSamp(16'b0), 
+     .inStepIndex(7'b0), 
+     .inStateLoad(1'b0), 
+     .outSamp(decSamp), 
+     .outValid(decValid) 
+     );
 
 endmodule
+
+test t(clock.val);
