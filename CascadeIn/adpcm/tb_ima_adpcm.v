@@ -29,6 +29,7 @@
 //  FITNESS FOR A PARTICULAR PURPOSE. 
 // 
 //---------------------------------------------------------------------------------------
+// Refactored to run on Cascade in April 2019 by Tiffany Yang
 
 include ima_adpcm_enc.v;
 include ima_adpcm_dec.v;
@@ -48,7 +49,6 @@ module test(clk);
   wire [15:0] decSamp;  // decoder output sample value 
   wire decValid;      // decoder output valid flag 
   integer sampCount, encCount, decCount;
-  //stream infid, encfid, decfid;
   reg [7:0] intmp, enctmp, dectmp;
   reg [3:0] encExpVal;
   reg [15:0] decExpVal;
@@ -74,18 +74,19 @@ module test(clk);
   reg[BUFFER_SIZE - 1:0] inBuf, encBuf, outBuf;
   reg[31:0] inBytesRead, encBytesRead, decBytesRead;
 
-  reg[4:0] inBufIdx, encBufIdx, decBufIdx;
+  //reg[4:0] inBufIdx, encBufIdx, decBufIdx;
 
+  parameter BUFFER_BYTES = 8;
 
-  parameter BUFFER_BYTES = 4;
+  //parameter BUFFER_BITS = BUFFER_BYTES * 8;
 
-  parameter BUFFER_SIZE = (1 << BUFFER_BYTES);
+  parameter TOTAL_IN_BYTES = 348160;
+  parameter TOTAL_ENC_BYTES = 174080;
+  parameter TOTAL_DEC_BYTES = 348160;
   
-
   parameter main0 = 0;
   parameter main1 = 1;
   parameter main2 = 2;
-
 
   parameter in0 = 0;
   parameter in1 = 1;
@@ -95,7 +96,6 @@ module test(clk);
   parameter in5 = 5;
   parameter in6 = 6;
 
-
   parameter enc0 = 0;
   parameter enc1 = 1;
   parameter enc2 = 2;
@@ -103,7 +103,6 @@ module test(clk);
   parameter enc4 = 4;
   parameter enc5 = 5;
   parameter enc6 = 6;
-
 
   parameter dec0 = 0;
   parameter dec1 = 1;
@@ -119,11 +118,6 @@ module test(clk);
   stream infid = $fopen("test_in.bin");
   stream encfid = $fopen("test_enc.bin");
   stream decfid = $fopen("test_dec.bin");
-
-  //assign inBufIdx = BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
-  //assign encBufIdx = BUFFER_SIZE - ((encBytesRead % BUFFER_BYTES) * 8) - 1;
-  //assign decBufIdx = BUFFER_SIZE - ((decBytesRead % BUFFER_BYTES) * 8) - 1;
-
   
   initial begin
     $display("Initializing");
@@ -149,11 +143,6 @@ module test(clk);
     $display("Done initializing");
 
   end
-
-  // file names 
-  //`define IN_FILE    "../../../scilab/test_in.bin"
-  //`define ENC_FILE  "../../../scilab/test_enc.bin"
-  //`define DEC_FILE  "../../../scilab/test_dec.bin"
 
   //---------------------------------------------------------------------------------------
   // test bench implementation 
@@ -247,9 +236,7 @@ module test(clk);
           $get(infid, inBuf);
           //intmp = $fgetc(infid);
 
-          inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
-
-          intmp <= inBuf[inBufIdx:inBufIdx - 7];
+          intmp <= inBuf[(BUFFER_BYTES << 3) - 1:((BUFFER_BYTES << 3) - 8)];
           inBytesRead <= inBytesRead + 1;
 
 
@@ -263,7 +250,10 @@ module test(clk);
         //begin
 
         // Stop looping through inputs if eof
-        if ($eof(infid)) begin
+
+        // TODO: NEED TO FIX BHVR OF EOF. REPLACE WITH BYTES_READ
+        //if ($eof(infid)) begin
+        if (inBytesRead == TOTAL_IN_BYTES) begin
           $display("Reached eof");
 
           iCtr <= 0;
@@ -272,16 +262,19 @@ module test(clk);
 
         else begin
           if (iCtr == 0) begin
-            inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
-            $display("inBufIdx: %d", inBufIdx);
-
             // read the next character to form the new input sample 
             // Note that first byte is used as the low byte of the sample 
             inSamp[7:0] <= intmp;
             //bytes_read <= bytes_read + 1;
             //$display("bytes_read: %d", bytes_read);
 
-            inReg <= inBuf[inBufIdx - 8:inBufIdx - 15];
+            case (inBytesRead % BUFFER_BYTES) 
+              1: inReg <= inBuf[55:48];
+              3: inReg <= inBuf[39:32];
+              5: inReg <= inBuf[23:16];
+              7: inReg <= inBuf[7:0];
+              default: $display("Unexpected number of bytes read for inSamp");
+            endcase // case (inBytesRead % BUFFER_BYTES)
 
             //inSamp[15:8] <= $fgetc(infid);
             //$get(infid, inReg);
@@ -294,20 +287,15 @@ module test(clk);
             if ((inBytesRead % BUFFER_BYTES) == 0) begin
               $display("Reading more bytes");
 
-              $get(infid, inBuf);
+              if (!$eof(infid)) $get(infid, inBuf);
             end
 
-
-          end
+          end // if (iCtr == 0)
 
           //$display("inSamp: %h", inSamp);
 
-          //inSamp <= 16'h0000;
-
-
-
           // sign input sample is valid 
-            inValid <= 1'b1;
+          inValid <= 1'b1;
 
           // @(posedge clock);
           if (iCtr >= 1) begin
@@ -321,7 +309,12 @@ module test(clk);
 
       in4: begin
         // update the sample counter 
-        if (iCtr == 0) sampCount <= sampCount + 1;
+        if (iCtr == 0) begin 
+          sampCount <= sampCount + 1;
+          //inByteInc <= 0;
+
+        end
+
 
         // wait for encoder input ready assertion to confirm the new sample was read
         // by the encoder.
@@ -332,12 +325,23 @@ module test(clk);
           // read next character from the input file 
           //intmp = $fgetc(infid);
 
-          inBufIdx <= BUFFER_SIZE - ((inBytesRead % BUFFER_BYTES) * 8) - 1;
-          $display("inBufIdx: %d", inBufIdx);
           //$get(infid, intmp);
-          intmp <= inBuf[inBufIdx:inBufIdx - 7];
+          case (BYTES_READ % BUFFER_BYTES)
+            0: intmp <= inBuf[63:56];
+            2: intmp <= inBuf[47:40];
+            4: intmp <= inBuf[31:24];
+            6: intmp <= inBuf[15:8];
+          endcase // case (BYTES_READ % BUFFER_BYTES)
 
-          inBytesRead <= inBytesRead + 1;
+
+          inBytesRead <= (sampCount << 1) + 1;
+          $display("inbytesread; %d", inBytesRead);
+
+          //if (!inByteInc) begin
+          //  inBytesRead <= inBytesRead + 1;
+          //  inByteInc <= 1;
+          //end
+          
 
           iCtr <= 0;
           inState <= in3;
@@ -351,7 +355,7 @@ module test(clk);
         //@(posedge clock);
 
         if (iCtr >= 1) begin
-          $display("Closing input file");
+          //$display("Closing input file");
           // close input file 
           //$fclose(infid);
 
