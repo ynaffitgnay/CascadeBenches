@@ -141,12 +141,6 @@ module ima_adpcm_dec (
       outValid <= 1'b0;
   end // always @ (posedge clock or posedge reset)
 
-  always @(posedge inValid) $display("input valid");
-  always @(posedge inReady) $display("inReady");
-
-  always @(posedge outValid) $display("outvalid");
-
-
   // quantizer index adaptation lookup table 
   always @ (inPCM) begin 
     case (inPCM[2:0]) 
