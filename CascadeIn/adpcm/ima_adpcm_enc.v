@@ -77,6 +77,9 @@ module ima_adpcm_enc (
   parameter PCM_BIT0 = 3'd4;
   parameter PCM_DONE = 3'd5;
 
+  always @(outValid or inReady) $display("oV: %d iR: %d", outValid, inReady);
+
+
   //---------------------------------------------------------------------------------------
   // module implementation 
   // encoder main control process 
