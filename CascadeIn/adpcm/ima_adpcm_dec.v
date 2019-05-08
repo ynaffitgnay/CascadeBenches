@@ -76,8 +76,6 @@ module ima_adpcm_dec (
   wire [16:0] preOutSamp;
 
   //---------------------------------------------------------------------------------------
-  always @ (predValid or inValid or outValid) $display("pV: %d iV: %d oV: %d", predValid, inValid, outValid);
-
   // module implementation 
   // main decoder process 
   always @ (posedge clock or posedge reset) begin 
