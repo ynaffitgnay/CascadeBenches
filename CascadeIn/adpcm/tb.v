@@ -27943,9 +27943,6 @@ module test(clk);
     endcase // case (decState)
   end // always @ (posedge clk)
 
-  always @(inDone or encDone or decDone) $display("iD: %d, eD: %d, dD: %d", inDone, encDone, decDone);
-
-
 /* */
   //------------------------------------------------------------------
   // device under test
