@@ -330,6 +330,11 @@ module test(clk);
             endcase // case (inBytesRead % BUFFER_BYTES)
 
             inBytesRead <= inBytesRead + 1;
+          end // if (iCtr == 0)
+
+          if (iCtr == 1) begin
+            // sign input sample is valid (should be able to do this at iCtr = 0)
+            inValid <= 1'b1;
 
             $display("inBytesRead: %d", inBytesRead);
 
@@ -348,20 +353,16 @@ module test(clk);
                    inBuf[inIdx][95:64],
                    inBuf[inIdx][63:32],
                    inBuf[inIdx][31:0]);
+            end // if ((inBytesRead % BUFFER_BYTES) == 0)
 
-            end
-
-          end // if (iCtr == 0)
-
-          //$display("inSamp: %h", inSamp);
-
-          // sign input sample is valid 
-          inValid <= 1'b1;
+            // Transition to next state
+            iCtr <= 0;
+            inState <= IN4;
+          end // if (iCtr == 1)
 
           // @(posedge clock);
           if (iCtr >= 1) begin
-            iCtr <= 0;
-            inState <= IN4;
+            
           end
         end // else: !if($eof(instream))
 
@@ -550,7 +551,7 @@ module test(clk);
           // delay for a clock cycle after comparison 
           //@(posedge clock);
 
-          if (eCtr >= 1) begin
+          if (eCtr == 1) begin
             // read next char from input file 
             //enctmp = $fgetc(encstream);
 
@@ -594,7 +595,11 @@ module test(clk);
             //$get(encstream, enctmp);
 
             encBytesRead <= encBytesRead + 1;
+          end // if (eCtr == 1)
+
+          if (eCtr == 2) begin
             $display("encBytesRead: %d", encBytesRead);
+
 
             if ((encBytesRead % BUFFER_BYTES) == 0) begin
               $display("Reading more enc bytes\n");
@@ -609,22 +614,19 @@ module test(clk);
                    encBuf[encIdx][95:64],
                    encBuf[encIdx][63:32],
                    encBuf[encIdx][31:0]);
-
-            end
-
+            end // if ((encBytesRead % BUFFER_BYTES) == 0)
             
             eCtr <= 0;
             encState <= ENC2;
 
-          end
+          end // if (eCtr == 2)
         end // else: !if(encPcm != encExpVal)
       end // case: ENC3
 
       ENC4: begin
         if (iCtr >= 1) begin
-          $display("Would close input file here");
+          //$display("Would close input file here");
           // close input file 
-          //$fclose(encstream);
           
           encDone <= 1;
 
@@ -680,7 +682,7 @@ module test(clk);
           dectmp <= decBuf[decIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           decBytesRead <= decBytesRead + 1;
 
-                    $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
+                   $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
                    decBuf[decIdx][255:224],
                    decBuf[decIdx][223:192],
                    decBuf[decIdx][191:160],
@@ -742,13 +744,15 @@ module test(clk);
             decBytesRead <= decBytesRead + 1;
             $display("decBytesRead: %d", decBytesRead);
            
+          end // if (dCtr == 0)
 
+          if (dCtr == 1) begin
             if ((decBytesRead % BUFFER_BYTES) == 0) begin
               $display("Reading more dec bytes");
               decIdx <= decIdx + 1;
 
               
-                    $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
+                   $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
                    decBuf[decIdx][255:224],
                    decBuf[decIdx][223:192],
                    decBuf[decIdx][191:160],
@@ -767,7 +771,7 @@ module test(clk);
           //while (!decValid)
           //  @(posedge clock);
           
-          if (decValid) begin
+          if (decValid && (dCtr >= 1)) begin
             dCtr <= 0;
             decState <= DEC3;
           end
@@ -798,7 +802,7 @@ module test(clk);
           // delay for a clock cycle after comparison 
           //@(posedge clock);
           // update the decoded sample counter 
-          if (dCtr >= 1) begin
+          if (dCtr == 1) begin
             decCount <= decCount + 1;
 
             //
@@ -835,8 +839,11 @@ module test(clk);
 
 
             decBytesRead <= decBytesRead + 1;
-            $display("decbytesread; %d", decBytesRead);
 
+          end // if (dCtr == 1)
+
+          if (dCtr == 2) begin
+            $display("decbytesread; %d", decBytesRead);
 
             dCtr <= 0;
             decState <= DEC2;
