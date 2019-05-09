@@ -36,16 +36,11 @@ include ima_adpcm_dec.v;
 
 module test(clk);
   parameter BUFFER_BYTES = 32;
-  // CORRECT VALUES
-  //parameter TOTAL_IN_BYTES = 348160;
-  //parameter TOTAL_ENC_BYTES = 174080;
-  //parameter TOTAL_DEC_BYTES = 348160;
 
   // Truncated for development
-  parameter TOTAL_IN_BYTES = 64;
-  parameter TOTAL_ENC_BYTES = 32;
-  parameter TOTAL_DEC_BYTES = 64;
-
+  parameter TOTAL_IN_BYTES = 348160;
+  parameter TOTAL_ENC_BYTES = 174080; 
+  parameter TOTAL_DEC_BYTES = 348160;
 
   parameter MAIN0 = 0;
   parameter MAIN1 = 1;
@@ -72,10 +67,6 @@ module test(clk);
 
   parameter TESTS_TO_RUN = 1;
 
-  //stream instream = $fopen("test_in.bin");
-  //stream encstream = $fopen("test_enc.bin");
-  //stream decstream = $fopen("test_dec.bin");
-
   
   input wire clk;
 
@@ -91,6 +82,7 @@ module test(clk);
   wire [15:0] decSamp;  // decoder output sample value
   wire decValid;      // decoder output valid flag
   integer sampCount, encCount, decCount;
+
   reg [7:0] intmp, enctmp, dectmp;
   reg [3:0] encExpVal;
   reg [15:0] decExpVal;
@@ -110,9 +102,9 @@ module test(clk);
   reg[15:0] inIdx, encIdx, decIdx;
 
   // Buffers to hold file content
-  //reg[(BUFFER_BYTES << 3) - 1:0] inBuf [(TOTAL_IN_BYTES / BUFFER_BYTES) - 1:0];
-  //reg[(BUFFER_BYTES << 3) - 1:0] encBuf [(TOTAL_ENC_BYTES / BUFFER_BYTES) - 1:0];
-  //reg[(BUFFER_BYTES << 3) - 1:0] decBuf [(TOTAL_DEC_BYTES / BUFFER_BYTES) - 1:0];
+  reg[(BUFFER_BYTES << 3) - 1:0] inBuf [(TOTAL_IN_BYTES / BUFFER_BYTES) - 1:0];
+  reg[(BUFFER_BYTES << 3) - 1:0] encBuf [(TOTAL_ENC_BYTES / BUFFER_BYTES) - 1:0];
+  reg[(BUFFER_BYTES << 3) - 1:0] decBuf [(TOTAL_DEC_BYTES / BUFFER_BYTES) - 1:0];
   reg[31:0] inBytesRead, encBytesRead, decBytesRead;
 
 
@@ -142,35 +134,12 @@ module test(clk);
 
     dCtr = 0;
     decState = 0;
-/*
-    // Fill the input buffer
-    for (inIdx = 0; inIdx < (TOTAL_IN_BYTES / BUFFER_BYTES); inIdx = inIdx + 1) begin
-      if (!($eof(instream))) $get(instream, inVal);
-      //$display("i: %d", inIdx);
 
-      inBuf[inIdx] <= inVal;
-    end
-
-    for (encIdx = 0; encIdx < (TOTAL_ENC_BYTES / BUFFER_BYTES); encIdx = encIdx + 1) begin
-      if (!($eof(encstream))) $get(encstream, encVal);
-      //$display("e: %d", encIdx);
-
-      encBuf[encIdx] <= encVal;
-    end
-
-    for (decIdx = 0; decIdx < (TOTAL_DEC_BYTES / BUFFER_BYTES); decIdx = decIdx + 1) begin
-      if (!($eof(decstream))) $get(decstream, decVal);
-      //$display("d: %d", decIdx);
-
-      decBuf[decIdx] <= decVal;
-    end
-*/
-
-
+    
     inBuf[0] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
     inBuf[1] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
     inBuf[2] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
-    inBuf[3] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
+    inBuf[3] = 256'h0000000000000000000000000000000000000000000000000000000000000000;    
     inBuf[4] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
     inBuf[5] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
     inBuf[6] = 256'h0000000000000000000000000000000000000000000000000000000000000000;
@@ -506,7 +475,7 @@ module test(clk);
     inBuf[336] = 256'hf8fff2fff7fffcfff9ffe7ffcbffc3ffd5ffd5ffbeffceff0b0028001c002d00;
     inBuf[337] = 256'h48001900c1ffb6fff0ff0300d9ffb2ffaaffb4ffcaffe0ffe8ffeaffebffe2ff;
     inBuf[338] = 256'hdaffe4fff9ff140031002400e0ffb1ffcefff9ff0e0047008300580003002300;
-    inBuf[339] = 256'h7600370091ff58ffaaff020025002a00190008000f0012000400fdfff0ffc4ff;    
+    inBuf[339] = 256'h7600370091ff58ffaaff020025002a00190008000f0012000400fdfff0ffc4ff;
     inBuf[340] = 256'h9fff9aff8cff95ff00005900280007005b004400a2ffc0ff6000d1ff46ff2202;
     inBuf[341] = 256'h87078d0aec093e09120a4e0a6b093609bb099e094909b709220abd0949092909;
     inBuf[342] = 256'hb6080108ba079a072f070507590771072b072d075207ee064506eb05a5054605;
@@ -846,7 +815,7 @@ module test(clk);
     inBuf[676] = 256'h1dfbbb01e30812105f17df1edf25692cac327638103ea74306490a4e6052b655;
     inBuf[677] = 256'hb2570e58fe5675547050a04b2446fe3f083a8e349a2ff62bcd29cb28ec28b129;
     inBuf[678] = 256'h542a5a2a682973278324fa20941d681aa917d11538146e12aa101d0e9a0aea06;
-    inBuf[679] = 256'hb00214fef0f9b8f542f116edade809e4d3dff8dbdad805d763d63cd79fd940dd;     
+    inBuf[679] = 256'hb00214fef0f9b8f542f116edade809e4d3dff8dbdad805d763d63cd79fd940dd;
     inBuf[680] = 256'h4ce292e8b2efc4f74600a408b310d117a81d6d220726be281b2b372d502f7231;
     inBuf[681] = 256'h3d337634a33441334e30ae2b9725bf1e76172b107309390381fd82f80af426f0;
     inBuf[682] = 256'h16ede0ea8ee906e911e97ee9e9e936ea8ceacbea30eb12ec25ed59eebbefcaf0;
@@ -1526,7 +1495,7 @@ module test(clk);
     inBuf[1356] = 256'h52f879f8a2f8bef8dcf8f4f801f916f931f94bf973f9a0f9c6f9edf90afa14fa;
     inBuf[1357] = 256'h1cfa1cfa18fa28fa4afa7efacffa31fb99fb05fc5efc9dfccbfcddfcddfce2fc;
     inBuf[1358] = 256'hedfc0efd51fdaafd16fe91fefefe5bffa6ffd2ffecff0500170039007300b300;
-    inBuf[1359] = 256'h02015c01a601e8012102410262028a02b102f0024803a2030a047604c7040f05;    
+    inBuf[1359] = 256'h02015c01a601e8012102410262028a02b102f0024803a2030a047604c7040f05;
     inBuf[1360] = 256'h490568059005c70506066f06fd06980750080c09ab09410aba0a030b430b790b;
     inBuf[1361] = 256'ha00be50b420ca60c320dcb0d500edc0e4e0f890fb40fbc0f970f7e0f660f490f;
     inBuf[1362] = 256'h5f0f910fc90f2c109310dc102a11571151114b113011fe10f61004111b116f11;
@@ -2886,6 +2855,7 @@ module test(clk);
     inBuf[2716] = 256'h09ff23ff45ff65ff82ffa5ffcbffedff14003e0062008900b600df0007013201;
     inBuf[2717] = 256'h5c018a01b701dc010502320259028002ab02d102f7021e03410365038903a903;
     inBuf[2718] = 256'hc903e70301042204400455046e0488049a04b004c504d404e804fb0404051205;
+    inBuf[2719] = 256'h1f05260532053d05410548054b054b05500552054f05530553054b054a054805;
     inBuf[2719] = 256'h1f05260532053d05410548054b054b05500552054f05530553054b054a054805;    
     inBuf[2720] = 256'h40053f053b05320530052b0520051e051a05120512050e05060507050205fa04;
     inBuf[2721] = 256'hfc04fa04f404f904f804f104f804f704f104fd040105fb0406050c0509051505;
@@ -5606,7 +5576,7 @@ module test(clk);
     inBuf[5436] = 256'h65fe90fed4fe29ff89fff1ff5e00ce003d01a501ff014202680269024302f301;
     inBuf[5437] = 256'h7a01dd00270065ffabfe0dfe9afd60fd63fd9ffd0cfe9cfe3effe2ff7800f300;
     inBuf[5438] = 256'h4b017e018d017b014e010d01bf0068001100beff78ff43ff25ff23ff3dff71ff;
-    inBuf[5439] = 256'hbaff0f006300ac00de00f300e700bf0080003700eeffb1ff89ff7eff8fffb7ff;    
+    inBuf[5439] = 256'hbaff0f006300ac00de00f300e700bf0080003700eeffb1ff89ff7eff8fffb7ff;
     inBuf[5440] = 256'hebff1d003e0044002a00f3ffaaff5cff15ffe1fec4febefecffef4fe2dff79ff;
     inBuf[5441] = 256'hdaff4c00c6003d019f01e001f501de01a1014b01e80083002200caff7bff37ff;
     inBuf[5442] = 256'h00ffdafec8feccfee4fe0dff3eff70ff98ffafffb1ff9dff78ff4bff22ff0bff;
@@ -11047,11 +11017,11 @@ module test(clk);
     inBuf[10877] = 256'h0a00fdfff7fff6fff2fff3fff6fff6fff6fff3fff3fff6fff4fff6fff9fff4ff;
     inBuf[10878] = 256'hf2fff9ff000006000c000c000d0014001c0020001f001e001d0011000300feff;
     inBuf[10879] = 256'hf9fff4fff1ffebffe5ffe4ffe6ffeaffedfff4ff02000b000c00140016000e00;
-    /* */
 
 
+         
     encBuf[0] = 256'h0008000800080008000800080008000800080008000800080008000800080008;
-    encBuf[1] = 256'h0008000800080008000800080008000800080008000800080008000800080008;
+    encBuf[1] = 256'h0008000800080008000800080008000800080008000800080008000800080008;    
     encBuf[2] = 256'h0008000800080008000800080008000800080008000800080008000800080008;
     encBuf[3] = 256'h0008000800080008000800080008000800080008000800080008000800080008;
     encBuf[4] = 256'h0008000800080008000800080008000800080008000800080008000800080008;
@@ -11729,7 +11699,7 @@ module test(clk);
     encBuf[676] = 256'h090b0a080800010a0c0d0e0b0c0c0b0b0e0b0c0b0b0b0a090008080a0d0c0c0c;
     encBuf[677] = 256'h0b0a080103040404020100080808080003040405020302020001090800080002;
     encBuf[678] = 256'h0204030203020202040305040204010100080802030705040304030201000000;
-    encBuf[679] = 256'h0002040504030402030100010002030306030303020201030206040304040202;    
+    encBuf[679] = 256'h0002040504030402030100010002030306030303020201030206040304040202;
     encBuf[680] = 256'h0101010303050603040304020201020100020304040402030302000009080909;
     encBuf[681] = 256'h01030307040103010808090a0801010604040304020201010201020404020502;
     encBuf[682] = 256'h0203020102020103030003000b090d0e0a0a0b09090b090a0e0a0b0d0a0a0a01;
@@ -13770,8 +13740,7 @@ module test(clk);
     encBuf[2717] = 256'h09080104030502020008090b0d0a0b090900030305030200090b0d0c0c0a0909;
     encBuf[2718] = 256'h00010303040403040303030201000a0c0e0c0c0b0b0b0b090001040403040303;
     encBuf[2719] = 256'h02010008090b0b0d0a0b0b0a0a000103060304020201080a0c0b0c0b0a080102;
-     
-    /*
+    
     encBuf[2720] = 256'h040302000a0d0c0c0b0a09080102040504030503020200080a0c0c0b0b0b0b0b;
     encBuf[2721] = 256'h0a0a0900010403030302000a0c0d0a0a00050506040304020208090d0c0c0b0b;
     encBuf[2722] = 256'h0b09080204040403020200080b0d0b0c0b090900020304040203030202010809;
@@ -16492,7 +16461,6 @@ module test(clk);
     encBuf[5437] = 256'h0100000009010809080b0e0b0b0105020000090103020000080f0a0801000202;
     encBuf[5438] = 256'h0008090b0b0801000b08020201010003090f090808000000080900010901010a;
     encBuf[5439] = 256'h090304020308000403010808080e0c090909080a0a080102010405030803000b;
-    /* */
 
 
     decBuf[0] = 256'h0100000001000000010000000100000001000000010000000100000001000000;
@@ -16834,7 +16802,7 @@ module test(clk);
     decBuf[336] = 256'hf9fff3fff9fffdfff9ffe7ffcdffc2ffd2ffd5ffbdffcdfff8ff24001e002e00;
     decBuf[337] = 256'h45001600c5ffbaffecff0700deffb8ffa4ffb6ffc7ffe1ffe6ffeaffeeffe3ff;
     decBuf[338] = 256'hdaffe2fffaff160031002700f8ffacffcafff8ff1100450083005a0007002800;
-    decBuf[339] = 256'h6e002e00b3ff59ffabfff4ff1c0029001e0000000900110009000300f0ffc8ff;
+    decBuf[339] = 256'h6e002e00b3ff59ffabfff4ff1c0029001e0000000900110009000300f0ffc8ff;    
     decBuf[340] = 256'h9aff94ff8eff94ffd9ff5b00250015005f00370099ffafff5f00e9ff51ff7800;
     decBuf[341] = 256'hef023d08830ad309730ae1095d09e4085209b5095b09ad09f809b40976093e09;
     decBuf[342] = 256'ha5081a089b0775070c07ed0643075d0716072b073f07e6065306f10598054705;
@@ -17174,7 +17142,7 @@ module test(clk);
     decBuf[676] = 256'h4afa5a019b09270f3b18551e1926292d9433bf37913e2743fc484a4ebc511e56;
     decBuf[677] = 256'hd3575858ef56cb548550654b9246af3f44391935cb2f592c3829a6282b29a329;
     decBuf[678] = 256'h112a742a652925278424a1200a1ec01ac117d0150b1470126510010e780a2d07;
-    decBuf[679] = 256'h790217fe1bfa72f511f114ed6ce80ae40ee06edc24d900d79dd6f7d6dbd95bdd;    
+    decBuf[679] = 256'h790217fe1bfa72f511f114ed6ce80ae40ee06edc24d900d79dd6f7d6dbd95bdd;
     decBuf[680] = 256'h87e2bae83bf04bf78bff87093d10c818541e5f232026a028e62af72cd82eb031;
     decBuf[681] = 256'h3e33a73439340f339530c42b9025101e00179510150909049efdc8f7fef38df0;
     decBuf[682] = 256'h6bed93ea0eeaa5e812e976e9d0e923ea6deab1ea6beb13ec12ed57eed2efd1f0;
@@ -17854,7 +17822,7 @@ module test(clk);
     decBuf[1356] = 256'h50f879f8a1f8baf8dbf8f0f803f915f931f94cf973f9a1f9c0f9f3f907fa1afa;
     decBuf[1357] = 256'h20fa1bfa16fa2bfa46fa7bfacdfa30fb8efbfbfb62fca5fccafcd5fcdffce8fc;
     decBuf[1358] = 256'hf0fc15fd53fdaefd1bfe82fefbfe4cffb3ffdbffe8ff0900130040007a00ae00;
-    decBuf[1359] = 256'h08015d01aa01f0011d0247025d028d02ac02f6025003a40307048004d1041b05;    
+    decBuf[1359] = 256'h08015d01aa01f0011d0247025d028d02ac02f6025003a40307048004d1041b05;
     decBuf[1360] = 256'h430567058805ce050e06690607079e074f08f508b7093a0ab10af20a540b890b;
     decBuf[1361] = 256'h9a0be30b410cae0c330dd40d400ec90e460f980fa60fb40f8f0f840f660f4b0f;
     decBuf[1362] = 256'h640f980fc80f26109f10cf1037115f11531148112a11fc10f4100a111f117011;
@@ -19214,7 +19182,7 @@ module test(clk);
     decBuf[2716] = 256'h0bff21ff43ff64ff82ffa4ffceffeaff1800440060008400b700d90005013801;
     decBuf[2717] = 256'h5a018601b801db0107022e025c027b02ae02d002fc0223033d0367038e03a803;
     decBuf[2718] = 256'hc803e603010420043e045204710486049a04b204c804d604e904f90404051205;
-    decBuf[2719] = 256'h1e05260531053d05420547054b054c054f0552055005520553054b054a054705;    
+    decBuf[2719] = 256'h1e05260531053d05420547054b054c054f0552055005520553054b054a054705;
     decBuf[2720] = 256'h3f053e053b05320530052a0520051f051b05130512050e05060507050205fa04;
     decBuf[2721] = 256'hfb04fa04f404f804f704f104f704f704f004fe040005fa0406050d0509051405;
     decBuf[2722] = 256'h1f051d052e0538053605460555055b056705760580059305a005a705ba05c805;
@@ -21935,8 +21903,6 @@ module test(clk);
     decBuf[5437] = 256'h7601d50013005cffb6fe1efe95fd5ffd70fd9cfd14fea6fe30ffd1ff6800f100;
     decBuf[5438] = 256'h4b017c018a017d0159010c01c60061001e00c9ff7cff4aff1dff25ff3cff6cff;
     decBuf[5439] = 256'hbdff0a006400a100d800f600ec00c30080004000f6ffb0ff82ff7aff90ffb3ff;
-
-    /*
     decBuf[5440] = 256'hebff1f00420048002c00f3ffb0ff5eff11ffdffec3febbfed2fef4fe2cff7fff;
     decBuf[5441] = 256'he2ff3f00c50042019301dd01ea01de01a7014d01e00079001b00c6ff79ff33ff;
     decBuf[5442] = 256'h06ffdcfec6fecdfee0fe12ff42ff6eff95ffafffb4ff9eff7cff49ff26ff07ff;
@@ -27377,12 +27343,14 @@ module test(clk);
     decBuf[10877] = 256'h0a00fcfff6fff5fff3fff5fff6fff7fff6fff3fff4fff7fff4fff7fff9fff5ff;
     decBuf[10878] = 256'hf2fff8ff000006000d000c000d0015001d0020001f001e001d0012000300fdff;
     decBuf[10879] = 256'hf8fff3fff1ffeaffe4ffe3ffe6ffeaffedfff5ff01000d000b00150016000e00;
-    /* */
+
+
+
 
     $display("Done initializing");
 
   end
-/*
+
   //---------------------------------------------------------------------------------------
   // test bench implementation
   // global signals generation
@@ -27409,8 +27377,6 @@ module test(clk);
       end
 
       MAIN1: begin
-        //$display("In MAIN1 (should only display once)");
-
         rst <= 0;
 
         mCtr <= 0;
@@ -27419,7 +27385,7 @@ module test(clk);
 
       MAIN2: begin
         if (inDone && encDone && decDone) begin
-          $display("Test %d done!. Count: %d", testCount , mCtr);
+          $display("Test %d done!. mCtr: %d", testCount , mCtr);
 
           testCount <= testCount + 1;
           mCtr <= 0;
@@ -27460,8 +27426,6 @@ module test(clk);
 
       IN2: begin
         if (iCtr >= 50) begin
-          $display("Getting input byte");
-
           // read input samples file
           intmp <= inBuf[inIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           inBytesRead <= inBytesRead + 1;
@@ -27476,16 +27440,6 @@ module test(clk);
                    inBuf[inIdx][63:32],
                    inBuf[inIdx][31:0]);
 
-          $display("inBuf[%d] = %h%h%h%h%h%h%h%h", 1,
-                   inBuf[1][255:224],
-                   inBuf[1][223:192],
-                   inBuf[1][191:160],
-                   inBuf[1][159:128],
-                   inBuf[1][127:96],
-                   inBuf[1][95:64],
-                   inBuf[1][63:32],
-                   inBuf[1][31:0]);
-
 
           iCtr <= 0;
           inState <= IN3;
@@ -27495,7 +27449,7 @@ module test(clk);
       IN3: begin
         // Stop looping through inputs if eof
         if (inBytesRead >= TOTAL_IN_BYTES) begin
-          $display("Reached eof");
+          $display("Reached eof of input");
 
           iCtr <= 0;
           inState <= IN5;
@@ -27528,16 +27482,18 @@ module test(clk);
 
             endcase // case (inBytesRead % BUFFER_BYTES)
 
+            // until next clock tick, inBytesRead is still previous value
             inBytesRead <= inBytesRead + 1;
+          end // if (iCtr == 0)
 
-            $display("inBytesRead: %d", inBytesRead);
+          if (iCtr == 1) begin
+            // sign input sample is valid
+            inValid <= 1'b1;
 
             if ((inBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more bytes");
-
               inIdx <= inIdx + 1;
 
-              $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx,
+              $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx + 1,
                    inBuf[inIdx][255:224],
                    inBuf[inIdx][223:192],
                    inBuf[inIdx][191:160],
@@ -27547,17 +27503,14 @@ module test(clk);
                    inBuf[inIdx][63:32],
                    inBuf[inIdx][31:0]);
 
-            end
+            end // if ((inBytesRead % BUFFER_BYTES) == 0)
 
-          end // if (iCtr == 0)
-
-          // sign input sample is valid
-          inValid <= 1'b1;
-
-          if (iCtr >= 1) begin
+            // Prepare for next state
             iCtr <= 0;
             inState <= IN4;
-          end
+
+          end // if (iCtr >= 1)
+
         end // else: !if($eof(instream))
 
       end // case: IN3
@@ -27567,16 +27520,15 @@ module test(clk);
         // update the sample counter
         if (iCtr == 0) begin
           sampCount <= sampCount + 1;
-          $display("Sample count: %d", sampCount);
-
         end
 
 
         // wait for encoder input ready assertion to confirm the new sample was read
         // by the encoder.
         if (inReady) begin
-          // read next character from the input file
+          //$display("Sample count: %d, iCtr: %d", sampCount, iCtr);
 
+          // read next character from the input file
           case (inBytesRead % BUFFER_BYTES)
             0:  intmp <= inBuf[inIdx][255:248];
             2:  intmp <= inBuf[inIdx][239:232];
@@ -27599,9 +27551,8 @@ module test(clk);
           endcase // case (inBytesRead % BUFFER_BYTES)
 
 
-
+          // use sampCount because you inReady occurs at an unknown time count
           inBytesRead <= (sampCount << 1) + 1;
-          $display("inbytesread; %d", inBytesRead);
 
           iCtr <= 0;
           inState <= IN3;
@@ -27646,10 +27597,9 @@ module test(clk);
         // open input file
         encIdx <= 0;
 
+
         // wait for reset release
         if (!rst) begin
-          $display("getting first enc byte");
-
           enctmp <= encBuf[encIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           encBytesRead <= encBytesRead + 1;
 
@@ -27682,6 +27632,9 @@ module test(clk);
 
           // wait for encoder output valid
           if (encValid) begin
+            if (!decReady) $display("Encoder output too quickly into decoder!!!");
+
+
             eCtr <= 0;
             encState <= ENC3;
           end
@@ -27695,8 +27648,9 @@ module test(clk);
           // announce error detection and exit simulation
           if (eCtr == 0) begin
             $display(" Error!");
-            $display("Error found in encoder output index %d.", encCount+1);
-            $display("   (expected value 'h%h, got value 'h%h)", encExpVal, encPcm);
+            $display("Error found in encoder output index %d.", encCount + 1);
+            $display("   (expected value 'h%h, got value 'h%h). encIdx: %d, inIdx: %d, decIdx: %d", encExpVal, encPcm, encIdx, inIdx, decIdx);            
+
           end
 
           // wait for a few clock cycles before ending simulation
@@ -27704,13 +27658,13 @@ module test(clk);
         end // if (encPcm != encExpVal)
 
         else begin
-          $display("encoder output correct. expected %h, got %h", encExpVal, encPcm);
+          //$display("encoder output correct. expected %h, got %h", encExpVal, encPcm);
 
           // update the encoded sample counter
           if (eCtr == 0) encCount <= encCount + 1;
 
           // delay for a clock cycle after comparison
-          if (eCtr >= 1) begin
+          if (eCtr == 1) begin
             // read next char from input file
             case (encBytesRead % BUFFER_BYTES)
               0:  enctmp <= encBuf[encIdx][255:248];
@@ -27750,13 +27704,16 @@ module test(clk);
             endcase // case (encBytesRead % BUFFER_BYTES)
 
             encBytesRead <= encBytesRead + 1;
-            $display("encBytesRead: %d", encBytesRead);
 
+          end // if (eCtr == 1)
+
+          if (eCtr == 2) begin
+            // This only happens because encBytesRead 
             if ((encBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more enc bytes\n");
+              $display("Reading more enc bytes");
               encIdx <= encIdx + 1;
 
-              $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx,
+              $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx + 1,
                    encBuf[encIdx][255:224],
                    encBuf[encIdx][223:192],
                    encBuf[encIdx][191:160],
@@ -27768,22 +27725,21 @@ module test(clk);
 
             end
 
+            // Prepare next state
             eCtr <= 0;
             encState <= ENC2;
 
-          end
+          end // if (eCtr == 2)
         end // else: !if(encPcm != encExpVal)
+        
       end // case: ENC3
 
       ENC4: begin
-        if (iCtr >= 1) begin
-          // "close input file"
-          encDone <= 1;
+        encDone <= 1;
 
-          eCtr <= 0;
-          encState <= ENC0;
+        eCtr <= 0;
+        encState <= ENC0;
 
-        end
       end
 
       default: encState <= ENC0;
@@ -27797,6 +27753,7 @@ module test(clk);
   // the ADPCM decoded samples file.
   always @(posedge clk) begin
     dCtr <= dCtr + 1;
+
     if (rst) decState <= DEC1;
 
     case (decState)
@@ -27814,10 +27771,8 @@ module test(clk);
         // "open" input file
         decIdx <= 0;
 
-
         // wait for reset release
         if (!rst) begin
-          $display("Grabbing first dec byte");
 
           // decoder output compare loop
           dectmp <= decBuf[decIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
@@ -27832,6 +27787,7 @@ module test(clk);
                    decBuf[decIdx][95:64],
                    decBuf[decIdx][63:32],
                    decBuf[decIdx][31:0]);
+
 
           dCtr <= 0;
           decState <= DEC2;
@@ -27875,13 +27831,14 @@ module test(clk);
             endcase // case (inBytesRead % BUFFER_BYTES)
 
             decBytesRead <= decBytesRead + 1;
-            $display("decBytesRead: %d", decBytesRead);
+          end // if (dCtr == 0)
 
+          // This could be problematic bc what if decValid happens at dCtr 0?
+          if (dCtr == 1) begin
             if ((decBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more dec bytes");
               decIdx <= decIdx + 1;
 
-              $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx,
+              $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx + 1,
                    decBuf[decIdx][255:224],
                    decBuf[decIdx][223:192],
                    decBuf[decIdx][191:160],
@@ -27894,9 +27851,11 @@ module test(clk);
           end
 
           // wait for decoder output valid
-          if (decValid) begin
+          if (decValid && dCtr >= 1) begin
+
             dCtr <= 0;
             decState <= DEC3;
+
           end
         end // else: !if($eof(decstream))
 
@@ -27912,16 +27871,17 @@ module test(clk);
             $display("   (expected value 'h%h, got value 'h%h)", decExpVal, decSamp);
           end
 
+          
           // wait for a few clock cycles before ending simulation
           if (dCtr >= 20) $finish();
 
         end // if (decSamp != decExpVal)
 
         else begin
-          $display("Dec correct! expected: %h, got: %h", decExpVal, decSamp);
+          //$display("Dec correct! expected: %h, got: %h", decExpVal, decSamp);
 
           // delay for a clock cycle after comparison
-          if (dCtr >= 1) begin
+          if (dCtr == 1) begin
             // update the decoded sample counter
             decCount <= decCount + 1;
 
@@ -27955,12 +27915,13 @@ module test(clk);
 
 
             decBytesRead <= decBytesRead + 1;
-            $display("decbytesread; %d", decBytesRead);
 
+          end // if (dCtr == 1)
 
+          if (dCtr == 2) begin
             dCtr <= 0;
             decState <= DEC2;
-          end // if (dCtr >= 1)
+          end // if (dCtr == 2)
         end // else: !if(decSamp != decExpVal)
       end // case: DEC3
 
@@ -27969,7 +27930,7 @@ module test(clk);
 
         // when decoder output is done announce simulation was successful
         $display(" Done");
-        $display("Simulation ended successfully after %0d samples", decCount);
+        $display("Simulation ended successfully after %d samples", decCount);
 
         decDone <= 1;
 
@@ -27982,14 +27943,12 @@ module test(clk);
     endcase // case (decState)
   end // always @ (posedge clk)
 
-
-
 /* */
   //------------------------------------------------------------------
   // device under test
   // Encoder instance
 
-/*
+
   ima_adpcm_enc enc
     (
      .clock(clk),
@@ -27999,12 +27958,12 @@ module test(clk);
      .inReady(inReady),
      .outPCM(encPcm),
      .outValid(encValid),
-//     .outPredictSamp(/* not used */),
-//     .outStepIndex(/* not used */)
-//     );
-//
+     .outPredictSamp(/* not used */),
+     .outStepIndex(/* not used */)
+     );
 
-/*
+
+
   // Decoder instance
   ima_adpcm_dec dec
     (
@@ -28019,7 +27978,7 @@ module test(clk);
      .outSamp(decSamp),
      .outValid(decValid)
      );
-*/
+
 endmodule
 
 test t(clock.val);
