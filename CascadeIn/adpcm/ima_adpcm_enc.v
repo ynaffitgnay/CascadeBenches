@@ -78,6 +78,8 @@ module ima_adpcm_enc (
   parameter PCM_DONE = 3'd5;
 
 
+  always@(posedge clock) $display("<<<<<<<<<enc inSamp: %h outPCM: %h sampDiff: %h prePCM: %h>>>>>>>>>", inSamp, outPCM, sampDiff, prePCM);
+
   //---------------------------------------------------------------------------------------
   // module implementation 
   // encoder main control process 
@@ -89,18 +91,23 @@ module ima_adpcm_enc (
       dequantSamp <= 19'b0;
       prePCM <= 4'b0;
       inReady <= 1'b0;
-    end else begin 
+    end else begin
+      $display("pcmSq: %d", pcmSq);
+
       case (pcmSq)
         // waiting for a new input sample 
-        PCM_IDLE: 
+        PCM_IDLE: begin
+          $display("sampDiff @ PCM_IDLE: %h, dequantSamp: %h, prePredSamp: %h, predictorSamp:%h", sampDiff, dequantSamp, prePredSamp, predictorSamp );
           // on a new input sample calculate the difference between the input 
           // sample and predictor output 
           if (inValid) begin 
             // compute the difference between the current predictor output and the input 
             // sample with extended width to prevent any wrapping.
             sampDiff <= {inSamp[15], inSamp, 3'b0} - {predictorSamp[18], predictorSamp};
+            $display("sampDiff @ PCM_IDLE: %h, %h - %h, inSamp: %h", sampDiff, {inSamp[15], inSamp, 3'b0}, {predictorSamp[18], predictorSamp}, inSamp );
+
             
-            // sign that input is not ready 
+            // sign that not ready for input
             inReady <= 1'b0;
             
             // switch to next state 
@@ -108,9 +115,11 @@ module ima_adpcm_enc (
           end else 
             // sign that input is ready 
             inReady <= 1'b1;
+          end
         
         // check the difference sign and set PCM sign bit accordingly 
-        PCM_SIGN: begin 
+        PCM_SIGN: begin
+          $display("sampDiff @ PCM_SIGN: %h", sampDiff );
           // check the difference sign 
           if (sampDiff[19]) begin 
             // set PCM sign bit and negate the calculated sample difference 
@@ -128,7 +137,8 @@ module ima_adpcm_enc (
         end 
 
         // determine quantizer bit 2 value 
-        PCM_BIT2: begin 
+        PCM_BIT2: begin
+          $display("sampDiff @ PCM_BIT2: %h, dequantSamp: %h", sampDiff, dequantSamp );
           // check if the difference is larger than step size 
           if (sampDiff[19:3] >= {2'b0, stepSize}) begin 
             // bit 2 of PCM nibble is set 
@@ -145,7 +155,8 @@ module ima_adpcm_enc (
         end 
         
         // determine quantizer bit 1 value 
-        PCM_BIT1: begin 
+        PCM_BIT1: begin
+          $display("sampDiff @ PCM_BIT1: %h, dequantSamp: %h", sampDiff, dequantSamp );
           // check if the difference is larger than step size 
           if (sampDiff[19:2] >= {3'b0, stepSize}) begin 
             // bit 1 of PCM nibble is set 
@@ -162,7 +173,8 @@ module ima_adpcm_enc (
         end 
         
         // determine quantizer bit 0 value 
-        PCM_BIT0: begin 
+        PCM_BIT0: begin
+          $display("sampDiff @ PCM_BIT0: %h, dequantSamp: %h", sampDiff, dequantSamp );
           // check if the difference is larger than step size 
           if (sampDiff[19:1] >= {4'b0, stepSize}) begin 
             // bit 0 of PCM nibble is set 
@@ -173,12 +185,13 @@ module ima_adpcm_enc (
             // bit 0 of PCM nibble is zero 
             prePCM[0] <= 1'b0;
           
-          // switch to next state 
+          // switch to next state v
           pcmSq <= PCM_DONE;
         end 
 
         // check saturation condition on new predictor sample and update it 
-        PCM_DONE: begin 
+        PCM_DONE: begin
+          $display("sampDiff @ PCM_DONE: %h, dequantSamp: %h, prePredSamp: %h, predictorSamp:%h", sampDiff, dequantSamp, prePredSamp, predictorSamp );
           // check the new predictor output saturation conditions 
           if (prePredSamp[19] && !prePredSamp[18])
             // negative saturation 
@@ -207,7 +220,8 @@ module ima_adpcm_enc (
   assign outStepIndex = stepIndex;
 
   // calculate the update predictor sample before it is updated by the state machine 
-  always @ (prePCM or predictorSamp or dequantSamp) begin
+  //always @ (prePCM or predictorSamp or dequantSamp) begin
+  always @(*) begin
     if (prePCM[3])
       prePredSamp <= {predictorSamp[18], predictorSamp} - {1'b0, dequantSamp};
     else 
