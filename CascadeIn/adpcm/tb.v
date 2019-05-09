@@ -27851,7 +27851,7 @@ module test(clk);
           end
 
           // wait for decoder output valid
-          if (decValid) begin
+          if (decValid && dCtr >= 1) begin
 
             dCtr <= 0;
             decState <= DEC3;
