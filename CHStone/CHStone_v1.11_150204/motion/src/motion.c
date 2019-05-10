@@ -46,11 +46,21 @@
  */
 
 /* private prototypes */
-static void decode_motion_vector
-_ANSI_ARGS_ ((int *pred, int r_size, int motion_code,
-	      int motion_residualesidual, int full_pel_vector));
+//static void decode_motion_vector
+//_ANSI_ARGS_ ((int *pred, int r_size, int motion_code,
+//	      int motion_residualesidual, int full_pel_vector));
 
-/* ISO/IEC 13818-2 sections 6.2.5.2, 6.3.17.2, and 7.6.3: Motion vectors */
+#include "global.h"
+#include "mpeg2dec.h"
+
+static void
+decode_motion_vector ( int *pred, int r_size, int motion_code, int motion_residual, 
+                       int full_pel_vector);	/* MPEG-1 (ISO/IEC 11172-1) support */
+
+//static void
+//motion_vector (int* PMV, int* dmvector, int h_r_size, int v_r_size, int dmv, int mvscale,
+//               int full_pel_vector);
+
 void
 motion_vectors (PMV, dmvector, motion_vertical_field_select, s,
 		motion_vector_count, mv_format, h_r_size, v_r_size, dmv,
@@ -88,6 +98,8 @@ motion_vectors (PMV, dmvector, motion_vertical_field_select, s,
 		     0);
     }
 }
+
+
 
 /* get and decode motion vector and differential motion vector 
    for one prediction */
@@ -138,12 +150,14 @@ motion_vector (PMV, dmvector, h_r_size, v_r_size, dmv, mvscale,
 
 }
 
+
+
 /* calculate motion vector component */
 /* ISO/IEC 13818-2 section 7.6.3.1: Decoding the motion vectors */
 /* Note: the arithmetic here is more elegant than that which is shown 
    in 7.6.3.1.  The end results (PMV[][][]) should, however, be the same.  */
 
-static void
+void
 decode_motion_vector (pred, r_size, motion_code, motion_residual,
 		      full_pel_vector)
      int *pred;

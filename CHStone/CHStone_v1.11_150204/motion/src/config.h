@@ -1,3 +1,6 @@
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
 /*
 +--------------------------------------------------------------------------+
 | CHStone : a suite of benchmark programs for C-based High-Level Synthesis |
@@ -49,3 +52,4 @@
 /* #define NON_ANSI_COMPILER */
 
 #define _ANSI_ARGS_(x) x
+#endif

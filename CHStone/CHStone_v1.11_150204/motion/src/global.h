@@ -1,3 +1,5 @@
+#ifndef _GLOBAL_H_
+#define _GLOBAL_H_
 /*
 +--------------------------------------------------------------------------+
 | CHStone : a suite of benchmark programs for C-based High-Level Synthesis |
@@ -16,7 +18,7 @@
 |    4. Please follow the copyright of each benchmark program.             |
 +--------------------------------------------------------------------------+
 */
-/* getvlc.h, variable length code tables                                    */
+/* global.h, global variables                                               */
 
 /* Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. */
 
@@ -45,29 +47,35 @@
  *
  */
 
-/* NOTE: #define constants such as MACROBLOCK_QUANT are upper case 
-   as per C programming convention. However, the MPEG document 
-   (ISO/IEC 13818-2) lists them in all lower case (e.g. Annex B) */
+#include "mpeg2dec.h"
 
-/* NOTE: the VLC tables are in a flash format---a transformation
-   of the tables in Annex B to a form more convenient towards 
-   parallel (more than one-bit-at-a-time) decoding */
+/* choose between declaration (GLOBAL undefined)
+ * and definition (GLOBAL defined)
+ * GLOBAL is defined in exactly one file mpeg2dec.c)
+ */
 
 
-/* Table B-10, motion_code, codes 0001 ... 01xx */
-const char MVtab0[8][2] = {
-  {ERROR, 0}, {3, 3}, {2, 2}, {2, 2},
-  {1, 1}, {1, 1}, {1, 1}, {1, 1}
-};
+/* Get_Bits.c */
+void Fill_Buffer (void);
+unsigned int Show_Bits (int n);
+unsigned int Get_Bits1 (void);
+void Flush_Buffer (int n);
+unsigned int Get_Bits (int n);
+int Get_Byte (void);
 
-/* Table B-10, motion_code, codes 0000011 ... 000011x */
-const char MVtab1[8][2] = {
-  {ERROR, 0}, {ERROR, 0}, {ERROR, 0}, {7, 6},
-  {6, 6}, {5, 6}, {4, 5}, {4, 5}
-};
+/* getvlc.c */
+int Get_motion_code  (void);
+int Get_dmvector  (void);
+int Get_coded_block_pattern  (void);
 
-/* Table B-10, motion_code, codes 0000001100 ... 000001011x */
-const char MVtab2[12][2] = {
-  {16, 9}, {15, 9}, {14, 9}, {13, 9}, {12, 9}, {11, 9},
-  {10, 8}, {10, 8}, {9, 8}, {9, 8}, {8, 8}, {8, 8}
-};
+
+/* motion.c */
+void motion_vector
+ (int *PMV, int *dmvector, int h_r_size, int v_r_size, int dmv,
+	      int mvscale, int full_pel_vector);
+void
+motion_vectors (int PMV[2][2][2], int dmvector[2], int vertical_field_select[2][2],
+                int s, int motion_vector_count, int mv_format, int h_r_size,
+                int v_r_size, int dmv, int mvscale);
+
+#endif

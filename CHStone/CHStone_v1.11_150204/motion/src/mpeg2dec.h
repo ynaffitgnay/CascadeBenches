@@ -1,3 +1,5 @@
+#ifndef _MPEG_2_DEC_H_
+#define _MPEG_2_DEC_H_
 /* mpeg2dec.h, MPEG specific defines                                        */
 /*
 +--------------------------------------------------------------------------+
@@ -46,8 +48,9 @@
 
 #define ERROR (-1)
 
-#define SEQUENCE_END_CODE       0x1B7
+#define SEQUENCE_END_CODE       (0x1B7)
 
 
 /* mv_format */
-#define MV_FIELD 0
+#define MV_FIELD (0)
+#endif

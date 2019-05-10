@@ -16,7 +16,7 @@
 |    4. Please follow the copyright of each benchmark program.             |
 +--------------------------------------------------------------------------+
 */
-/* global.h, global variables                                               */
+/* getvlc.c, variable length decoding                                       */
 
 /* Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. */
 
@@ -44,37 +44,52 @@
  * design.
  *
  */
+#include "getvlc.h"
 
-#include "mpeg2dec.h"
+int
+Get_motion_code ()
+{
+  int code;
 
-/* choose between declaration (GLOBAL undefined)
- * and definition (GLOBAL defined)
- * GLOBAL is defined in exactly one file mpeg2dec.c)
- */
+  if (Get_Bits1 ())
+    {
+      return 0;
+    }
 
+  if ((code = Show_Bits (9)) >= 64)
+    {
+      code >>= 6;
+      Flush_Buffer (MVtab0[code][1]);
 
-/* Get_Bits.c */
-void Fill_Buffer _ANSI_ARGS_ ((void));
-unsigned int Show_Bits _ANSI_ARGS_ ((int n));
-unsigned int Get_Bits1 _ANSI_ARGS_ ((void));
-void Flush_Buffer _ANSI_ARGS_ ((int n));
-unsigned int Get_Bits _ANSI_ARGS_ ((int n));
-int Get_Byte _ANSI_ARGS_ ((void));
+      return Get_Bits1 ()? -MVtab0[code][0] : MVtab0[code][0];
+    }
 
-/* getvlc.c */
-int Get_motion_code _ANSI_ARGS_ ((void));
-int Get_dmvector _ANSI_ARGS_ ((void));
-int Get_coded_block_pattern _ANSI_ARGS_ ((void));
+  if (code >= 24)
+    {
+      code >>= 3;
+      Flush_Buffer (MVtab1[code][1]);
 
+      return Get_Bits1 ()? -MVtab1[code][0] : MVtab1[code][0];
+    }
 
-/* motion.c */
-void motion_vector
-_ANSI_ARGS_ ((int *PMV, int *dmvector, int h_r_size, int v_r_size, int dmv,
-	      int mvscale, int full_pel_vector));
+  if ((code -= 12) < 0)
+    return 0;
 
-int System_Stream_Flag;
+  Flush_Buffer (MVtab2[code][1]);
+  return Get_Bits1 ()? -MVtab2[code][0] : MVtab2[code][0];
+}
 
-unsigned char ld_Rdbfr[2048];
-unsigned char *ld_Rdptr, *ld_Rdmax;
-unsigned int ld_Bfr;
-int ld_Incnt;
+/* get differential motion vector (for dual prime prediction) */
+int
+Get_dmvector ()
+{
+
+  if (Get_Bits (1))
+    {
+      return Get_Bits (1) ? -1 : 1;
+    }
+  else
+    {
+      return 0;
+    }
+}

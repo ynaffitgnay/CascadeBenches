@@ -16,35 +16,41 @@
 |    4. Please follow the copyright of each benchmark program.             |
 +--------------------------------------------------------------------------+
 */
+/* getbits.c, bit level routines                                            */
+
 /*
- * Copyright (C) 2008
- * Y. Hara, H. Tomiyama, S. Honda, H. Takada and K. Ishii
- * Nagoya University, Japan
- * All rights reserved.
- *
+ * All modifications (mpeg2decode -> mpeg2play) are
+ * Copyright (C) 1996, Stefan Eckart. All Rights Reserved.
+ */
+
+/* Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. */
+
+/*
  * Disclaimer of Warranty
  *
  * These software programs are available to the user without any license fee or
- * royalty on an "as is" basis. The authors disclaims any and all warranties, 
- * whether express, implied, or statuary, including any implied warranties or 
- * merchantability or of fitness for a particular purpose. In no event shall the
- * copyright-holder be liable for any incidental, punitive, or consequential damages
- * of any kind whatsoever arising from the use of these programs. This disclaimer
- * of warranty extends to the user of these programs and user's customers, employees,
- * agents, transferees, successors, and assigns.
+ * royalty on an "as is" basis.  The MPEG Software Simulation Group disclaims
+ * any and all warranties, whether express, implied, or statuary, including any
+ * implied warranties or merchantability or of fitness for a particular
+ * purpose.  In no event shall the copyright-holder be liable for any
+ * incidental, punitive, or consequential damages of any kind whatsoever
+ * arising from the use of these programs.
+ *
+ * This disclaimer of warranty extends to the user of these programs and user's
+ * customers, employees, agents, transferees, successors, and assigns.
+ *
+ * The MPEG Software Simulation Group does not represent or warrant that the
+ * programs furnished hereunder are free of infringement of any third-party
+ * patents.
+ *
+ * Commercial implementations of MPEG-1 and MPEG-2 video, including shareware,
+ * are subject to royalty fees to patent holders.  Many of these patents are
+ * general enough such that they are unavoidable regardless of implementation
+ * design.
  *
  */
-#include <stdio.h>
-
 #define Num 2048
 
-/*
-+--------------------------------------------------------------------------+
-| * Test Vectors (added for CHStone)                                       |
-|     inRdbfr, inPMV, inPMV : input data                                   |
-|     outPMV, outmvfs : expected output data                               |
-+--------------------------------------------------------------------------+
-*/
 const unsigned char inRdbfr[Num] = {
   0, 104, 120, 48, 72, 32, 160, 192, 192, 64, 56, 248, 248, 88, 136, 224, 200,
   208, 176, 72, 96, 40, 184, 160, 32, 32, 120, 168, 64, 32, 72, 184,
@@ -319,77 +325,161 @@ const unsigned char out_ld_Rdptr[Num] = {
   16, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 227, 227, 227,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
-const int inPMV[2][2][2] = { {{45, 207}, {70, 41}}, {{4, 180}, {120, 216}} };
-const int inmvfs[2][2] = { {232, 200}, {32, 240} };
-const int outPMV[2][2][2] =
-  { {{1566, 206}, {70, 41}}, {{1566, 206}, {120, 216}} };
-const int outmvfs[2][2] = { {0, 200}, {0, 240} };
 
-int evalue;
-#include "config.h"
+
 #include "global.h"
-#include "getbits.c"
-#include "getvlc.h"
-#include "getvlc.c"
-#include "motion.c"
 
-void
-Initialize_Buffer ()
+int System_Stream_Flag;
+
+unsigned char ld_Rdbfr[2048];
+unsigned char *ld_Rdptr, *ld_Rdmax;
+unsigned int ld_Bfr;
+int ld_Incnt;
+
+
+/* initialize buffer, call once before first getbits or showbits */
+int
+read (unsigned char *s1, const unsigned char *s2, int n)
 {
-  ld_Incnt = 0;
-  ld_Rdptr = ld_Rdbfr + 2048;
-  ld_Rdmax = ld_Rdptr;
-  ld_Bfr = 68157440;
-  Flush_Buffer (0);		/* fills valid data into bfr */
+  unsigned char *p1;
+  const unsigned char *p2;
+  int n_tmp;
+  
+p1 = s1;
+  p2 = s2;
+  n_tmp = n;
+  
+while (n_tmp-- > 0)
+    {
+      *p1 = *p2;
+      
+p1++;
+      
+p2++;
+    
+}
+  
+return n;
 }
 
-int
-main ()
+void
+Fill_Buffer ()
 {
-  int i, j, k;
-  int main_result;
-  int PMV[2][2][2];
-  int dmvector[2];
-  int motion_vertical_field_select[2][2];
-  int s, motion_vector_count, mv_format, h_r_size, v_r_size, dmv, mvscale;
+  int Buffer_Level;
+  unsigned char *p;
+  p = ld_Rdbfr;
 
-      main_result = 0;
-      evalue = 0;
-      System_Stream_Flag = 0;
-      s = 0;
-      motion_vector_count = 1;
-      mv_format = 0;
-      h_r_size = 200;
-      v_r_size = 200;
-      dmv = 0;
-      mvscale = 1;
-      for (i = 0; i < 2; i++)
+
+  Buffer_Level = read (ld_Rdbfr, inRdbfr, 2048);
+  ld_Rdptr = ld_Rdbfr;
+
+  if (System_Stream_Flag)
+    ld_Rdmax -= 2048;
+
+
+  /* end of the bitstream file */
+  if (Buffer_Level < 2048)
+    {
+      /* just to be safe */
+      if (Buffer_Level < 0)
+	Buffer_Level = 0;
+
+      /* pad until the next to the next 32-bit word boundary */
+      while (Buffer_Level & 3)
+	ld_Rdbfr[Buffer_Level++] = 0;
+
+      /* pad the buffer with sequence end codes */
+      while (Buffer_Level < 2048)
 	{
-	  dmvector[i] = 0;
-	  for (j = 0; j < 2; j++)
-	    {
-	      motion_vertical_field_select[i][j] = inmvfs[i][j];
-	      for (k = 0; k < 2; k++)
-		PMV[i][j][k] = inPMV[i][j][k];
-	    }
+	  ld_Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE >> 24;
+	  ld_Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE >> 16;
+	  ld_Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE >> 8;
+	  ld_Rdbfr[Buffer_Level++] = SEQUENCE_END_CODE & 0xff;
 	}
+    }
+}
 
-      Initialize_Buffer ();
-      motion_vectors (PMV, dmvector, motion_vertical_field_select, s,
-		      motion_vector_count, mv_format, h_r_size, v_r_size, dmv,
-		      mvscale);
+unsigned int
+Show_Bits (N)
+     int N;
+{
+  return ld_Bfr >> (unsigned)(32-N)%32;
+}
 
-      for (i = 0; i < 2; i++)
-	for (j = 0; j < 2; j++)
-	  {
-	    main_result +=
-	      (motion_vertical_field_select[i][j] != outmvfs[i][j]);
-	    for (k = 0; k < 2; k++)
-	      main_result += (PMV[i][j][k] != outPMV[i][j][k]);
-	  }
 
-  
-    printf ("%d\n", main_result);
-  return main_result;
+/* return next bit (could be made faster than Get_Bits(1)) */
 
+unsigned int
+Get_Bits1 ()
+{
+  return Get_Bits (1);
+}
+
+
+/* advance by n bits */
+
+void
+Flush_Buffer (N)
+     int N;
+{
+  int Incnt;
+
+#ifdef RAND_VAL 
+	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
+	ld_Bfr <<= (N%20);
+#else
+  ld_Bfr <<= N;
+#endif
+	
+  Incnt = ld_Incnt -= N;
+
+  if (Incnt <= 24)
+    {
+      if (ld_Rdptr < ld_Rdbfr + 2044)
+	{
+	  do
+	    {
+#ifdef RAND_VAL 
+	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
+	    	ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt)%20);
+#else
+	    	ld_Bfr |= *ld_Rdptr++ << (24 - Incnt);
+#endif
+	    	Incnt += 8;
+	    }
+	  while (Incnt <= 24);
+	}
+      else
+	{
+	  do
+	    {
+	      if (ld_Rdptr >= ld_Rdbfr + 2048)
+		Fill_Buffer ();
+#ifdef RAND_VAL 
+	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
+	      ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt)%20);
+#else
+	      ld_Bfr |= *ld_Rdptr++ << (24 - Incnt);
+#endif
+	      Incnt += 8;
+	    }
+	  while (Incnt <= 24);
+	}
+      ld_Incnt = Incnt;
+    }
+}
+
+
+/* return next n bits (right adjusted) */
+
+unsigned int
+Get_Bits (N)
+     int N;
+{
+  unsigned int Val;
+
+  Val = Show_Bits (N);
+  Flush_Buffer (N);
+
+  return Val;
 }
