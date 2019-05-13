@@ -1,12 +1,12 @@
-module get_motion_code(clk);
-//, buf, inReady, outshift, done, mcode );
+module get_motion_code(clk, rst, buf, inReady, outshift, done, mcode );
   input wire clk;
-  //input wire [19:0] buf;
-  //input wire inReady;
-  //
-  //output reg [4:0] outshift;
-  //output reg done;
-  //output integer mcode;
+  input wire rst;
+  input wire [19:0] buf;
+  input wire inReady;
+  
+  output reg [4:0] outshift;
+  output reg done;
+  output mcode;
 
   localparam ERROR = 17;
 
@@ -79,4 +79,13 @@ module get_motion_code(clk);
 
 endmodule // get_motion_code
 
-get_motion_code gmc(clock.val);
+
+reg[19:0] buf;
+reg inReady;
+reg[5:0] outshift;
+reg done;
+reg mcode;
+
+
+
+get_motion_code gmc(clock.val, buf, inReady, outshift, done, mcode);
