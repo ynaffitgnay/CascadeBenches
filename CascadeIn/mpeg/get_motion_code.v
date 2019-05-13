@@ -82,10 +82,12 @@ endmodule // get_motion_code
 
 reg[19:0] buf;
 reg inReady;
+reg rst;
 reg[5:0] outshift;
 reg done;
 reg mcode;
 
 
 
-get_motion_code gmc(clock.val, buf, inReady, outshift, done, mcode);
+get_motion_code gmc(clock.val, rst, buf, inReady, outshift, done, mcode);
+

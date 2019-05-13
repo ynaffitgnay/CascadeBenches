@@ -39,8 +39,8 @@ module decode_motion_vector#(
     else if (in_valid) begin
       // After one clock cycle, pred should be valid
       done <= 1'b1;
-      $display("lim: %d, vec: %d", lim, vec);
-      $display("out_pred: %d", out_pred);
+      //$display("lim: %d, vec: %d", lim, vec);
+      //$display("out_pred: %d", out_pred);
 
     end
 
@@ -63,12 +63,6 @@ module decode_motion_vector#(
   assign vec = vec1 + vec2 + vec3;
 
   assign out_pred = (motion_code == 0) ? (vec1) : (full_pel_vector ? (vec << 1) : vec);
-
-
-  initial $display("out_pred: %d", out_pred);
-
-
-
 
 endmodule
 
@@ -95,4 +89,5 @@ end
 
 decode_motion_vector dmv(clock.val, rst, in_pred, motion_code, motion_residual, 
                          in_valid, full_pel_vector, out_pred, done);
+
 
