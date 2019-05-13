@@ -186,7 +186,6 @@ module aes_inv_cipher_top(clk, rst, kld, ld, done, key, text_in, text_out );
   assign sa32_ark = sa32_sub ^ w2[07:00];
   assign sa33_ark = sa33_sub ^ w3[07:00];
 
-  //assign {sa00_next, sa10_next, sa20_next, sa30_next} = inv_mix_col(sa00_ark,sa10_ark,sa20_ark,sa30_ark);
   assign sa00_next = sax0[31:24];
   assign sa10_next = sax0[23:16];
   assign sa20_next = sax0[15:08];
@@ -228,58 +227,6 @@ module aes_inv_cipher_top(clk, rst, kld, ld, done, key, text_in, text_out );
   always @(posedge clk) text_out[071:064] <= sa31_ark;
   always @(posedge clk) text_out[039:032] <= sa32_ark;
   always @(posedge clk) text_out[007:000] <= sa33_ark;
-
-  ////////////////////////////////////////////////////////////////////
-  //
-  // Generic Functions
-  //
-
-  //function [31:0] inv_mix_col;
-  //  input	[7:0]	s0,s1,s2,s3;
-  //  begin
-  //    inv_mix_col[31:24]=pmul_e(s0)^pmul_b(s1)^pmul_d(s2)^pmul_9(s3);
-  //    inv_mix_col[23:16]=pmul_9(s0)^pmul_e(s1)^pmul_b(s2)^pmul_d(s3);
-  //    inv_mix_col[15:08]=pmul_d(s0)^pmul_9(s1)^pmul_e(s2)^pmul_b(s3);
-  //    inv_mix_col[07:00]=pmul_b(s0)^pmul_d(s1)^pmul_9(s2)^pmul_e(s3);
-  //  end
-  //endfunction
-  //
-  //// Some synthesis tools don't like xtime being called recursevly ...
-  //function [7:0] pmul_e;
-  //  input [7:0] b;
-  //  reg [7:0] two,four,eight;
-  //  begin
-  //    two=xtime(b);four=xtime(two);eight=xtime(four);pmul_e=eight^four^two;
-  //  end
-  //endfunction
-  //
-  //function [7:0] pmul_9;
-  //  input [7:0] b;
-  //  reg [7:0] two,four,eight;
-  //  begin
-  //    two=xtime(b);four=xtime(two);eight=xtime(four);pmul_9=eight^b;
-  //  end
-  //endfunction
-  //
-  //function [7:0] pmul_d;
-  //  input [7:0] b;
-  //  reg [7:0] two,four,eight;
-  //  begin
-  //    two=xtime(b);four=xtime(two);eight=xtime(four);pmul_d=eight^four^b;
-  //  end
-  //endfunction
-  //
-  //function [7:0] pmul_b;
-  //  input [7:0] b;
-  //  reg [7:0] two,four,eight;
-  //  begin
-  //    two=xtime(b);four=xtime(two);eight=xtime(four);pmul_b=eight^two^b;
-  //  end
-  //endfunction
-  //
-  //function [7:0] xtime;
-  //  input [7:0] b;xtime={b[6:0],1'b0}^(8'h1b&{8{b[7]}});
-  //endfunction
 
   ////////////////////////////////////////////////////////////////////
   //

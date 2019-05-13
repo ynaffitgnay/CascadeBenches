@@ -107,14 +107,6 @@ module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
 	    else
 	      if(|dcnt)	dcnt <= dcnt - 4'h1;
 
-  //TODO: get rid
-  //always@(posedge clk) $display("Done: %d", done);
-
-  //always@(posedge clk) $display("text_in:   %h%h%h%h", 
-  //                              text_in[127:96], text_in[95:64], text_in[63:32], text_in[31:0]);
-  //always@(posedge clk) $display("text_out:  %h%h%h%h", 
-  //                              text_out[127:96], text_out[95:64], text_out[63:32], text_out[31:0]);
-
 
   always @(posedge clk) done <= !(|dcnt[3:1]) & dcnt[0] & !ld;
   always @(posedge clk) if(ld) text_in_r <= text_in;
@@ -224,28 +216,6 @@ module aes_cipher_top(clk, rst, ld, done, key, text_in, text_out );
   always @(posedge clk) text_out[071:064] <= sa31_sr ^ w1[07:00];
   always @(posedge clk) text_out[039:032] <= sa32_sr ^ w2[07:00];
   always @(posedge clk) text_out[007:000] <= sa33_sr ^ w3[07:00];
-
-  ////////////////////////////////////////////////////////////////////
-  //
-  // Generic Functions
-  //
-
-  //function [31:0] mix_col;
-  //input	[7:0]	s0,s1,s2,s3;
-  //reg	[7:0]	s0_o,s1_o,s2_o,s3_o;
-  //begin
-  //mix_col[31:24]=xtime(s0)^xtime(s1)^s1^s2^s3;
-  //mix_col[23:16]=s0^xtime(s1)^xtime(s2)^s2^s3;
-  //mix_col[15:08]=s0^s1^xtime(s2)^xtime(s3)^s3;
-  //mix_col[07:00]=xtime(s0)^s0^s1^s2^xtime(s3);
-  //end
-  //endfunction
-
-
-  //function [7:0] xtime;
-  //  input [7:0] b; xtime={b[6:0],1'b0}^(8'h1b&{8{b[7]}});
-  //endfunction // xtime
-
 
 
   ////////////////////////////////////////////////////////////////////
