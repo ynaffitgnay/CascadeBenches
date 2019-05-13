@@ -77,7 +77,10 @@ Get_motion_code ()
       return Get_Bits1 ()? -MVtab1[code][0] : MVtab1[code][0];
     }
 
-  if ((code -= 12) < 0) 
+  // This seems like a typo? Since MVtab2 is only 12 entries... so accessing it
+  // using code > 12 doesn't make sense.
+  //if ((code -= 12) < 0)
+  if ((code -= 12) > 0)
     return 0;
 
   Flush_Buffer (MVtab2[code][1]);
