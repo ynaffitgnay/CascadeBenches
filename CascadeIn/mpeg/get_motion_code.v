@@ -3,7 +3,7 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
 
   input wire clk;
   input wire rst;
-  input wire [19:0] buf;
+  input wire [10:0] buf;
   input wire in_valid;
   
   output wire [4:0] outshift;
@@ -32,13 +32,13 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
 
   end
 
-  assign code1 = buf[18:10];
+  assign code1 = buf[9:1];
   
   assign code2 = (code1 >= 64) ? (code1 >> 6) : ((code1 >= 24) ? code1 >> 3 : code1);
-  assign outshift = 1 + (buf[19] ? 0 : ((code1 >= 64) ? ((MVtab0[code2][1]) + 1) : ((code1 >= 24) ? (MVtab1[code2][1] + 1) : ((code1 < 12) ? 0 : (MVtab2[code2][1] + 1)))));
+  assign outshift = 1 + (buf[10] ? 0 : ((code1 >= 64) ? ((MVtab0[code2][1]) + 1) : ((code1 >= 24) ? (MVtab1[code2][1] + 1) : ((code1 < 12) ? 0 : (MVtab2[code2][1] + 1)))));
   assign mcode1 = (code1 >= 64) ? MVtab0[code2][0] : ((code1 >= 24) ? MVtab1[code2][0] : ((code1 < 12) ? 0 : (MVtab2[code2][1])));
-  assign check_output_bit = 19 - (outshift - 1);
-  assign mcode = buf[19] ? 0 : ((code1 < 12) ? 0 : (buf[check_output_bit] ? (mcode1 * -1) : mcode1));
+  assign check_output_bit = 10 - (outshift - 1);
+  assign mcode = buf[10] ? 0 : ((code1 < 12) ? 0 : (buf[check_output_bit] ? (mcode1 * -1) : mcode1));
  
   
 
@@ -106,7 +106,7 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
 endmodule // get_motion_code
 
 
-reg[19:0] buf;
+reg[10:0] buf;
 reg in_valid;
 reg rst;
 reg[5:0] outshift;
@@ -116,7 +116,7 @@ reg[31:0] ctr = 0;
 
 
 initial begin
-  buf = 20'b1000111100001111;
+  buf = 11'b1000111;
 //20'h7ffff;
 //20'b1000111100001111;
   in_valid = 1;
