@@ -326,6 +326,7 @@ const unsigned char out_ld_Rdptr[Num] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+#include <stdio.h>
 
 #include "global.h"
 
@@ -335,7 +336,7 @@ unsigned char ld_Rdbfr[2048];
 unsigned char *ld_Rdptr, *ld_Rdmax;
 unsigned int ld_Bfr;
 int ld_Incnt;
-
+int advanced_bits = 0;
 
 /* initialize buffer, call once before first getbits or showbits */
 int
@@ -467,6 +468,9 @@ Flush_Buffer (N)
 	}
       ld_Incnt = Incnt;
     }
+
+  advanced_bits += N;
+  printf( "Advanced %d bits\n", advanced_bits );
 }
 
 

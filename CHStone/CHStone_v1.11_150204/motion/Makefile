@@ -7,10 +7,10 @@ OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 HEADERS := $(wildcard $(SRC)/*.h)
 
 mpeg_tb: $(OBJECTS)
-	$(CC) $^ -o $@
+	$(CC) -g $^ -o $@
 
 $(OBJ)/%.o: $(SRC)/%.c $(HEADERS)
-	$(CC) -c $< -o $@ -I$(SRC) 
+	$(CC) -g -c $< -o $@ -I$(SRC) 
 
 clean:
 	-rm -f $(OBJECTS)

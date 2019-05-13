@@ -44,6 +44,8 @@
  * design.
  *
  */
+#include <stdio.h>
+
 #include "getvlc.h"
 
 int
@@ -60,7 +62,8 @@ Get_motion_code ()
     {
       code >>= 6;
       Flush_Buffer (MVtab0[code][1]);
-
+      printf("flushed %d bytes from buffer. code: %d\n", MVtab0[code][1], code);
+      
       return Get_Bits1 ()? -MVtab0[code][0] : MVtab0[code][0];
     }
 
@@ -68,14 +71,17 @@ Get_motion_code ()
     {
       code >>= 3;
       Flush_Buffer (MVtab1[code][1]);
+      printf("flushed %d bytes from buffer. code: %d\n", MVtab1[code][1], code);
+      
 
       return Get_Bits1 ()? -MVtab1[code][0] : MVtab1[code][0];
     }
 
-  if ((code -= 12) < 0)
+  if ((code -= 12) < 0) 
     return 0;
 
   Flush_Buffer (MVtab2[code][1]);
+  printf("flushed %d bytes from buffer. code: %d\n", MVtab2[code][1], code);
   return Get_Bits1 ()? -MVtab2[code][0] : MVtab2[code][0];
 }
 
