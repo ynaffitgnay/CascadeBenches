@@ -121,7 +121,11 @@ module test(clk);
   parameter DEC4 = 4;
 
   parameter TESTS_TO_RUN = 1;
-
+  
+  
+  // NOTE: Cascade does not like input files to be outside of
+  // the Cascade home directory. Make sure to copy these into
+  // the home directory (at least until the path gets fixed)
   stream instream = $fopen("test_in.bin");
   stream encstream = $fopen("test_enc.bin");
   stream decstream = $fopen("test_dec.bin");
