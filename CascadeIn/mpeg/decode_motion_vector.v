@@ -14,7 +14,7 @@ module decode_motion_vector#(
   input wire clk;
   input wire rst;
   input wire [31:0] in_pred;
-  input wire [31:0] motion_code;
+  input wire signed [31:0] motion_code;
   input wire [31:0] motion_residual;
   input wire in_valid;
   input wire full_pel_vector;
@@ -32,10 +32,8 @@ module decode_motion_vector#(
 
   always @(posedge clk) begin
     if (rst) begin
-      //out_pred <= 32'b0;
       done <= 1'b0;
     end
-
     else if (in_valid) begin
       // After one clock cycle, pred should be valid
       done <= 1'b1;
@@ -51,18 +49,19 @@ module decode_motion_vector#(
   assign lim = (16 << r_size);
   assign vec1 = (full_pel_vector) ? (in_pred >> 1) : (in_pred);
 
-  // 17 is defined as ERROR in get_motion_code
-  // (all motion codes should be between 0 and 17)
-  assign vec2 = (motion_code < 17) ? 
+  assign vec2 = (motion_code > 0) ? 
                 (((motion_code - 1) << r_size) + motion_residual + 1) :
-                ((motion_residual + 1) * -1) ;
+                (motion_code < 0 ? 
+                ((((-motion_code - 1) << r_size) + (motion_residual + 1)) * -1) :
+                 0);
 
-  assign vec3 = (motion_code < 17) ? (((vec1 + vec2) >= lim) ? ((lim + lim) * -1) : 0) :
-                                     (((vec1 + vec2) < -lim) ? (lim + lim) : 0);
+
+  assign vec3 = (motion_code > 0) ? (((vec1 + vec2) >= lim) ? ((lim + lim) * -1) : 0) :
+                (motion_code < 0 ? (((vec1 + vec2) < -lim) ? (lim + lim) : 0) : 0);
 
   assign vec = vec1 + vec2 + vec3;
 
-  assign out_pred = (motion_code == 0) ? (vec1) : (full_pel_vector ? (vec << 1) : vec);
+  assign out_pred = full_pel_vector ? (vec << 1) : vec;
 
 endmodule
 
@@ -75,6 +74,8 @@ reg full_pel_vector;
 
 reg [31:0] out_pred;
 reg done;
+integer ctr = 0;
+
 
 initial begin
   in_pred = 32'd45;
@@ -85,7 +86,15 @@ initial begin
 end
 
 
+always @(posedge clock.val) begin
+  ctr <= ctr + 1;
+  $display("out_pred: %d", out_pred);
 
+  if (done) $display("done: out_pred: %d", out_pred);
+  
+  if (ctr == 5) $finish;
+
+end
 
 decode_motion_vector dmv(clock.val, rst, in_pred, motion_code, motion_residual, 
                          in_valid, full_pel_vector, out_pred, done);
