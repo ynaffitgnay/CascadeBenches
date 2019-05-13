@@ -1,10 +1,10 @@
 module fpu_pri_encoder#(
-                        parameter WIDTH = 106, 
-                        parameter WIDTH_LOG = 7                 
-                        )(
-                          value,
-                          msb
-                          );
+  parameter WIDTH = 106, 
+  parameter WIDTH_LOG = 7                 
+)(
+  value,
+  msb
+);
 
   input wire [WIDTH - 1 : 0] value;
   output wire [WIDTH_LOG:0] msb;
