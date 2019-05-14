@@ -429,7 +429,8 @@ Flush_Buffer (N)
 	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
 	ld_Bfr <<= (N%20);
 #else
-  ld_Bfr <<= N;
+  //ld_Bfr <<= N;
+  ld_Bfr = (N >= 32) ? 0 : (ld_Bfr << N);
 #endif
 	
   Incnt = ld_Incnt -= N;
