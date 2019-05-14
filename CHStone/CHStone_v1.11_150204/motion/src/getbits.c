@@ -430,7 +430,8 @@ Flush_Buffer (N)
 	ld_Bfr <<= (N%20);
 #else
   //ld_Bfr <<= N;
-  ld_Bfr = (N >= 32) ? 0 : (ld_Bfr << N);
+  ld_Bfr <<= (N%32);
+  //ld_Bfr = (N > 32) ? 0 : (ld_Bfr << N);
 #endif
 	
   Incnt = ld_Incnt -= N;
@@ -445,7 +446,7 @@ Flush_Buffer (N)
 	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
 	    	ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt)%20);
 #else
-	    	ld_Bfr |= *ld_Rdptr++ << (24 - Incnt);
+	    	ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt) % 32);
 #endif
 	    	Incnt += 8;
 	    }
@@ -461,7 +462,7 @@ Flush_Buffer (N)
 	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
 	      ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt)%20);
 #else
-	      ld_Bfr |= *ld_Rdptr++ << (24 - Incnt);
+	      ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt) % 32);
 #endif
 	      Incnt += 8;
 	    }
@@ -471,7 +472,7 @@ Flush_Buffer (N)
     }
 
   advanced_bits += N;
-  printf( "Advanced %d bits\n", advanced_bits );
+  printf( "ld_Bfr: %x. Advanced %d bits\n", ld_Bfr, advanced_bits );
 }
 
 
