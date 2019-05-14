@@ -326,7 +326,7 @@ const unsigned char out_ld_Rdptr[Num] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-#define RAND_VAL 1
+//#define RAND_VAL 1
 
 #include <stdio.h>
 
@@ -431,8 +431,8 @@ Flush_Buffer (N)
 	/* N is between 0 and 20 with realistic input sets, while it may become larger than the width of the integer type when using randomly generated input sets which are used in the contained input set. The following is to avoid this.  */
 	ld_Bfr <<= (N%20);
 #else
-  ld_Bfr <<= N;
-  //ld_Bfr <<= (N%32);
+  //ld_Bfr <<= N;
+  ld_Bfr <<= (N%32);
   //ld_Bfr = (N > 32) ? 0 : (ld_Bfr << N);
 #endif
 	
@@ -450,7 +450,14 @@ Flush_Buffer (N)
         //printf("(24 - Incnt) mod 20: %d \n", (24 - Incnt) % 20);
 #else
 	    	ld_Bfr |= *ld_Rdptr++ << ((24 - Incnt) % 32);
-        //printf("(24 - Incnt) mod 32: %d \n", (24 - Incnt) % 32);
+        printf("(24 - Incnt): %d,  mod 32: %d \n", (24 - Incnt), (24 - Incnt) % 32);
+        //printf("(24 - (Incnt + 8)): %d, 24 - (Incnt + 16): %d, 24 - (Incnt + 24): %d\n",
+        //       ((24 - (Incnt + 8)) % 32), ((24 - (Incnt + 16)) % 32) , ((24 - (Incnt + 24)) % 32));
+
+        printf("(24 - (Incnt + 8)): %d, 24 - (Incnt + 16): %d, 24 - (Incnt + 24): %d\n",
+               (24 - (Incnt + 8)), (24 - (Incnt + 16)) , (24 - (Incnt + 24)));
+
+        
 #endif
         printf("ld_Bfr: %x\n", ld_Bfr);
 	    	Incnt += 8;
