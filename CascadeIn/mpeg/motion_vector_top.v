@@ -150,6 +150,7 @@ module motion_vector_top#(
     //$display("old_h_mcode_inbuf: %h, h_mcode_inbuf: %h", old_h_mcode_inbuf, h_mcode_inbuf);
     //$display("in_bfr[31:0]: %h, s1_ld_bfr: %h", (in_bfr >> (BITS - 13)), s1_ld_bfr[31:20]);
 
+    $display("fb_N: %d, stage: %d", fb_N, stage);
 
     if (rst) begin
       h_decode_in_valid <= 1'b0;
@@ -195,21 +196,25 @@ module motion_vector_top#(
 
       if (h_mcode_done) begin
         fb_N <= 1 + h_outshift;
-
+        
         fb_in_valid <= 1'b1;
         stage <= S_3;        
       end
     end
 
-    else if (stage == S_3) begin
+     else if (stage == S_3) begin
+       fb_in_valid <= 1'b0;
+     
       if (fb_done) begin
+        $display("fb_N: %d",fb_N);
+
         s2_ld_bfr <= ld_bfr;
         s2_incnt <= incnt;
 
         h_decode_in_valid <= 1'b1;
 
-        //fb_in_valid <= 1'b0;
-        fb_N <= (H_R_SIZE != 0 && h_motion_code != 0) ? H_R_SIZE : 0;        
+        fb_in_valid <= 1'b1;
+        fb_N <= (H_R_SIZE != 0 && h_motion_code != 0) ? H_R_SIZE : 0;  
 
         stage <= S_4;
       end // if (fb_done)
@@ -295,6 +300,7 @@ module motion_vector_top#(
                               .buf( h_mcode_inbuf ),
                               .in_valid( h_mcode_in_valid ),
                               .outshift( h_outshift ),
+                              .done( h_mcode_done ),
                               .mcode( h_mcode )
                               );
 
@@ -315,6 +321,7 @@ module motion_vector_top#(
                               .buf( v_mcode_inbuf ),
                               .in_valid( v_mcode_in_valid ),
                               .outshift( v_outshift ),
+                              .done( v_mcode_done ),
                               .mcode( v_mcode )
                               );
 
@@ -378,7 +385,7 @@ always @(posedge clock.val) begin
 
 
   
-  if (ctr > 15) $finish();
+  if (ctr > 20) $finish();
 end
 
 

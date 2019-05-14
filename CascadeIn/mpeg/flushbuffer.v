@@ -84,12 +84,9 @@ module flushbuffer#(
                   bytes_read <= bytes_read + 1;                  
                 end
 
-
-
-
     end
     else if (in_valid) begin // this should be last
-      $display("starting new flush");
+      $display("starting new flush for N: %d", N);
       // TODO: figure out how to mark inCnt as invalid
       // also deal with clock cycle delay between assigning incnt and getting incnt...
       $display("incnt: %d, (N mod 32): %d", incnt, N % 32);
