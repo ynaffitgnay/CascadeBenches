@@ -26,7 +26,7 @@ module get_dmvector(clk, rst, buf, inReady, done, dmvec );
 
 endmodule // get_dmvector
 
-
+/*
 reg[1:0] buf;
 reg rst;
 reg inReady = 1;
@@ -36,8 +36,9 @@ reg signed dmvec;
 
 always @(posedge clock.val) begin
   buf <= {1'b1, 1'b1};
-  $display("dmvec: %d", dmvec);
+  //$display("dmvec: %d", dmvec);
 end
 
 
 get_dmvector gdm(clock.val, rst, buf, inReady, done, dmvec);
+*/

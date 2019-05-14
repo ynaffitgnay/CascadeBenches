@@ -107,7 +107,7 @@ module flushbuffer#(
 
 endmodule
 
-
+/*
 // INITIALIZE FLUSH_BUFFER WITH IN_INCNT AS 0.
 // in_incnt should be a reg that gets set to out_incnt from top module whenever
 // flushbuffer = done
@@ -189,3 +189,4 @@ endmodule // test_flush_buf
 
 
 test_flush_buf tfb(clock.val);
+*/

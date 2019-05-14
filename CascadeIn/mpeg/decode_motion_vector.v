@@ -63,8 +63,9 @@ module decode_motion_vector#(
 
   assign out_pred = full_pel_vector ? (vec << 1) : vec;
 
-endmodule
+endmodule // decode_motion_vector
 
+/*
 reg rst;
 integer in_pred;
 integer motion_code;
@@ -100,3 +101,4 @@ decode_motion_vector dmv(clock.val, rst, in_pred, motion_code, motion_residual,
                          in_valid, full_pel_vector, out_pred, done);
 
 
+*/

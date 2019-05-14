@@ -109,7 +109,7 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
 
 endmodule // get_motion_code
 
-
+/*
 reg[10:0] buf;
 reg in_valid;
 reg rst;
@@ -145,3 +145,4 @@ end
 
 get_motion_code gmc(clock.val, rst, buf, in_valid, outshift, done, mcode);
 
+*/
