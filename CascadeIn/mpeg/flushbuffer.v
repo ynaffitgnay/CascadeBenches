@@ -34,8 +34,9 @@ module flushbuffer#(
   always @(posedge clk) begin
     $display("in_valid: %d, bytes_read: %d, lb: %h", in_valid, bytes_read, ld_bfr);
     $display("%d, %d, %d, %d", byte0, byte1, byte2, byte3);
+    //$display("inbfr: %h", in_bfr);
 
-
+/*
     if (rst) begin
       $display("rst");
       ld_bfr <= 32'h4100000;
@@ -98,7 +99,7 @@ module flushbuffer#(
       loading_bfr <= 1'b1;      
 
     end
-
+*/
   end // always @ (posedge clk)
   assign byte0 = (in_bfr >> ((BYTES - bytes_read - 1) << 3)) & 32'hff;
   assign byte1 = (in_bfr >> ((BYTES - bytes_read - 2) << 3)) & 32'hff;
