@@ -248,6 +248,8 @@ module motion_vector_top#(
           s6_incnt <= incnt;
 
           v_decode_in_valid <= 1'b1;
+          $display("v_in_pred: %d", v_in_pred);
+
 
           fb_N <= (V_R_SIZE != 0 && v_mcode != 0) ? V_R_SIZE : 0;
           fb_in_valid <= 1'b1;
