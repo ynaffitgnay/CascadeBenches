@@ -32,15 +32,12 @@ module flushbuffer#(
   integer bytes_read;
   reg [7:0] in_bfr_reg[BYTES - 1:0];
 
-  wire [7:0] byte0, byte1, byte2, byte3;
+  wire [31:0] byte0, byte1, byte2, byte3;
   
  
   always @(posedge clk) begin
-    //$display("%d, %d, %d, %d", BYTE[bytes_read].bi, BYTE[bytes_read + 1].bi, BYTE[bytes_read + 2].bi, BYTE[bytes_read + 3].bi);
-    //$display("%d, %d, %d, %d", BYTE[0].bi, BYTE[1].bi, BYTE[2].bi, BYTE[3].bi);
-    $display("in_valid: %d, bytes_read: %d", in_valid, bytes_read);
+    $display("in_valid: %d, bytes_read: %d, lb: %h", in_valid, bytes_read, ld_bfr);
     $display("%d, %d, %d, %d", byte0, byte1, byte2, byte3);
-    //$display("%h, %h, %h, %h", byte0, byte1, byte2, byte3);
 
 
     if (rst) begin
@@ -65,11 +62,16 @@ module flushbuffer#(
 
       end
 
-      if (incnt <= 0) begin
-        ld_bfr <= ld_bfr;
+      $display("incnt: %d", incnt);
+
+      if (incnt < 0) begin
+        $display("(24 - incnt) mod 32: %h, byte << ... %h", (24 - incnt) % 32, byte0 << (24 - incnt) % 32);
+
+        ld_bfr <= ld_bfr | (byte0 << (24 - incnt) % 32);
+        $display("lb: %h", ld_bfr);
+
         loading_bfr <= 1'b1;
 
-// | BYTES
       end
       else if (incnt <= 8) begin
       end
@@ -113,10 +115,10 @@ module flushbuffer#(
     //assign incnt = out_incnt - N;    
 
   end // always @ (posedge clk)
-  assign byte0 = in_bfr >> ((BYTES - bytes_read - 1) << 3);
-  assign byte1 = in_bfr >> ((BYTES - bytes_read - 2) << 3);
-  assign byte2 = in_bfr >> ((BYTES - bytes_read - 3) << 3);
-  assign byte3 = in_bfr >> ((BYTES - bytes_read - 4) << 3);
+  assign byte0 = (in_bfr >> ((BYTES - bytes_read - 1) << 3)) & 32'hff;
+  assign byte1 = (in_bfr >> ((BYTES - bytes_read - 2) << 3)) & 32'hff;
+  assign byte2 = (in_bfr >> ((BYTES - bytes_read - 3) << 3)) & 32'hff;
+  assign byte3 = (in_bfr >> ((BYTES - bytes_read - 4) << 3)) & 32'hff;
 
 endmodule
 
