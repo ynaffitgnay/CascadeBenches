@@ -35,14 +35,14 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
 
   assign code1 = buf[9:1];
   
-  assign code2 = (code1 >= 64) ? (code1 >> 6) : ((code1 >= 24) ? code1 >> 3 : code1);
+  assign code2 = (code1 >= 64) ? (code1 >> 6) : ((code1 >= 24) ? code1 >> 3 : (code1 - 12));
   assign outshift = 1 + (buf[10] ? 0 : 
                          ((code1 >= 64) ? ((MVtab0[code2][1]) + 1) : 
                           ((code1 >= 24) ? (MVtab1[code2][1] + 1) : 
-                           ((code1 >= 12) ? 0 : (MVtab2[code2][1] + 1)))));
-  assign mcode1 = (code1 >= 64) ? MVtab0[code2][0] : ((code1 >= 24) ? MVtab1[code2][0] : ((code1 >= 12) ? 0 : (MVtab2[code2][0] )));
+                           ((code1 >= 12) ? (MVtab2[code2][1] + 1) : 0))));
+  assign mcode1 = (code1 >= 64) ? MVtab0[code2][0] : ((code1 >= 24) ? MVtab1[code2][0] : ((code1 >= 12) ? (MVtab2[code2][0]) : 0));
   assign check_output_bit = 10 - (outshift - 1);
-  assign mcode = buf[10] ? 0 : ((code1 >= 12) ? 0 : (buf[check_output_bit] ? (mcode1 * -1) : mcode1));
+  assign mcode = buf[10] ? 0 : ((code1 < 12) ? 0 : (buf[check_output_bit] ? (mcode1 * -1) : mcode1));
  
   
 
@@ -120,7 +120,7 @@ reg[31:0] ctr = 0;
 
 
 initial begin
-  buf = 11'b00000001110;
+  buf = 11'b00000011110;
 
 //11'b1000111;
 //20'h7ffff;
