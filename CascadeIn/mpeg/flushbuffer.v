@@ -33,12 +33,12 @@ module flushbuffer#(
  
   always @(posedge clk) begin
     $display("in_valid: %d, bytes_read: %d, lb: %h", in_valid, bytes_read, ld_bfr);
-    $display("%d, %d, %d, %d", byte0, byte1, byte2, byte3);
+    //$display("%d, %d, %d, %d", byte0, byte1, byte2, byte3);
     //$display("inbfr: %h", in_bfr);
 
 
     if (rst) begin
-      $display("rst");
+      //$display("rst");
       ld_bfr <= 32'h4100000;
       incnt <= 32'b0;
       done <= 1'b0;
@@ -89,7 +89,7 @@ module flushbuffer#(
       $display("starting new flush for N: %d", N);
       // TODO: figure out how to mark inCnt as invalid
       // also deal with clock cycle delay between assigning incnt and getting incnt...
-      $display("incnt: %d, (N mod 32): %d", incnt, N % 32);
+      //$display("incnt: %d, (N mod 32): %d", incnt, N % 32);
       ld_bfr <= (ld_bfr << (N % 32));
       incnt <= incnt - N;
       loading_bfr <= 1'b1;      

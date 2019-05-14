@@ -111,7 +111,7 @@ module motion_vector_top#(
   wire signed [4:0] h_mcode;
                               
   wire [31:0] h_in_pred;
-  reg [4:0] h_motion_code;
+//  reg [4:0] h_motion_code;
   wire [31:0] h_motion_residual;
   reg h_decode_in_valid;
   wire [31:0] h_out_pred;
@@ -124,7 +124,7 @@ module motion_vector_top#(
   wire signed [4:0] v_mcode;
 
   wire [31:0] v_in_pred;
-  reg [4:0] v_motion_code;
+//  reg [4:0] v_mcode;
   wire [31:0] v_motion_residual;
   reg v_decode_in_valid;
   wire [31:0] v_out_pred;
@@ -150,7 +150,7 @@ module motion_vector_top#(
     //$display("old_h_mcode_inbuf: %h, h_mcode_inbuf: %h", old_h_mcode_inbuf, h_mcode_inbuf);
     //$display("in_bfr[31:0]: %h, s1_ld_bfr: %h", (in_bfr >> (BITS - 13)), s1_ld_bfr[31:20]);
 
-    $display("fb_N: %d, stage: %d", fb_N, stage);
+    $display("fb_N: %d, stage: %d, h_mcode: %d, v_mcode: %d", fb_N, stage, h_mcode, v_mcode);
 
     if (rst) begin
       h_decode_in_valid <= 1'b0;
@@ -213,8 +213,8 @@ module motion_vector_top#(
 
         h_decode_in_valid <= 1'b1;
 
+        fb_N <= (H_R_SIZE != 0 && h_mcode != 0) ? H_R_SIZE : 0;  
         fb_in_valid <= 1'b1;
-        fb_N <= (H_R_SIZE != 0 && h_motion_code != 0) ? H_R_SIZE : 0;  
 
         stage <= S_4;
       end // if (fb_done)
@@ -231,7 +231,12 @@ module motion_vector_top#(
 
         stage <= S_5;
       end        
-    end // if (stage == S_4)    
+    end // if (stage == S_4)   
+    
+    else if (stage == S_5) begin
+      
+    end
+
   end // always @ (posedge clk)
 
 
@@ -273,7 +278,7 @@ module motion_vector_top#(
   assign shift_r_size_mod = ((32 - H_R_SIZE) % 32);
   assign shift_r_size_mod_unsigned = shift_r_size_mod % 32;
 
-  assign h_motion_residual = (H_R_SIZE != 0 && h_motion_code != 0) ? (ld_bfr >> shift_r_size_mod_unsigned) : 0;
+  assign h_motion_residual = (H_R_SIZE != 0 && h_mcode != 0) ? (ld_bfr >> shift_r_size_mod_unsigned) : 0;
 
   assign v_mcode_inbuf = (s3_ld_bfr >> (s3_incnt - 11));
   assign v_in_pred = mvscale ? (in_PMV[0][S][1] >> 1) : in_PMV[0][S][1];
@@ -308,7 +313,7 @@ module motion_vector_top#(
                                              .clk( clk ), 
                                              .rst( rst ), 
                                              .in_pred( h_in_pred ), 
-                                             .motion_code( h_motion_code ), 
+                                             .motion_code( h_mcode ), 
                                              .motion_residual( h_motion_residual ),
                                              .in_valid( h_decode_in_valid ),
                                              .full_pel_vector ( /* UNUSED */ ),
@@ -331,7 +336,7 @@ module motion_vector_top#(
                                            .clk( clk ), 
                                            .rst( rst ), 
                                            .in_pred( v_in_pred ), 
-                                           .motion_code( v_motion_code ), 
+                                           .motion_code( v_mcode ), 
                                            .motion_residual( v_motion_residual ),
                                            .in_valid( v_decode_in_valid ),
                                            .full_pel_vector ( /* UNUSED */ ),
@@ -385,7 +390,7 @@ always @(posedge clock.val) begin
 
 
   
-  if (ctr > 20) $finish();
+  if (ctr > 30) $finish();
 end
 
 
