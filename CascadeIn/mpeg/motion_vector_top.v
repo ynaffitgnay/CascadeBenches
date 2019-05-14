@@ -205,6 +205,9 @@ module motion_vector_top#(
   
           s2_ld_bfr <= ld_bfr;
           s2_incnt <= incnt;
+
+          $display("ld_bfr: %d", ld_bfr);
+
   
           h_decode_in_valid <= 1'b1;
   
@@ -217,6 +220,8 @@ module motion_vector_top#(
   
       S_4: begin
         if (fb_done) begin
+          $display("s2_ld_bfr: %h, motion_residual: %d, shift: %d" ,s2_ld_bfr, h_motion_residual, shift_r_size_mod_unsigned);
+
           s3_ld_bfr <= ld_bfr;
           s3_incnt <= incnt;
   
@@ -292,7 +297,7 @@ module motion_vector_top#(
   assign shift_r_size_mod = ((32 - H_R_SIZE) % 32);
   assign shift_r_size_mod_unsigned = shift_r_size_mod % 32;
 
-  assign h_motion_residual = (H_R_SIZE != 0 && h_mcode != 0) ? (s2_ld_bfr >> shift_r_size_mod_unsigned) : 0;
+  assign h_motion_residual = (H_R_SIZE != 0 && h_mcode != 0) ? (s3_ld_bfr >> shift_r_size_mod_unsigned) : 0;
 
   assign v_mcode_inbuf = (s3_ld_bfr >> (s3_incnt - 11));
   assign v_in_pred = mvscale ? (in_PMV[0][S][1] >> 1) : in_PMV[0][S][1];
