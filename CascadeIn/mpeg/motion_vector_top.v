@@ -132,7 +132,6 @@ module motion_vector_top#(
 
   wire [31:0] shift_r_size_mod;
   wire [31:0] shift_r_size_mod_unsigned;
-
   
   
   reg[4:0] stage;
@@ -142,7 +141,8 @@ module motion_vector_top#(
   reg[31:0] s2_incnt;
   reg[31:0] s3_ld_bfr;
   reg[31:0] s3_incnt;
-
+  reg[31:0] s6_ld_bfr;
+  reg[31:0] s6_incnt;
 
 
   always @(posedge clk) begin
@@ -166,77 +166,97 @@ module motion_vector_top#(
 
     end
 
-    if (stage == S_IDLE) begin
-      if (in_valid) begin
-        // Initialize ld_bfr
-        fb_N <= 0;
-        fb_in_valid <= 1;
-        stage <= S_1;
+    case (stage)
+      S_IDLE: begin
+        if (in_valid) begin
+          // Initialize ld_bfr
+          fb_N <= 0;
+          fb_in_valid <= 1;
+          stage <= S_1;
+        end
       end
-    end
 
       //$display("in_bfr: %h", in_bfr);
 
-    else if (stage == S_1) begin
-      if (fb_done) begin
-        // Capture this state so you can continue to use ld_bfr without waiting
-        s1_ld_bfr <= ld_bfr;
-        s1_incnt <= incnt;
-        h_mcode_in_valid <= 1'b1;
-        
-        fb_in_valid <= 1'b0;
-
-        stage <= S_2;
-      end
-    end // if (stage == S_1)
-    
-    else if (stage == S_2) begin
-      out_mvfs[1][S] <= s1_ld_bfr[s1_incnt - 1];
-      out_mvfs[0][S] <= s1_ld_bfr[s1_incnt - 1];
-
-      if (h_mcode_done) begin
-        fb_N <= 1 + h_outshift;
-        
-        fb_in_valid <= 1'b1;
-        stage <= S_3;        
-      end
-    end
-
-     else if (stage == S_3) begin
-       fb_in_valid <= 1'b0;
-     
-      if (fb_done) begin
-        $display("fb_N: %d",fb_N);
-
-        s2_ld_bfr <= ld_bfr;
-        s2_incnt <= incnt;
-
-        h_decode_in_valid <= 1'b1;
-
-        fb_N <= (H_R_SIZE != 0 && h_mcode != 0) ? H_R_SIZE : 0;  
-        fb_in_valid <= 1'b1;
-
-        stage <= S_4;
-      end // if (fb_done)
-    end // if (stage == S_3)
-
-    else if (stage == S_4) begin
-      if (fb_done) begin
-        s3_ld_bfr <= ld_bfr;
-        s3_incnt <= incnt;
-
-        v_mcode_in_valid <= 1'b1;
-
-        fb_in_valid <= 1'b0;
-
-        stage <= S_5;
-      end        
-    end // if (stage == S_4)   
-    
-    else if (stage == S_5) begin
+      S_1: begin
+        if (fb_done) begin
+          // Capture this state so you can continue to use ld_bfr without waiting
+          s1_ld_bfr <= ld_bfr;
+          s1_incnt <= incnt;
+          h_mcode_in_valid <= 1'b1;
+          
+          fb_in_valid <= 1'b0;
+  
+          stage <= S_2;
+        end
+      end // if (stage == S_1)
       
-    end
+      S_2: begin
+        out_mvfs[1][S] <= s1_ld_bfr[s1_incnt - 1];
+        out_mvfs[0][S] <= s1_ld_bfr[s1_incnt - 1];
+  
+        if (h_mcode_done) begin
+          fb_N <= 1 + h_outshift;
+          
+          fb_in_valid <= 1'b1;
+          stage <= S_3;        
+        end
+      end
+  
+      S_3: begin
+         fb_in_valid <= 1'b0;
+       
+        if (fb_done) begin
+          $display("fb_N: %d",fb_N);
+  
+          s2_ld_bfr <= ld_bfr;
+          s2_incnt <= incnt;
+  
+          h_decode_in_valid <= 1'b1;
+  
+          fb_N <= (H_R_SIZE != 0 && h_mcode != 0) ? H_R_SIZE : 0;  
+          fb_in_valid <= 1'b1;
+  
+          stage <= S_4;
+        end // if (fb_done)
+      end // if (stage == S_3)
+  
+      S_4: begin
+        if (fb_done) begin
+          s3_ld_bfr <= ld_bfr;
+          s3_incnt <= incnt;
+  
+          v_mcode_in_valid <= 1'b1;
+  
+          fb_in_valid <= 1'b0;
+  
+          stage <= S_5;
+        end        
+      end // if (stage == S_4)   
+      
+      S_5: begin
+        if (v_mcode_done) begin  
+          fb_N <= 1 + v_outshift;
+          fb_in_valid <= 1'b1;
+          stage <= S_6;
+        end
+      end
 
+      S_6: begin
+        // when mcode is done, residual can be completed as soon as buffer flushed
+        if (fb_done) begin
+          s6_ld_bfr <= ld_bfr;
+          s6_incnt <= incnt;
+
+          v_decode_in_valid <= 1'b1;
+
+          fb_N <= (V_R_SIZE != 0 && v_mcode != 0) ? V_R_SIZE : 0;
+          fb_in_valid <= 1'b1;
+        end
+        
+        // Idle here
+      end
+    endcase
   end // always @ (posedge clk)
 
 
@@ -259,8 +279,8 @@ module motion_vector_top#(
   assign out_PMV_0_0_1 = out_PMV[0][0][1];
   assign out_PMV_0_1_0 = out_PMV[0][1][0];
   assign out_PMV_0_1_1 = out_PMV[0][1][1];
-  assign out_PMV_1_0_0 = out_PMV[1][0][0];
-  assign out_PMV_1_0_1 = out_PMV[1][0][1];
+  assign out_PMV_1_0_0 = out_PMV[0][0][0];  // PMV[1][S][0] = PMV[0][S][0]
+  assign out_PMV_1_0_1 = out_PMV[0][0][1];  // PMV[1][S][1] = PMV[0][S][1]
   assign out_PMV_1_1_0 = out_PMV[1][1][0];
   assign out_PMV_1_1_1 = out_PMV[1][1][1];
 
@@ -278,13 +298,19 @@ module motion_vector_top#(
   assign shift_r_size_mod = ((32 - H_R_SIZE) % 32);
   assign shift_r_size_mod_unsigned = shift_r_size_mod % 32;
 
-  assign h_motion_residual = (H_R_SIZE != 0 && h_mcode != 0) ? (ld_bfr >> shift_r_size_mod_unsigned) : 0;
+  assign h_motion_residual = (H_R_SIZE != 0 && h_mcode != 0) ? (s2_ld_bfr >> shift_r_size_mod_unsigned) : 0;
 
   assign v_mcode_inbuf = (s3_ld_bfr >> (s3_incnt - 11));
   assign v_in_pred = mvscale ? (in_PMV[0][S][1] >> 1) : in_PMV[0][S][1];
-
   assign out_PMV[0][S][1] = (mvscale) ? (v_out_pred << 1) : v_out_pred;
 
+  assign v_motion_residual = (V_R_SIZE != 0 && v_mcode != 0) ? (s6_ld_bfr >> shift_r_size_mod_unsigned) : 0;
+
+
+  //assign out_PMV[1][S][0] = out_PMV[0][S][0];
+  //assign out_PMV[1][S][1] = out_PMV[0][S][1];
+  
+  
   assign done = h_decode_done & v_decode_done;
 
   flushbuffer#( BYTES ) fb(
