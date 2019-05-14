@@ -36,7 +36,7 @@ module flushbuffer#(
     $display("%d, %d, %d, %d", byte0, byte1, byte2, byte3);
     //$display("inbfr: %h", in_bfr);
 
-/*
+
     if (rst) begin
       $display("rst");
       ld_bfr <= 32'h4100000;
@@ -48,11 +48,10 @@ module flushbuffer#(
     end
     else if (loading_bfr) begin
       if (incnt > 24) begin
-        $display("Perhaps done loading");
+      //  $display("Perhaps done loading");
 
         done <= 1'b1;
         loading_bfr <= 1'b0;
-
       end
       
       $display("incnt: %d", incnt);
@@ -97,9 +96,9 @@ module flushbuffer#(
       ld_bfr <= (ld_bfr << (N % 32));
       incnt <= incnt - N;
       loading_bfr <= 1'b1;      
-
+      done <= 0;
     end
-*/
+
   end // always @ (posedge clk)
   assign byte0 = (in_bfr >> ((BYTES - bytes_read - 1) << 3)) & 32'hff;
   assign byte1 = (in_bfr >> ((BYTES - bytes_read - 2) << 3)) & 32'hff;

@@ -25,10 +25,14 @@ module get_motion_code(clk, rst, buf, in_valid, outshift, done, mcode );
       done <= 1'b0;
     else if (in_valid) begin      
       done <= 1'b1;
-      $display("code2: %d, check_output_bit: %d", code2, check_output_bit);
+      $display("code1: %d, code2: %d, check_output_bit: %d", code1, code2, check_output_bit);
       //$display("MVtab2[code2][1] + 1 = %d", MVtab2[code2][1] + 1);
 
     end
+         else if (!in_valid) begin
+           done <= 1'b0;
+         end
+
 
 
   end

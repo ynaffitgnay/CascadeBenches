@@ -90,13 +90,12 @@ module motion_vector_top#(
   output wire [31:0] out_mvfs_1_0;
   output wire [31:0] out_mvfs_1_1; 
 
-  output reg done;
+  output wire done;
 
   wire[31:0] in_PMV[1:0][1:0][1:0];  
   wire[31:0] in_mvfs[1:0][1:0];
   wire[31:0] out_PMV[1:0][1:0][1:0];
   reg[31:0] out_mvfs[1:0][1:0];
-
 
   reg [31:0] fb_N;
   reg fb_in_valid;
@@ -105,22 +104,18 @@ module motion_vector_top#(
   reg signed [31:0] incnt;  // driven by flushbuffer
   wire fb_done;
 
-
   wire [10:0] h_mcode_inbuf;
   reg h_mcode_in_valid;
   wire [4:0] h_outshift;
   wire h_mcode_done;
   wire signed [4:0] h_mcode;
-
                               
-  
   wire [31:0] h_in_pred;
   reg [4:0] h_motion_code;
-  reg [31:0] h_motion_residual;
-  reg h_code_rcv;
-  reg [31:0] h_out_pred;
+  wire [31:0] h_motion_residual;
+  reg h_decode_in_valid;
+  wire [31:0] h_out_pred;
   reg h_decode_done;
-
   
   wire [10:0] v_mcode_inbuf;
   reg v_mcode_in_valid;
@@ -128,83 +123,112 @@ module motion_vector_top#(
   wire v_mcode_done;
   wire signed [4:0] v_mcode;
 
-
-
-
   wire [31:0] v_in_pred;
   reg [4:0] v_motion_code;
-  reg [31:0] v_motion_residual;
-  reg v_code_rcv;
-  reg [31:0] v_out_pred;
-  reg v_decode_done;
-                                           
+  wire [31:0] v_motion_residual;
+  reg v_decode_in_valid;
+  wire [31:0] v_out_pred;
+  reg v_decode_done;                                           
 
-  integer s0_flushed_bits;
+  wire [31:0] shift_r_size_mod;
+  wire [31:0] shift_r_size_mod_unsigned;
 
-
-
-  reg[4:0] stage;
   
+  
+  reg[4:0] stage;
+  reg[31:0] s1_ld_bfr;
+  reg[31:0] s1_incnt;
+  reg[31:0] s2_ld_bfr;
+  reg[31:0] s2_incnt;
+  reg[31:0] s3_ld_bfr;
+  reg[31:0] s3_incnt;
 
-  wire [31:0] byte0, byte1, byte2, byte3;
-
-  //reg bytes_read = 0;
-  //
-  //assign byte0 = (in_bfr >> ((BYTES - bytes_read - 1) << 3)) & 32'hff;
-  //assign byte1 = (in_bfr >> ((BYTES - bytes_read - 2) << 3)) & 32'hff;
-  //assign byte2 = (in_bfr >> ((BYTES - bytes_read - 3) << 3)) & 32'hff;
-  //assign byte3 = (in_bfr >> ((BYTES - bytes_read - 4) << 3)) & 32'hff;
 
 
   always @(posedge clk) begin
     //$display("top: %d, %d, %d, %d", byte0, byte1, byte2, byte3);
+    //$display("old_h_mcode_inbuf: %h, h_mcode_inbuf: %h", old_h_mcode_inbuf, h_mcode_inbuf);
+    //$display("in_bfr[31:0]: %h, s1_ld_bfr: %h", (in_bfr >> (BITS - 13)), s1_ld_bfr[31:20]);
+
 
     if (rst) begin
-      done <= 1'b0;
-      s0_flushed_bits <= 32'b0;
-      h_code_rcv <= 1'b0;
-      v_code_rcv <= 1'b0;
+      h_decode_in_valid <= 1'b0;
+      v_decode_in_valid <= 1'b0;
 
       fb_N <= 0;
       fb_in_valid <= 0;
 
       stage <= S_IDLE;
+      s1_ld_bfr <= 32'b0;
+      s1_incnt <= 32'b0;
+
 
     end
 
-    if (stage == S_IDLE && in_valid) begin
-      // Initialize ld_bfr
-      fb_N <= 0;
-      fb_in_valid <= 1;
+    if (stage == S_IDLE) begin
+      if (in_valid) begin
+        // Initialize ld_bfr
+        fb_N <= 0;
+        fb_in_valid <= 1;
+        stage <= S_1;
+      end
+    end
 
       //$display("in_bfr: %h", in_bfr);
 
-      
-      if (fb_done) stage <= S_1;
+    else if (stage == S_1) begin
+      if (fb_done) begin
+        // Capture this state so you can continue to use ld_bfr without waiting
+        s1_ld_bfr <= ld_bfr;
+        s1_incnt <= incnt;
+        h_mcode_in_valid <= 1'b1;
+        
+        fb_in_valid <= 1'b0;
 
+        stage <= S_2;
+      end
+    end // if (stage == S_1)
+    
+    else if (stage == S_2) begin
+      out_mvfs[1][S] <= s1_ld_bfr[s1_incnt - 1];
+      out_mvfs[0][S] <= s1_ld_bfr[s1_incnt - 1];
+
+      if (h_mcode_done) begin
+        fb_N <= 1 + h_outshift;
+
+        fb_in_valid <= 1'b1;
+        stage <= S_3;        
+      end
     end
 
+    else if (stage == S_3) begin
+      if (fb_done) begin
+        s2_ld_bfr <= ld_bfr;
+        s2_incnt <= incnt;
 
-    if (stage == S_1) begin
-      $finish();
+        h_decode_in_valid <= 1'b1;
 
-      $display("Stage 0");
+        //fb_in_valid <= 1'b0;
+        fb_N <= (H_R_SIZE != 0 && h_motion_code != 0) ? H_R_SIZE : 0;        
 
-      out_mvfs[1][S] <= in_bfr[BITS - 1];
-      out_mvfs[0][S] <= in_bfr[BITS - 1];
+        stage <= S_4;
+      end // if (fb_done)
+    end // if (stage == S_3)
 
-      s0_flushed_bits <= 32'b1;
-      
-      stage <= 1;
-    end
+    else if (stage == S_4) begin
+      if (fb_done) begin
+        s3_ld_bfr <= ld_bfr;
+        s3_incnt <= incnt;
 
-    if (stage == 1) begin
-      
+        v_mcode_in_valid <= 1'b1;
 
+        fb_in_valid <= 1'b0;
 
-      
-    end
+        stage <= S_5;
+      end        
+    end // if (stage == S_4)    
   end // always @ (posedge clk)
+
 
   // Assign array entries
   assign in_PMV[0][0][0] = in_PMV_0_0_0;
@@ -235,11 +259,23 @@ module motion_vector_top#(
   assign out_mvfs_1_0 = out_mvfs[1][0];
   assign out_mvfs_1_1 = out_mvfs[1][1];
 
-
-  assign h_mcode_inbuf = (in_bfr >> (BITS - 1 - s0_flushed_bits - 11));
+  // incnt, 1 for setting mvfs, 11 for mcode_inbuf size
+  assign h_mcode_inbuf = (s1_ld_bfr >> (s1_incnt - 1 - 11));
   assign h_in_pred = in_PMV[0][S][0];
+  assign out_PMV[0][S][0] = h_out_pred;
+
+
+  assign shift_r_size_mod = ((32 - H_R_SIZE) % 32);
+  assign shift_r_size_mod_unsigned = shift_r_size_mod % 32;
+
+  assign h_motion_residual = (H_R_SIZE != 0 && h_motion_code != 0) ? (ld_bfr >> shift_r_size_mod_unsigned) : 0;
+
+  assign v_mcode_inbuf = (s3_ld_bfr >> (s3_incnt - 11));
   assign v_in_pred = mvscale ? (in_PMV[0][S][1] >> 1) : in_PMV[0][S][1];
 
+  assign out_PMV[0][S][1] = (mvscale) ? (v_out_pred << 1) : v_out_pred;
+
+  assign done = h_decode_done & v_decode_done;
 
   flushbuffer#( BYTES ) fb(
                            .clk( clk ),
@@ -268,7 +304,7 @@ module motion_vector_top#(
                                              .in_pred( h_in_pred ), 
                                              .motion_code( h_motion_code ), 
                                              .motion_residual( h_motion_residual ),
-                                             .in_valid( h_code_rcv ),
+                                             .in_valid( h_decode_in_valid ),
                                              .full_pel_vector ( /* UNUSED */ ),
                                              .out_pred( h_out_pred ),
                                              .done( h_decode_done )
@@ -290,7 +326,7 @@ module motion_vector_top#(
                                            .in_pred( v_in_pred ), 
                                            .motion_code( v_motion_code ), 
                                            .motion_residual( v_motion_residual ),
-                                           .in_valid( v_code_rcv ),
+                                           .in_valid( v_decode_in_valid ),
                                            .full_pel_vector ( /* UNUSED */ ),
                                            .out_pred( v_out_pred ),
                                            .done( v_decode_done )
