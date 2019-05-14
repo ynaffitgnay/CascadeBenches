@@ -86,18 +86,18 @@ module tb_motion( clk );
       for (i = 1; i >= 0; i = i - 1) begin
         for (j = 1; j >= 0; j = j - 1) begin
           if (test_mvfs[i][j] != out_mvfs[i][j]) begin
-            $display("mvfs[%d][%d] failed. expected %d, got %d", i, j, test_mvfs[i][j], out_mvfs[i][j]);
+            //$display("mvfs[%d][%d] failed. expected %d, got %d", i, j, test_mvfs[i][j], out_mvfs[i][j]);
 
           end
           for (k = 1; k >= 0; k = k - 1) begin
             if (test_PMV[i][j][k] != out_PMV[i][j][k]) begin
-              $display("PMV[%d][%d][%d] failed. expected %d, got %d", i, j, k, test_PMV[i][j][k],out_PMV[i][j][k]);
+              //$display("PMV[%d][%d][%d] failed. expected %d, got %d", i, j, k, test_PMV[i][j][k],out_PMV[i][j][k]);
             end
           end
         end
       end
 
-      $display("test_mvfs[1][1]: %d", test_mvfs[1][1]);
+      //$display("test_mvfs[1][1]: %d", test_mvfs[1][1]);
 
     end
 

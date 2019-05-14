@@ -38,7 +38,7 @@ module decode_motion_vector#(
       // After one clock cycle, pred should be valid
       done <= 1'b1;
       //$display("lim: %d, vec: %d", lim, vec);
-      //$display("out_pred: %d", out_pred);
+      $display("in_pred: %d, motion_code: %d, motion_residual: %d, out_pred: %d", in_pred, motion_code, motion_residual, out_pred);
 
     end
 
