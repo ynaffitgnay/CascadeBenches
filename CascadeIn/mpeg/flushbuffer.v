@@ -7,8 +7,8 @@ module flushbuffer#(
   loading_bfr,
   in_valid,  
   in_bfr, 
-  out_ld_bfr, 
-  out_incnt,
+  ld_bfr, 
+  incnt,
   done
 );
   localparam BITS = BYTES << 3;
@@ -22,15 +22,15 @@ module flushbuffer#(
   input wire[BITS - 1:0] in_bfr;
 
   output reg loading_bfr;
-  output reg[31:0] out_ld_bfr;
-  output reg[31:0] out_incnt;
+  output reg[31:0] ld_bfr;
+  output reg signed [31:0] incnt;
   output reg done;
 
   
-  reg [31:0] ld_bfr;
-  reg signed [31:0] incnt;
+  //reg [31:0] ld_bfr;
+  //reg signed [31:0] incnt;
   integer bytes_read;
-  reg [7:0] in_bfr_reg[BYTES - 1:0];
+  //reg [7:0] in_bfr_reg[BYTES - 1:0];
 
   wire [31:0] byte0, byte1, byte2, byte3;
   
@@ -44,9 +44,9 @@ module flushbuffer#(
       $display("rst");
       ld_bfr <= 32'h4100000;
       incnt <= 32'b0;
-      out_incnt <= 32'b0;
+      //out_incnt <= 32'b0;
       done <= 1'b0;
-      out_ld_bfr <= 0;  // TODO: something reasonable
+      //out_ld_bfr <= 0;  // TODO: something reasonable
 
       //temp_incnt <= 0;
       bytes_read <= 32'b0;
@@ -55,30 +55,45 @@ module flushbuffer#(
     else if (loading_bfr) begin
       //$display("loading_bfr");
       if (incnt > 24) begin
-        out_ld_bfr <= ld_bfr;
-        out_incnt <= incnt;
+        $display("Perhaps done loading");
+
+        //out_ld_bfr <= ld_bfr;
+        //out_incnt <= incnt;
         done <= 1'b1;
         loading_bfr <= 1'b0;
 
       end
-
+      
       $display("incnt: %d", incnt);
 
-      if (incnt < 0) begin
-        $display("(24 - incnt) mod 32: %h, byte << ... %h", (24 - incnt) % 32, byte0 << (24 - incnt) % 32);
+      if (incnt <= 0) begin
+        //$display("(24 - incnt) mod 32: %d, byte << ... %h", (24 - incnt) % 32, byte0 << (24 - incnt) % 32);
 
-        ld_bfr <= ld_bfr | (byte0 << (24 - incnt) % 32);
-        $display("lb: %h", ld_bfr);
+        ld_bfr <= ld_bfr | (byte0 << ((24 - incnt) % 32)) | (byte1 << ((24 - (incnt + 8)) % 32)) | (byte2 << ((24 - (incnt + 16)) % 32)) | (byte3 << ((24 - (incnt + 24)) % 32));
 
-        loading_bfr <= 1'b1;
+        incnt <= incnt + 32;
+        bytes_read <= bytes_read + 4;
 
       end
       else if (incnt <= 8) begin
+        ld_bfr <= ld_bfr | (byte0 << ((24 - incnt) % 32)) | (byte1 << ((24 - (incnt + 8)) % 32)) | (byte2 << ((24 - (incnt + 16)) % 32));
+
+        incnt <= incnt + 24;
+        bytes_read <= bytes_read + 3;
       end
            else if (incnt <= 16) begin
+             ld_bfr <= ld_bfr | (byte0 << ((24 - incnt) % 32)) | (byte1 << ((24 - (incnt + 8)) % 32));
+
+             incnt <= incnt + 16;
+             bytes_read <= bytes_read + 2;
            end
 
                 else if (incnt <= 24) begin
+
+                  ld_bfr <= ld_bfr | (byte0 << ((24 - incnt) % 32));
+
+                  incnt <= incnt + 8;
+                  bytes_read <= bytes_read + 1;                  
                 end
 
 
@@ -90,7 +105,7 @@ module flushbuffer#(
 
       // TODO: figure out how to mark inCnt as invalid
       // also deal with clock cycle delay between assigning incnt and getting incnt...
-      $display("incnt: %d", incnt);
+      $display("incnt: %d, (N mod 32): %d", incnt, N % 32);
       ld_bfr <= (ld_bfr << (N % 32));
       incnt <= incnt - N;
       loading_bfr <= 1'b1;
@@ -168,7 +183,9 @@ module test_flush_buf(input wire clk);
       $display("Eventually I get here");
 
       in_valid <= 1'b1;
-      N <= 32'd5;
+      //N <= 32'd5;
+      N <= 32'b0;
+
       state <= 1;
 
     end
