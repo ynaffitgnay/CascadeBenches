@@ -7102,7 +7102,7 @@ module test(clk);
             iCtr <= 0;
             inState <= IN4;
 
-          end // if (iCtr >= 1)
+          end // if (iCtr == 1)
 
         end // else: !if($eof(instream))
 
@@ -7243,7 +7243,6 @@ module test(clk);
             $display(" Error!");
             $display("Error found in encoder output index %d.", encCount + 1);
             $display("   (expected value 'h%h, got value 'h%h). encIdx: %d, inIdx: %d, decIdx: %d", encExpVal, encPcm, encIdx, inIdx, decIdx);            
-
           end
 
           // wait for a few clock cycles before ending simulation

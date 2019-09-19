@@ -35,6 +35,42 @@
 `include "ima_adpcm_dec.v"
 
 module test(clk);
+  parameter BUFFER_BYTES = 32;
+  // CORRECT VALUES
+  //parameter TOTAL_IN_BYTES = 348160;
+  //parameter TOTAL_ENC_BYTES = 174080;
+  //parameter TOTAL_DEC_BYTES = 348160;
+
+  // Truncated for development
+  parameter TOTAL_IN_BYTES = 10880;
+  parameter TOTAL_ENC_BYTES = 5440;
+  parameter TOTAL_DEC_BYTES = 10880;
+ 
+  parameter MAIN0 = 0;
+  parameter MAIN1 = 1;
+  parameter MAIN2 = 2;
+
+  parameter IN0 = 0;
+  parameter IN1 = 1;
+  parameter IN2 = 2;
+  parameter IN3 = 3;
+  parameter IN4 = 4;
+  parameter IN5 = 5;
+
+  parameter ENC0 = 0;
+  parameter ENC1 = 1;
+  parameter ENC2 = 2;
+  parameter ENC3 = 3;
+  parameter ENC4 = 4;
+  
+  parameter DEC0 = 0;
+  parameter DEC1 = 1;
+  parameter DEC2 = 2;
+  parameter DEC3 = 3;
+  parameter DEC4 = 4;
+
+  parameter TESTS_TO_RUN = 1;
+
   input wire clk;
 
   //---------------------------------------------------------------------------------------
@@ -49,6 +85,7 @@ module test(clk);
   wire [15:0] decSamp;  // decoder output sample value 
   wire decValid;      // decoder output valid flag 
   integer sampCount, encCount, decCount;
+
   reg [7:0] intmp, enctmp, dectmp;
   reg [3:0] encExpVal;
   reg [15:0] decExpVal;
@@ -82,53 +119,14 @@ module test(clk);
   reg[31:0] mCtr;
   reg[31:0] iCtr;
   reg[31:0] eCtr;
-  reg[31:0] dCtr;
-
-  parameter BUFFER_BYTES = 32;
-  // CORRECT VALUES
-  //parameter TOTAL_IN_BYTES = 348160;
-  //parameter TOTAL_ENC_BYTES = 174080;
-  //parameter TOTAL_DEC_BYTES = 348160;
-
-  // Truncated for development
-  parameter TOTAL_IN_BYTES = 10880;
-  parameter TOTAL_ENC_BYTES = 5440;
-  parameter TOTAL_DEC_BYTES = 10880;
-
-  
- 
-  parameter MAIN0 = 0;
-  parameter MAIN1 = 1;
-  parameter MAIN2 = 2;
-
-  parameter IN0 = 0;
-  parameter IN1 = 1;
-  parameter IN2 = 2;
-  parameter IN3 = 3;
-  parameter IN4 = 4;
-  parameter IN5 = 5;
-
-  parameter ENC0 = 0;
-  parameter ENC1 = 1;
-  parameter ENC2 = 2;
-  parameter ENC3 = 3;
-  parameter ENC4 = 4;
-  
-  parameter DEC0 = 0;
-  parameter DEC1 = 1;
-  parameter DEC2 = 2;
-  parameter DEC3 = 3;
-  parameter DEC4 = 4;
-
-  parameter TESTS_TO_RUN = 1;
-  
+  reg[31:0] dCtr;  
   
   // NOTE: Cascade does not like input files to be outside of
   // the Cascade home directory. Make sure to copy these into
   // the home directory (at least until the path gets fixed)
-  integer instream = $fopen("test_in.bin", "r");
-  integer encstream = $fopen("test_enc.bin", "r");
-  integer decstream = $fopen("test_dec.bin", "r");
+  integer instream = $fopen("test_in_bin.txt", "r");
+  integer encstream = $fopen("test_enc_bin.txt", "r");
+  integer decstream = $fopen("test_dec_bin.txt", "r");
   
   initial begin
     $display("Initializing");
@@ -232,7 +230,6 @@ module test(clk);
 
     case (inState)
       IN0: begin
-        //@(posedge clk);
         iCtr <= 0;
       end
 
@@ -254,10 +251,6 @@ module test(clk);
         end
       end // case: IN1
       
-      // wait for reset release
-      //while (rst) @(posedge clock);
-      //repeat (50) @(posedge clock);  // 50 cycles
-
       IN2: begin
         if (iCtr >= 50) begin
           $display("Getting input byte");
@@ -340,10 +333,10 @@ module test(clk);
             // sign input sample is valid (should be able to do this at iCtr = 0)
             inValid <= 1'b1;
 
-            $display("inBytesRead: %d", inBytesRead);
+            //$display("inBytesRead: %d", inBytesRead);
 
             if ((inBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more bytes");
+              //$display("Reading more bytes");
 
               inIdx <= inIdx + 1;
               //if (!($eof(instream))) $get(instream, inBuf);
@@ -365,9 +358,9 @@ module test(clk);
           end // if (iCtr == 1)
 
           // @(posedge clock);
-          if (iCtr >= 1) begin
-            
-          end
+          //if (iCtr >= 1) begin
+          //  
+          //end
         end // else: !if($eof(instream))
 
       end // case: IN3
@@ -539,8 +532,8 @@ module test(clk);
           // announce error detection and exit simulation
           if (eCtr == 0) begin
             $display(" Error!");
-            $display("Error found in encoder output index %d.", encCount+1);
-            $display("   (expected value 'h%h, got value 'h%h)", encExpVal, encPcm);
+            $display("Error found in encoder output index %d.", encCount + 1);
+            $display("   (expected value 'h%h, got value 'h%h). encIdx: %d, inIdx: %d, decIdx: %d", encExpVal, encPcm, encIdx, inIdx, decIdx);            
           end
 
           // wait for a few clock cycles before ending simulation 
@@ -609,7 +602,7 @@ module test(clk);
               $display("Reading more enc bytes\n");
               encIdx <= encIdx + 1;
 
-              $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
+              $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx + 1, 
                    encBuf[encIdx][255:224],
                    encBuf[encIdx][223:192],
                    encBuf[encIdx][191:160],
@@ -628,16 +621,15 @@ module test(clk);
       end // case: ENC3
 
       ENC4: begin
-        if (iCtr >= 1) begin
+        //if (iCtr >= 1) begin
           //$display("Would close input file here");
           // close input file 
           
-          encDone <= 1;
+        encDone <= 1;
 
-          eCtr <= 0;
-          encState <= ENC0;
+        eCtr <= 0;
+        encState <= ENC0;
 
-        end
       end
 
       default: encState <= ENC0;
