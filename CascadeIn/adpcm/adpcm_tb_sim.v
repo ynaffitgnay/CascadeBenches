@@ -31,8 +31,8 @@
 //---------------------------------------------------------------------------------------
 // Refactored to run on Cascade in April 2019 by Tiffany Yang
 
-include ima_adpcm_enc.v;
-include ima_adpcm_dec.v;
+`include "ima_adpcm_enc.v"
+`include "ima_adpcm_dec.v"
 
 module test(clk);
   parameter BUFFER_BYTES = 32;

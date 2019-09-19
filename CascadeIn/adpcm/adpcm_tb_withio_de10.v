@@ -131,7 +131,7 @@ module test(clk);
   integer decstream = $fopen("test_dec.bin", "r");
   
   initial begin
-    $display("Initializing");
+    //$display("Initializing");
 
     testCount = 0;
 
@@ -170,7 +170,7 @@ module test(clk);
     end
     
 
-    $display("Done initializing");
+    //$display("Done initializing");
 
   end
 
@@ -194,9 +194,9 @@ module test(clk);
         decDone <= 0;
 
         if (mCtr >= 2) begin
-          $display("");
-          $display("IMA ADPCM encoder & decoder simulation");
-          $display("--------------------------------------");
+          //$display("");
+          //$display("IMA ADPCM encoder & decoder simulation");
+          //$display("--------------------------------------");
           mCtr <= 0;
           mainState <= MAIN1;
         end
@@ -213,7 +213,7 @@ module test(clk);
 
       MAIN2: begin
         if (inDone && encDone && decDone) begin
-          $display("Test %d done!. Count: %d", testCount , mCtr);
+          //$display("Test %d done!. Count: %d", testCount , mCtr);
 
           testCount <= testCount + 1;
           mCtr <= 0;
@@ -260,7 +260,7 @@ module test(clk);
 
       IN2: begin
         if (iCtr >= 50) begin
-          $display("Getting input byte");
+          //$display("Getting input byte");
 
           // read input samples file 
           //$get(instream, inBuf);
@@ -269,15 +269,15 @@ module test(clk);
           intmp <= inBuf[inIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           inBytesRead <= inBytesRead + 1;
 
-          $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
-                   inBuf[inIdx][255:224],
-                   inBuf[inIdx][223:192],
-                   inBuf[inIdx][191:160],
-                   inBuf[inIdx][159:128],
-                   inBuf[inIdx][127:96],
-                   inBuf[inIdx][95:64],
-                   inBuf[inIdx][63:32],
-                   inBuf[inIdx][31:0]);
+          //$display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
+          //         inBuf[inIdx][255:224],
+          //         inBuf[inIdx][223:192],
+          //         inBuf[inIdx][191:160],
+          //         inBuf[inIdx][159:128],
+          //         inBuf[inIdx][127:96],
+          //         inBuf[inIdx][95:64],
+          //         inBuf[inIdx][63:32],
+          //         inBuf[inIdx][31:0]);
 
 
           iCtr <= 0;
@@ -294,7 +294,7 @@ module test(clk);
         // TODO: NEED TO FIX BHVR OF EOF. REPLACE WITH BYTES_READ
         //if ($eof(instream)) begin
         if (inBytesRead >= TOTAL_IN_BYTES) begin
-          $display("Reached eof");
+          //$display("Reached eof");
 
           iCtr <= 0;
           inState <= IN5;
@@ -329,7 +329,8 @@ module test(clk);
               27: inSamp[15:8] <= inBuf[inIdx][39:32];
               29: inSamp[15:8] <= inBuf[inIdx][23:16];
               31: inSamp[15:8] <= inBuf[inIdx][7:0];
-              default: $display("Unexpected number of bytes read for inSamp");
+              default: begin
+              end//$display("Unexpected number of bytes read for inSamp");
 
             endcase // case (inBytesRead % BUFFER_BYTES)
 
@@ -340,23 +341,23 @@ module test(clk);
             // sign input sample is valid (should be able to do this at iCtr = 0)
             inValid <= 1'b1;
 
-            $display("inBytesRead: %d", inBytesRead);
+            //$display("inBytesRead: %d", inBytesRead);
 
             if ((inBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more bytes");
+              //$display("Reading more bytes");
 
               inIdx <= inIdx + 1;
               //if (!($eof(instream))) $get(instream, inBuf);
 
-              $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
-                   inBuf[inIdx][255:224],
-                   inBuf[inIdx][223:192],
-                   inBuf[inIdx][191:160],
-                   inBuf[inIdx][159:128],
-                   inBuf[inIdx][127:96],
-                   inBuf[inIdx][95:64],
-                   inBuf[inIdx][63:32],
-                   inBuf[inIdx][31:0]);
+              //$display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
+              //     inBuf[inIdx][255:224],
+              //     inBuf[inIdx][223:192],
+              //     inBuf[inIdx][191:160],
+              //     inBuf[inIdx][159:128],
+              //     inBuf[inIdx][127:96],
+              //     inBuf[inIdx][95:64],
+              //     inBuf[inIdx][63:32],
+              //     inBuf[inIdx][31:0]);
             end // if ((inBytesRead % BUFFER_BYTES) == 0)
 
             // Transition to next state
@@ -378,7 +379,7 @@ module test(clk);
         if (iCtr == 0) begin 
           sampCount <= sampCount + 1;
           //inByteInc <= 0;
-          $display("Sample count: %d", sampCount);
+          //$display("Sample count: %d", sampCount);
 
         end
 
@@ -412,14 +413,14 @@ module test(clk);
             26: intmp <= inBuf[inIdx][47:40];
             28: intmp <= inBuf[inIdx][31:24];
             30: intmp <= inBuf[inIdx][15:8];
-            default: $display("Unexpected value");
-
+            default: begin//$display("Unexpected value");
+            end
           endcase // case (inBytesRead % BUFFER_BYTES)
 
 
 
           inBytesRead <= (sampCount << 1) + 1;
-          $display("inbytesread; %d", inBytesRead);
+          //$display("inbytesread; %d", inBytesRead);
 
           //if (!inByteInc) begin
           //  inBytesRead <= inBytesRead + 1;
@@ -480,21 +481,21 @@ module test(clk);
         encIdx <= 0;
 
         if (!rst) begin
-          $display("getting first enc byte");
+          //$display("getting first enc byte");
 
           //$get(encstream, enctmp);
           enctmp <= encBuf[encIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           encBytesRead <= encBytesRead + 1;
 
-          $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
-                   encBuf[encIdx][255:224],
-                   encBuf[encIdx][223:192],
-                   encBuf[encIdx][191:160],
-                   encBuf[encIdx][159:128],
-                   encBuf[encIdx][127:96],
-                   encBuf[encIdx][95:64],
-                   encBuf[encIdx][63:32],
-                   encBuf[encIdx][31:0]);
+          //$display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
+          //         encBuf[encIdx][255:224],
+          //         encBuf[encIdx][223:192],
+          //         encBuf[encIdx][191:160],
+          //         encBuf[encIdx][159:128],
+          //         encBuf[encIdx][127:96],
+          //         encBuf[encIdx][95:64],
+          //         encBuf[encIdx][63:32],
+          //         encBuf[encIdx][31:0]);
 
 
           eCtr <= 0;
@@ -511,7 +512,7 @@ module test(clk);
       ENC2: begin
         //if ($eof(encstream)) begin
         if (encBytesRead >= TOTAL_ENC_BYTES) begin
-          $display("Reached eof of encryption file");
+          //$display("Reached eof of encryption file");
           eCtr <= 0;
           encState <= ENC4;
         end
@@ -538,9 +539,9 @@ module test(clk);
         if (encPcm != encExpVal) begin 
           // announce error detection and exit simulation
           if (eCtr == 0) begin
-            $display(" Error!");
-            $display("Error found in encoder output index %d.", encCount+1);
-            $display("   (expected value 'h%h, got value 'h%h)", encExpVal, encPcm);
+            //$display(" Error!");
+            //$display("Error found in encoder output index %d.", encCount+1);
+            //$display("   (expected value 'h%h, got value 'h%h)", encExpVal, encPcm);
           end
 
           // wait for a few clock cycles before ending simulation 
@@ -549,7 +550,7 @@ module test(clk);
         end // if (encPcm != encExpVal)
 
         else begin
-          $display("encoder output correct. expected %h, got %h", encExpVal, encPcm);
+          //$display("encoder output correct. expected %h, got %h", encExpVal, encPcm);
           // update the encoded sample counter 
           if (eCtr == 0) encCount <= encCount + 1;
           // delay for a clock cycle after comparison 
@@ -593,8 +594,8 @@ module test(clk);
               29: enctmp <= encBuf[encIdx][23:16];
               30: enctmp <= encBuf[encIdx][15:8];
               31: enctmp <= encBuf[encIdx][7:0];
-              default: $display("Unexpected value when filling in enctmp");
-
+              default: begin //$display("Unexpected value when filling in enctmp");
+              end
             endcase // case (encBytesRead % BUFFER_BYTES)
             //$get(encstream, enctmp);
 
@@ -602,22 +603,22 @@ module test(clk);
           end // if (eCtr == 1)
 
           if (eCtr == 2) begin
-            $display("encBytesRead: %d", encBytesRead);
+            //$display("encBytesRead: %d", encBytesRead);
 
 
             if ((encBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more enc bytes\n");
+              //$display("Reading more enc bytes\n");
               encIdx <= encIdx + 1;
 
-              $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
-                   encBuf[encIdx][255:224],
-                   encBuf[encIdx][223:192],
-                   encBuf[encIdx][191:160],
-                   encBuf[encIdx][159:128],
-                   encBuf[encIdx][127:96],
-                   encBuf[encIdx][95:64],
-                   encBuf[encIdx][63:32],
-                   encBuf[encIdx][31:0]);
+              //$display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
+              //     encBuf[encIdx][255:224],
+              //     encBuf[encIdx][223:192],
+              //     encBuf[encIdx][191:160],
+              //     encBuf[encIdx][159:128],
+              //     encBuf[encIdx][127:96],
+              //     encBuf[encIdx][95:64],
+              //     encBuf[encIdx][63:32],
+              //     encBuf[encIdx][31:0]);
             end // if ((encBytesRead % BUFFER_BYTES) == 0)
             
             eCtr <= 0;
@@ -677,7 +678,7 @@ module test(clk);
         //while (rst) @(posedge clock);
 
         if (!rst) begin
-          $display("Grabbing first dec byte");
+          //$display("Grabbing first dec byte");
           // decoder output compare loop
           
           //dectmp = $fgetc(decstream);
@@ -686,15 +687,15 @@ module test(clk);
           dectmp <= decBuf[decIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           decBytesRead <= decBytesRead + 1;
 
-                   $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
-                   decBuf[decIdx][255:224],
-                   decBuf[decIdx][223:192],
-                   decBuf[decIdx][191:160],
-                   decBuf[decIdx][159:128],
-                   decBuf[decIdx][127:96],
-                   decBuf[decIdx][95:64],
-                   decBuf[decIdx][63:32],
-                   decBuf[decIdx][31:0]);
+                   //$display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
+                   //decBuf[decIdx][255:224],
+                   //decBuf[decIdx][223:192],
+                   //decBuf[decIdx][191:160],
+                   //decBuf[decIdx][159:128],
+                   //decBuf[decIdx][127:96],
+                   //decBuf[decIdx][95:64],
+                   //decBuf[decIdx][63:32],
+                   //decBuf[decIdx][31:0]);
 
 
           dCtr <= 0;
@@ -707,7 +708,7 @@ module test(clk);
         //$write("Simulation progress: ");
         //if ($eof(decstream)) begin
         if (decBytesRead >= TOTAL_DEC_BYTES) begin
-          $display("Reached eof of dec file");
+          //$display("Reached eof of dec file");
           dCtr <= 0;
           decState <= DEC4;
         end
@@ -741,30 +742,30 @@ module test(clk);
               27: decExpVal[15:8] <= decBuf[decIdx][39:32];
               29: decExpVal[15:8] <= decBuf[decIdx][23:16];
               31: decExpVal[15:8] <= decBuf[decIdx][7:0];
-              default: $display("Unexpected number of bytes read for decExpVal");
-
+              default: begin//$display("Unexpected number of bytes read for decExpVal");
+              end
             endcase // case (inBytesRead % BUFFER_BYTES)
 
             decBytesRead <= decBytesRead + 1;
-            $display("decBytesRead: %d", decBytesRead);
+            //$display("decBytesRead: %d", decBytesRead);
            
           end // if (dCtr == 0)
 
           if (dCtr == 1) begin
             if ((decBytesRead % BUFFER_BYTES) == 0) begin
-              $display("Reading more dec bytes");
+              //$display("Reading more dec bytes");
               decIdx <= decIdx + 1;
 
               
-                   $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
-                   decBuf[decIdx][255:224],
-                   decBuf[decIdx][223:192],
-                   decBuf[decIdx][191:160],
-                   decBuf[decIdx][159:128],
-                   decBuf[decIdx][127:96],
-                   decBuf[decIdx][95:64],
-                   decBuf[decIdx][63:32],
-                   decBuf[decIdx][31:0]);
+                   //$display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
+                   //decBuf[decIdx][255:224],
+                   //decBuf[decIdx][223:192],
+                   //decBuf[decIdx][191:160],
+                   //decBuf[decIdx][159:128],
+                   //decBuf[decIdx][127:96],
+                   //decBuf[decIdx][95:64],
+                   //decBuf[decIdx][63:32],
+                   //decBuf[decIdx][31:0]);
 
               
             end
@@ -788,9 +789,9 @@ module test(clk);
         if (decSamp != decExpVal) begin
           if (dCtr == 0) begin
             // announce error detection and exit simulation 
-            $display(" Error!");
-            $display("Error found in decoder output index %d.", decCount+1);
-            $display("   (expected value 'h%h, got value 'h%h)", decExpVal, decSamp);
+            //$display(" Error!");
+            //$display("Error found in decoder output index %d.", decCount+1);
+            //$display("   (expected value 'h%h, got value 'h%h)", decExpVal, decSamp);
           end
 
           // wait for a few clock cycles before ending simulation 
@@ -801,7 +802,7 @@ module test(clk);
         end // if (decSamp != decExpVal)
         
         else begin
-          $display("Dec correct! expected: %h, got: %h", decExpVal, decSamp);
+          //$display("Dec correct! expected: %h, got: %h", decExpVal, decSamp);
 
           // delay for a clock cycle after comparison 
           //@(posedge clock);
@@ -837,8 +838,8 @@ module test(clk);
               26: dectmp <= decBuf[decIdx][47:40];
               28: dectmp <= decBuf[decIdx][31:24];
               30: dectmp <= decBuf[decIdx][15:8];
-              default: $display("Unexpected value");
-
+              default: begin//$display("Unexpected value");
+              end
             endcase // case (inBytesRead % BUFFER_BYTES)
 
 
@@ -847,7 +848,7 @@ module test(clk);
           end // if (dCtr == 1)
 
           if (dCtr == 2) begin
-            $display("decbytesread; %d", decBytesRead);
+            //$display("decbytesread; %d", decBytesRead);
 
             dCtr <= 0;
             decState <= DEC2;
@@ -861,8 +862,8 @@ module test(clk);
         //$fclose(decstream);
 
         // when decoder output is done announce simulation was successful 
-        $display(" Done");
-        $display("Simulation ended successfully after %0d samples", decCount);
+        //$display(" Done");
+        //$display("Simulation ended successfully after %0d samples", decCount);
         //$finish;
         decDone <= 1;
 
