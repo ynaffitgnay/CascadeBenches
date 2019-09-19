@@ -34,15 +34,14 @@
 
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-include fpu_pri_encoder.v;
-include fpu_exceptions.v;
-include fpu_round.v;
-include fpu_add.v;
-include fpu_sub.v;
-include fpu_mul.v;
-include fpu_div.v;
-include fpu_double.v;
-
+`include "fpu_pri_encoder.v"
+`include "fpu_exceptions.v"
+`include "fpu_round.v"
+`include "fpu_add.v"
+`include "fpu_sub.v"
+`include "fpu_mul.v"
+`include "fpu_div.v"
+`include "fpu_double.v"
 
 module fpu_tb( clk );
   input wire clk;
