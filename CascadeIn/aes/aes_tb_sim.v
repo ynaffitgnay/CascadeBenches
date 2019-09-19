@@ -57,16 +57,15 @@
 //
 // Refactored April 2019 for Cascade compatibility by Tiffany Yang
 
-include aes_pmul.v;
-include aes_mix_col.v;
-include aes_inv_mix_col.v;
-include aes_inv_sbox.v;
-include aes_sbox.v;
-include aes_rcon.v;
-include aes_key_expand_128.v;
-include aes_cipher_top.v;
-include aes_inv_cipher_top.v;
-
+`include "aes_pmul.v"
+`include "aes_mix_col.v"
+`include "aes_inv_mix_col.v"
+`include "aes_inv_sbox.v"
+`include "aes_sbox.v"
+`include "aes_rcon.v"
+`include "aes_key_expand_128.v"
+`include "aes_cipher_top.v"
+`include "aes_inv_cipher_top.v"
 
 module test(clk);
   input wire clk;
