@@ -26,4 +26,4 @@ module fpu_pri_encoder#(
   end
 
 
-endmodule; // fpu_pri_encoder
+endmodule // fpu_pri_encoder
