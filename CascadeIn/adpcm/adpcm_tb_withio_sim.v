@@ -105,7 +105,7 @@ module test(clk);
   reg[15:0] inIdx, encIdx, decIdx;
 
   // Buffers to hold file content
-  reg[(BUFFER_BYTES << 3) - 1:0] inBuf [(TOTAL_IN_BYTES / BUFFER_BYTES) - 1:0];
+  //reg[(BUFFER_BYTES << 3) - 1:0] inBuf [(TOTAL_IN_BYTES / BUFFER_BYTES) - 1:0];
   reg[(BUFFER_BYTES << 3) - 1:0] encBuf [(TOTAL_ENC_BYTES / BUFFER_BYTES) - 1:0];
   reg[(BUFFER_BYTES << 3) - 1:0] decBuf [(TOTAL_DEC_BYTES / BUFFER_BYTES) - 1:0];
   reg[31:0] inBytesRead, encBytesRead, decBytesRead;
@@ -146,27 +146,31 @@ module test(clk);
     decState = 0;
 
     // Fill the input buffer
-    for (inIdx = 0; inIdx < (TOTAL_IN_BYTES / BUFFER_BYTES); inIdx = inIdx + 1) begin
-      if (!($feof(instream))) $fread(instream, inVal);
-      //$display("i: %d", inIdx);
     
-      inBuf[inIdx] <= inVal;
-    end
-
+    //for (inIdx = 0; inIdx < (TOTAL_IN_BYTES / BUFFER_BYTES); inIdx = inIdx + 1) begin
+    //  if (!($feof(instream))) $fread(instream, inVal);
+    //  //$display("i: %d", inIdx);
+    //
+    //  inBuf[inIdx] <= inVal;
+    //end
+    //
     for (encIdx = 0; encIdx < (TOTAL_ENC_BYTES / BUFFER_BYTES); encIdx = encIdx + 1) begin
       if (!($feof(encstream))) $fread(encstream, encVal);
       //$display("e: %d", encIdx);
     
       encBuf[encIdx] <= encVal;
     end
-
+    
     for (decIdx = 0; decIdx < (TOTAL_DEC_BYTES / BUFFER_BYTES); decIdx = decIdx + 1) begin
       if (!($feof(decstream))) $fread(decstream, decVal);
       //$display("d: %d", decIdx);
     
       decBuf[decIdx] <= decVal;
     end
-    
+
+    //$fread(instream, inVal);
+    //$fread(encstream, encVal);
+    //$fread(decstream, decVal);
 
     $display("Done initializing");
 
@@ -241,8 +245,12 @@ module test(clk);
         sampCount <= 0;
         inBytesRead <= 0;
 
-        // binary input file 
-        //if (iCtr == 0) $seek(instream, 0);
+        // binary input file
+        if (iCtr == 0) begin
+          $rewind(instream);
+          $fread(instream, inVal);
+        end
+
         inIdx <= 0;
 
         if (!rst) begin
@@ -259,18 +267,18 @@ module test(clk);
           //$get(instream, inBuf);
           //intmp = $fgetc(instream);
 
-          intmp <= inBuf[inIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
+          intmp <= inVal[(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           inBytesRead <= inBytesRead + 1;
 
           $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
-                   inBuf[inIdx][255:224],
-                   inBuf[inIdx][223:192],
-                   inBuf[inIdx][191:160],
-                   inBuf[inIdx][159:128],
-                   inBuf[inIdx][127:96],
-                   inBuf[inIdx][95:64],
-                   inBuf[inIdx][63:32],
-                   inBuf[inIdx][31:0]);
+                   inVal[255:224],
+                   inVal[223:192],
+                   inVal[191:160],
+                   inVal[159:128],
+                   inVal[127:96],
+                   inVal[95:64],
+                   inVal[63:32],
+                   inVal[31:0]);
 
 
           iCtr <= 0;
@@ -285,8 +293,8 @@ module test(clk);
         // Stop looping through inputs if eof
 
         // TODO: NEED TO FIX BHVR OF EOF. REPLACE WITH BYTES_READ
-        //if ($eof(instream)) begin
-        if (inBytesRead >= TOTAL_IN_BYTES) begin
+        if ($feof(instream)) begin
+        //if (inBytesRead >= TOTAL_IN_BYTES) begin
           $display("Reached eof");
 
           iCtr <= 0;
@@ -306,22 +314,22 @@ module test(clk);
             //$get(instream, inReg);
 
             case (inBytesRead % BUFFER_BYTES)
-              1:  inSamp[15:8] <= inBuf[inIdx][247:240];
-              3:  inSamp[15:8] <= inBuf[inIdx][231:224];
-              5:  inSamp[15:8] <= inBuf[inIdx][215:208];
-              7:  inSamp[15:8] <= inBuf[inIdx][199:192];
-              9:  inSamp[15:8] <= inBuf[inIdx][183:176];
-              11: inSamp[15:8] <= inBuf[inIdx][167:160];
-              13: inSamp[15:8] <= inBuf[inIdx][151:144];
-              15: inSamp[15:8] <= inBuf[inIdx][135:128];
-              17: inSamp[15:8] <= inBuf[inIdx][119:112];
-              19: inSamp[15:8] <= inBuf[inIdx][103:96];
-              21: inSamp[15:8] <= inBuf[inIdx][87:80];
-              23: inSamp[15:8] <= inBuf[inIdx][71:64];
-              25: inSamp[15:8] <= inBuf[inIdx][55:48];
-              27: inSamp[15:8] <= inBuf[inIdx][39:32];
-              29: inSamp[15:8] <= inBuf[inIdx][23:16];
-              31: inSamp[15:8] <= inBuf[inIdx][7:0];
+              1:  inSamp[15:8] <= inVal[247:240];
+              3:  inSamp[15:8] <= inVal[231:224];
+              5:  inSamp[15:8] <= inVal[215:208];
+              7:  inSamp[15:8] <= inVal[199:192];
+              9:  inSamp[15:8] <= inVal[183:176];
+              11: inSamp[15:8] <= inVal[167:160];
+              13: inSamp[15:8] <= inVal[151:144];
+              15: inSamp[15:8] <= inVal[135:128];
+              17: inSamp[15:8] <= inVal[119:112];
+              19: inSamp[15:8] <= inVal[103:96];
+              21: inSamp[15:8] <= inVal[87:80];
+              23: inSamp[15:8] <= inVal[71:64];
+              25: inSamp[15:8] <= inVal[55:48];
+              27: inSamp[15:8] <= inVal[39:32];
+              29: inSamp[15:8] <= inVal[23:16];
+              31: inSamp[15:8] <= inVal[7:0];
               default: $display("Unexpected number of bytes read for inSamp");
 
             endcase // case (inBytesRead % BUFFER_BYTES)
@@ -337,19 +345,18 @@ module test(clk);
 
             if ((inBytesRead % BUFFER_BYTES) == 0) begin
               //$display("Reading more bytes");
-
               inIdx <= inIdx + 1;
-              //if (!($eof(instream))) $get(instream, inBuf);
+              if (!($feof(instream))) $fread(instream, inVal);
 
               $display("inBuf[%d] = %h%h%h%h%h%h%h%h", inIdx, 
-                   inBuf[inIdx][255:224],
-                   inBuf[inIdx][223:192],
-                   inBuf[inIdx][191:160],
-                   inBuf[inIdx][159:128],
-                   inBuf[inIdx][127:96],
-                   inBuf[inIdx][95:64],
-                   inBuf[inIdx][63:32],
-                   inBuf[inIdx][31:0]);
+                   inVal[255:224],
+                   inVal[223:192],
+                   inVal[191:160],
+                   inVal[159:128],
+                   inVal[127:96],
+                   inVal[95:64],
+                   inVal[63:32],
+                   inVal[31:0]);
             end // if ((inBytesRead % BUFFER_BYTES) == 0)
 
             // Transition to next state
@@ -389,22 +396,22 @@ module test(clk);
           //$get(instream, intmp);
           
           case (inBytesRead % BUFFER_BYTES)
-            0:  intmp <= inBuf[inIdx][255:248];
-            2:  intmp <= inBuf[inIdx][239:232];
-            4:  intmp <= inBuf[inIdx][223:216];
-            6:  intmp <= inBuf[inIdx][207:200];
-            8:  intmp <= inBuf[inIdx][191:184];
-            10: intmp <= inBuf[inIdx][175:168];
-            12: intmp <= inBuf[inIdx][159:152];
-            14: intmp <= inBuf[inIdx][143:136];
-            16: intmp <= inBuf[inIdx][127:120];
-            18: intmp <= inBuf[inIdx][111:104];
-            20: intmp <= inBuf[inIdx][95:88];
-            22: intmp <= inBuf[inIdx][79:72];
-            24: intmp <= inBuf[inIdx][63:56];
-            26: intmp <= inBuf[inIdx][47:40];
-            28: intmp <= inBuf[inIdx][31:24];
-            30: intmp <= inBuf[inIdx][15:8];
+            0:  intmp <= inVal[255:248];
+            2:  intmp <= inVal[239:232];
+            4:  intmp <= inVal[223:216];
+            6:  intmp <= inVal[207:200];
+            8:  intmp <= inVal[191:184];
+            10: intmp <= inVal[175:168];
+            12: intmp <= inVal[159:152];
+            14: intmp <= inVal[143:136];
+            16: intmp <= inVal[127:120];
+            18: intmp <= inVal[111:104];
+            20: intmp <= inVal[95:88];
+            22: intmp <= inVal[79:72];
+            24: intmp <= inVal[63:56];
+            26: intmp <= inVal[47:40];
+            28: intmp <= inVal[31:24];
+            30: intmp <= inVal[15:8];
             default: $display("Unexpected value");
 
           endcase // case (inBytesRead % BUFFER_BYTES)
