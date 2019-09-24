@@ -42,9 +42,9 @@ module test(clk);
   //parameter TOTAL_DEC_BYTES = 348160;
 
   // Truncated for development
-  parameter TOTAL_IN_BYTES = 10880;
-  parameter TOTAL_ENC_BYTES = 5440;
-  parameter TOTAL_DEC_BYTES = 10880;
+  //parameter TOTAL_IN_BYTES = 10880;
+  //parameter TOTAL_ENC_BYTES = 5440;
+  //parameter TOTAL_DEC_BYTES = 10880;
  
   parameter MAIN0 = 0;
   parameter MAIN1 = 1;
@@ -69,7 +69,7 @@ module test(clk);
   parameter DEC3 = 3;
   parameter DEC4 = 4;
 
-  parameter TESTS_TO_RUN = 1;
+  parameter TESTS_TO_RUN = 2;
 
   input wire clk;
 
@@ -106,8 +106,8 @@ module test(clk);
 
   // Buffers to hold file content
   //reg[(BUFFER_BYTES << 3) - 1:0] inBuf [(TOTAL_IN_BYTES / BUFFER_BYTES) - 1:0];
-  reg[(BUFFER_BYTES << 3) - 1:0] encBuf [(TOTAL_ENC_BYTES / BUFFER_BYTES) - 1:0];
-  reg[(BUFFER_BYTES << 3) - 1:0] decBuf [(TOTAL_DEC_BYTES / BUFFER_BYTES) - 1:0];
+  //reg[(BUFFER_BYTES << 3) - 1:0] encBuf [(TOTAL_ENC_BYTES / BUFFER_BYTES) - 1:0];
+  //reg[(BUFFER_BYTES << 3) - 1:0] decBuf [(TOTAL_DEC_BYTES / BUFFER_BYTES) - 1:0];
   reg[31:0] inBytesRead, encBytesRead, decBytesRead;
  
 
@@ -154,19 +154,19 @@ module test(clk);
     //  inBuf[inIdx] <= inVal;
     //end
     //
-    for (encIdx = 0; encIdx < (TOTAL_ENC_BYTES / BUFFER_BYTES); encIdx = encIdx + 1) begin
-      if (!($feof(encstream))) $fread(encstream, encVal);
-      //$display("e: %d", encIdx);
+    //for (encIdx = 0; encIdx < (TOTAL_ENC_BYTES / BUFFER_BYTES); encIdx = encIdx + 1) begin
+    //  if (!($feof(encstream))) $fread(encstream, encVal);
+    //  //$display("e: %d", encIdx);
+    //
+    //  encBuf[encIdx] <= encVal;
+    //end
     
-      encBuf[encIdx] <= encVal;
-    end
-    
-    for (decIdx = 0; decIdx < (TOTAL_DEC_BYTES / BUFFER_BYTES); decIdx = decIdx + 1) begin
-      if (!($feof(decstream))) $fread(decstream, decVal);
-      //$display("d: %d", decIdx);
-    
-      decBuf[decIdx] <= decVal;
-    end
+    //for (decIdx = 0; decIdx < (TOTAL_DEC_BYTES / BUFFER_BYTES); decIdx = decIdx + 1) begin
+    //  if (!($feof(decstream))) $fread(decstream, decVal);
+    //  //$display("d: %d", decIdx);
+    //
+    //  decBuf[decIdx] <= decVal;
+    //end
 
     //$fread(instream, inVal);
     //$fread(encstream, encVal);
@@ -476,25 +476,29 @@ module test(clk);
         
         // open input file 
         //encstream = $fopen(`ENC_FILE, "rb");
-        //if (eCtr == 0) $seek(encstream, 0);
+        if (eCtr == 0) begin
+          $rewind(encstream);
+          $fread(encstream, encVal);
+        end
+
         encIdx <= 0;
 
         if (!rst) begin
           $display("getting first enc byte");
 
           //$get(encstream, enctmp);
-          enctmp <= encBuf[encIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
+          enctmp <= encVal[(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           encBytesRead <= encBytesRead + 1;
 
           $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx, 
-                   encBuf[encIdx][255:224],
-                   encBuf[encIdx][223:192],
-                   encBuf[encIdx][191:160],
-                   encBuf[encIdx][159:128],
-                   encBuf[encIdx][127:96],
-                   encBuf[encIdx][95:64],
-                   encBuf[encIdx][63:32],
-                   encBuf[encIdx][31:0]);
+                   encVal[255:224],
+                   encVal[223:192],
+                   encVal[191:160],
+                   encVal[159:128],
+                   encVal[127:96],
+                   encVal[95:64],
+                   encVal[63:32],
+                   encVal[31:0]);
 
 
           eCtr <= 0;
@@ -509,8 +513,7 @@ module test(clk);
       // encoder output compare loop 
       //enctmp = $fgetc(encstream);
       ENC2: begin
-        //if ($eof(encstream)) begin
-        if (encBytesRead >= TOTAL_ENC_BYTES) begin
+        if ($feof(encstream)) begin
           $display("Reached eof of encryption file");
           eCtr <= 0;
           encState <= ENC4;
@@ -561,38 +564,38 @@ module test(clk);
 
             
             case (encBytesRead % BUFFER_BYTES)
-              0:  enctmp <= encBuf[encIdx][255:248];
-              1:  enctmp <= encBuf[encIdx][247:240];
-              2:  enctmp <= encBuf[encIdx][239:232];
-              3:  enctmp <= encBuf[encIdx][231:224];
-              4:  enctmp <= encBuf[encIdx][223:216];
-              5:  enctmp <= encBuf[encIdx][215:208];
-              6:  enctmp <= encBuf[encIdx][207:200];
-              7:  enctmp <= encBuf[encIdx][199:192];
-              8:  enctmp <= encBuf[encIdx][191:184];
-              9:  enctmp <= encBuf[encIdx][183:176];
-              10: enctmp <= encBuf[encIdx][175:168];
-              11: enctmp <= encBuf[encIdx][167:160];
-              12: enctmp <= encBuf[encIdx][159:152];
-              13: enctmp <= encBuf[encIdx][151:144];
-              14: enctmp <= encBuf[encIdx][143:136];
-              15: enctmp <= encBuf[encIdx][135:128];
-              16: enctmp <= encBuf[encIdx][127:120];
-              17: enctmp <= encBuf[encIdx][119:112];
-              18: enctmp <= encBuf[encIdx][111:104];
-              19: enctmp <= encBuf[encIdx][103:96];
-              20: enctmp <= encBuf[encIdx][95:88];
-              21: enctmp <= encBuf[encIdx][87:80];
-              22: enctmp <= encBuf[encIdx][79:72];
-              23: enctmp <= encBuf[encIdx][71:64];
-              24: enctmp <= encBuf[encIdx][63:56];
-              25: enctmp <= encBuf[encIdx][55:48];
-              26: enctmp <= encBuf[encIdx][47:40];
-              27: enctmp <= encBuf[encIdx][39:32];
-              28: enctmp <= encBuf[encIdx][31:24];
-              29: enctmp <= encBuf[encIdx][23:16];
-              30: enctmp <= encBuf[encIdx][15:8];
-              31: enctmp <= encBuf[encIdx][7:0];
+              0:  enctmp <= encVal[255:248];
+              1:  enctmp <= encVal[247:240];
+              2:  enctmp <= encVal[239:232];
+              3:  enctmp <= encVal[231:224];
+              4:  enctmp <= encVal[223:216];
+              5:  enctmp <= encVal[215:208];
+              6:  enctmp <= encVal[207:200];
+              7:  enctmp <= encVal[199:192];
+              8:  enctmp <= encVal[191:184];
+              9:  enctmp <= encVal[183:176];
+              10: enctmp <= encVal[175:168];
+              11: enctmp <= encVal[167:160];
+              12: enctmp <= encVal[159:152];
+              13: enctmp <= encVal[151:144];
+              14: enctmp <= encVal[143:136];
+              15: enctmp <= encVal[135:128];
+              16: enctmp <= encVal[127:120];
+              17: enctmp <= encVal[119:112];
+              18: enctmp <= encVal[111:104];
+              19: enctmp <= encVal[103:96];
+              20: enctmp <= encVal[95:88];
+              21: enctmp <= encVal[87:80];
+              22: enctmp <= encVal[79:72];
+              23: enctmp <= encVal[71:64];
+              24: enctmp <= encVal[63:56];
+              25: enctmp <= encVal[55:48];
+              26: enctmp <= encVal[47:40];
+              27: enctmp <= encVal[39:32];
+              28: enctmp <= encVal[31:24];
+              29: enctmp <= encVal[23:16];
+              30: enctmp <= encVal[15:8];
+              31: enctmp <= encVal[7:0];
               default: $display("Unexpected value when filling in enctmp");
 
             endcase // case (encBytesRead % BUFFER_BYTES)
@@ -608,16 +611,18 @@ module test(clk);
             if ((encBytesRead % BUFFER_BYTES) == 0) begin
               $display("Reading more enc bytes\n");
               encIdx <= encIdx + 1;
+              
+              if (!($feof(encstream))) $fread(encstream, encVal);
 
               $display("encBuf[%d] = %h%h%h%h%h%h%h%h", encIdx + 1, 
-                   encBuf[encIdx][255:224],
-                   encBuf[encIdx][223:192],
-                   encBuf[encIdx][191:160],
-                   encBuf[encIdx][159:128],
-                   encBuf[encIdx][127:96],
-                   encBuf[encIdx][95:64],
-                   encBuf[encIdx][63:32],
-                   encBuf[encIdx][31:0]);
+                   encVal[255:224],
+                   encVal[223:192],
+                   encVal[191:160],
+                   encVal[159:128],
+                   encVal[127:96],
+                   encVal[95:64],
+                   encVal[63:32],
+                   encVal[31:0]);
             end // if ((encBytesRead % BUFFER_BYTES) == 0)
             
             eCtr <= 0;
@@ -666,9 +671,13 @@ module test(clk);
 
         decBytesRead <= 0;
 
-        // open input file 
+        // open input file
         //decstream = $fopen(`DEC_FILE, "rb");
-        //if (dCtr == 0) $seek(decstream, 0);
+        if (dCtr == 0) begin
+          $rewind(decstream);
+          $fread(decstream, decVal);
+        end
+
         decIdx <= 0;
 
         
@@ -682,18 +691,18 @@ module test(clk);
           //dectmp = $fgetc(decstream);
           //$get(decstream, dectmp);
 
-          dectmp <= decBuf[decIdx][(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
+          dectmp <= decVal[(BUFFER_BYTES << 3) - 1:(BUFFER_BYTES << 3) - 8];
           decBytesRead <= decBytesRead + 1;
 
                    $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
-                   decBuf[decIdx][255:224],
-                   decBuf[decIdx][223:192],
-                   decBuf[decIdx][191:160],
-                   decBuf[decIdx][159:128],
-                   decBuf[decIdx][127:96],
-                   decBuf[decIdx][95:64],
-                   decBuf[decIdx][63:32],
-                   decBuf[decIdx][31:0]);
+                   decVal[255:224],
+                   decVal[223:192],
+                   decVal[191:160],
+                   decVal[159:128],
+                   decVal[127:96],
+                   decVal[95:64],
+                   decVal[63:32],
+                   decVal[31:0]);
 
 
           dCtr <= 0;
@@ -704,8 +713,8 @@ module test(clk);
       DEC2: begin
         // display simulation progress bar title 
         //$write("Simulation progress: ");
-        //if ($eof(decstream)) begin
-        if (decBytesRead >= TOTAL_DEC_BYTES) begin
+        if ($feof(decstream)) begin
+        //if (decBytesRead >= TOTAL_DEC_BYTES) begin
           $display("Reached eof of dec file");
           dCtr <= 0;
           decState <= DEC4;
@@ -724,22 +733,22 @@ module test(clk);
 
 
             case (decBytesRead % BUFFER_BYTES)
-              1:  decExpVal[15:8] <= decBuf[decIdx][247:240];
-              3:  decExpVal[15:8] <= decBuf[decIdx][231:224];
-              5:  decExpVal[15:8] <= decBuf[decIdx][215:208];
-              7:  decExpVal[15:8] <= decBuf[decIdx][199:192];
-              9:  decExpVal[15:8] <= decBuf[decIdx][183:176];
-              11: decExpVal[15:8] <= decBuf[decIdx][167:160];
-              13: decExpVal[15:8] <= decBuf[decIdx][151:144];
-              15: decExpVal[15:8] <= decBuf[decIdx][135:128];
-              17: decExpVal[15:8] <= decBuf[decIdx][119:112];
-              19: decExpVal[15:8] <= decBuf[decIdx][103:96];
-              21: decExpVal[15:8] <= decBuf[decIdx][87:80];
-              23: decExpVal[15:8] <= decBuf[decIdx][71:64];
-              25: decExpVal[15:8] <= decBuf[decIdx][55:48];
-              27: decExpVal[15:8] <= decBuf[decIdx][39:32];
-              29: decExpVal[15:8] <= decBuf[decIdx][23:16];
-              31: decExpVal[15:8] <= decBuf[decIdx][7:0];
+              1:  decExpVal[15:8] <= decVal[247:240];
+              3:  decExpVal[15:8] <= decVal[231:224];
+              5:  decExpVal[15:8] <= decVal[215:208];
+              7:  decExpVal[15:8] <= decVal[199:192];
+              9:  decExpVal[15:8] <= decVal[183:176];
+              11: decExpVal[15:8] <= decVal[167:160];
+              13: decExpVal[15:8] <= decVal[151:144];
+              15: decExpVal[15:8] <= decVal[135:128];
+              17: decExpVal[15:8] <= decVal[119:112];
+              19: decExpVal[15:8] <= decVal[103:96];
+              21: decExpVal[15:8] <= decVal[87:80];
+              23: decExpVal[15:8] <= decVal[71:64];
+              25: decExpVal[15:8] <= decVal[55:48];
+              27: decExpVal[15:8] <= decVal[39:32];
+              29: decExpVal[15:8] <= decVal[23:16];
+              31: decExpVal[15:8] <= decVal[7:0];
               default: $display("Unexpected number of bytes read for decExpVal");
 
             endcase // case (inBytesRead % BUFFER_BYTES)
@@ -752,20 +761,20 @@ module test(clk);
           if (dCtr == 1) begin
             if ((decBytesRead % BUFFER_BYTES) == 0) begin
               $display("Reading more dec bytes");
+              
               decIdx <= decIdx + 1;
+              if (!($feof(decstream))) $fread(decstream, decVal);
 
               
-                   $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
-                   decBuf[decIdx][255:224],
-                   decBuf[decIdx][223:192],
-                   decBuf[decIdx][191:160],
-                   decBuf[decIdx][159:128],
-                   decBuf[decIdx][127:96],
-                   decBuf[decIdx][95:64],
-                   decBuf[decIdx][63:32],
-                   decBuf[decIdx][31:0]);
-
-              
+              $display("decBuf[%d] = %h%h%h%h%h%h%h%h", decIdx, 
+                   decVal[255:224],
+                   decVal[223:192],
+                   decVal[191:160],
+                   decVal[159:128],
+                   decVal[127:96],
+                   decVal[95:64],
+                   decVal[63:32],
+                   decVal[31:0]);
             end
 
           end
@@ -820,22 +829,22 @@ module test(clk);
             //$get(decstream, dectmp);
 
             case (decBytesRead % BUFFER_BYTES)
-              0:  dectmp <= decBuf[decIdx][255:248];
-              2:  dectmp <= decBuf[decIdx][239:232];
-              4:  dectmp <= decBuf[decIdx][223:216];
-              6:  dectmp <= decBuf[decIdx][207:200];
-              8:  dectmp <= decBuf[decIdx][191:184];
-              10: dectmp <= decBuf[decIdx][175:168];
-              12: dectmp <= decBuf[decIdx][159:152];
-              14: dectmp <= decBuf[decIdx][143:136];
-              16: dectmp <= decBuf[decIdx][127:120];
-              18: dectmp <= decBuf[decIdx][111:104];
-              20: dectmp <= decBuf[decIdx][95:88];
-              22: dectmp <= decBuf[decIdx][79:72];
-              24: dectmp <= decBuf[decIdx][63:56];
-              26: dectmp <= decBuf[decIdx][47:40];
-              28: dectmp <= decBuf[decIdx][31:24];
-              30: dectmp <= decBuf[decIdx][15:8];
+              0:  dectmp <= decVal[255:248];
+              2:  dectmp <= decVal[239:232];
+              4:  dectmp <= decVal[223:216];
+              6:  dectmp <= decVal[207:200];
+              8:  dectmp <= decVal[191:184];
+              10: dectmp <= decVal[175:168];
+              12: dectmp <= decVal[159:152];
+              14: dectmp <= decVal[143:136];
+              16: dectmp <= decVal[127:120];
+              18: dectmp <= decVal[111:104];
+              20: dectmp <= decVal[95:88];
+              22: dectmp <= decVal[79:72];
+              24: dectmp <= decVal[63:56];
+              26: dectmp <= decVal[47:40];
+              28: dectmp <= decVal[31:24];
+              30: dectmp <= decVal[15:8];
               default: $display("Unexpected value");
 
             endcase // case (inBytesRead % BUFFER_BYTES)
