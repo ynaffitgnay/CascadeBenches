@@ -78,7 +78,7 @@ module ima_adpcm_dec (
   //---------------------------------------------------------------------------------------
   // module implementation 
   // main decoder process 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock) begin
     if (reset) begin 
       predictorSamp <= 19'b0;
       predValid <= 1'b0;
@@ -120,7 +120,7 @@ module ima_adpcm_dec (
   assign preOutSamp = {predictorSamp[18], predictorSamp[18:3]} + predictorSamp[2];
 
   // output interface 
-  always @ (posedge clock or posedge reset) begin
+  always @ (posedge clock) begin
     if (reset) begin 
       outSamp <= 16'b0;
       outValid <= 1'b0;
@@ -139,7 +139,7 @@ module ima_adpcm_dec (
       outValid <= 1'b1;
     end else 
       outValid <= 1'b0;
-  end // always @ (posedge clock or posedge reset)
+  end // always @ (posedge clock)
 
   // quantizer index adaptation lookup table 
   always @ (inPCM) begin 
@@ -158,7 +158,7 @@ module ima_adpcm_dec (
   assign preStepIndex = {1'b0, stepIndex} + {{3{stepDelta[4]}}, stepDelta};
 
   // update the step index with saturation checking 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock) begin
     if (reset)
       stepIndex <= 7'b0;
     else if (inStateLoad)
