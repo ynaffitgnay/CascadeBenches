@@ -81,7 +81,7 @@ module ima_adpcm_enc (
   //---------------------------------------------------------------------------------------
   // module implementation 
   // encoder main control process 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock) begin
     if (reset) begin 
       pcmSq <= 3'b0;
       sampDiff <= 20'b0;
@@ -218,7 +218,7 @@ module ima_adpcm_enc (
   end  
 
   // output interface 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock) begin
     if (reset) begin 
       outPCM <= 4'b0;
       outValid <= 1'b0;
@@ -246,7 +246,7 @@ module ima_adpcm_enc (
   assign preStepIndex = {1'b0, stepIndex} + {{3{stepDelta[4]}}, stepDelta};
 
   // update the step index with saturation checking 
-  always @ (posedge clock or posedge reset) begin 
+  always @ (posedge clock) begin
     if (reset)
       stepIndex <= 7'b0;
     else if (pcmSq == PCM_DONE) begin 
