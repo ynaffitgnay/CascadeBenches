@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------------------
 //  Project:  ADPCM Decoder 
 // 
-//  Filename:  ima_adpcm_enc.v      (February 19, 2010)
+//  Filename:  ima_adpcm_dec.v      (February 19, 2010)
 // 
 //  Author(s):  Moti Litochevski 
 // 

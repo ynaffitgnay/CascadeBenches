@@ -60,7 +60,7 @@ module test(clk);
   parameter DEC3 = 3;
   parameter DEC4 = 4;
 
-  parameter TESTS_TO_RUN = 10000000000;
+  parameter TESTS_TO_RUN = 20;
 
   input wire clk;
 
