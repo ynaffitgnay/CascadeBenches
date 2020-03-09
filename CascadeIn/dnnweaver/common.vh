@@ -42,6 +42,9 @@
 `define PRECISION_OP   16
 `define PRECISION_ACC   48
 `define PRECISION_FRAC   0
+`define ceil_a_by_b(a,b)  (a < b ? 1 : a % b == 0 ? a/b : a/b+1) 
+`define floor_a_by_b(a,b) (a < b ? 0 : a/b)
+
 /*
 // ==================================================================
   function integer ceil_a_by_b;
