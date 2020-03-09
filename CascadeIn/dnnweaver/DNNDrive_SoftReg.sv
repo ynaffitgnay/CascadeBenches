@@ -152,7 +152,7 @@ module DNNDrive_SoftReg #(
     // Dont need the SoftReg interface
     //assign softreg_resp = '{valid: 1'b0, data: 0};
     
-	// copied from memdrive
+    // copied from memdrive
     // clk and debug counter
     wire[63:0] clk_counter;
 
@@ -209,10 +209,10 @@ module DNNDrive_SoftReg #(
     always_comb begin
         new_read_resp_credit_cnt = read_resp_credit_cnt;
         if (incoming_req_is_read && !decr_read_resp_credit_cnt) begin
-			$display("Cycle %d DNNDrive %d: Gained response credit", clk_counter, srcApp);
+      $display("Cycle %d DNNDrive %d: Gained response credit", clk_counter, srcApp);
             new_read_resp_credit_cnt = read_resp_credit_cnt + 1;
         end else if (!incoming_req_is_read && decr_read_resp_credit_cnt) begin
-			$display("Cycle %d DDNDRive %d: Lost response credit", clk_counter, srcApp);
+      $display("Cycle %d DDNDRive %d: Lost response credit", clk_counter, srcApp);
             new_read_resp_credit_cnt = read_resp_credit_cnt - 1;
         end
         // otherwise either gained/lost none (+0) or both (+0)
@@ -248,8 +248,8 @@ module DNNDrive_SoftReg #(
     // Counter
     reg[63:0]  start_cycle;
     logic      start_cycle_we;
-	reg[63:0]  end_cycle;
-	logic      end_cycle_we;
+	  reg[63:0]  end_cycle;
+	  logic      end_cycle_we;
     
     Counter64 
     clk_counter64
@@ -263,14 +263,14 @@ module DNNDrive_SoftReg #(
     always@(posedge clk) begin : start_cycle_update
         if (rst) begin
             start_cycle  <= 64'h0;
-			end_cycle    <= 64'h0;
+            end_cycle    <= 64'h0;
         end else begin
             if (start_cycle_we) begin
                 start_cycle <= clk_counter;
             end
-			if (end_cycle_we) begin
-				end_cycle <= clk_counter;
-			end
+            if (end_cycle_we) begin
+                end_cycle <= clk_counter;
+            end
         end
     end
  
@@ -328,7 +328,7 @@ module DNNDrive_SoftReg #(
 
     logic  enough_sr_resp_credits;
     assign enough_sr_resp_credits = (read_resp_credit_cnt != 32'h0000_0000);
-	
+    
     // FSM update logic
     always_comb begin
         next_state = current_state;
@@ -341,12 +341,12 @@ module DNNDrive_SoftReg #(
         intiate_start = 1'b0;
      
         decr_read_resp_credit_cnt = 1'b0;
-		end_cycle_we = 1'b0;
-		
+        end_cycle_we = 1'b0;
+        
         case (current_state)
             IDLE : begin
                 if (!sr_inQ_empty) begin
-					$display("Cycle %d DNNDrive %d: Starting programming", clk_counter, srcApp);
+                    $display("Cycle %d DNNDrive %d: Starting programming", clk_counter, srcApp);
                     next_state = PROGRAMMING;
                     //next_state   = CLEAN_UP1;
                 end else begin
@@ -380,15 +380,15 @@ module DNNDrive_SoftReg #(
                 intiate_start = 1'b1;
                 // Go to await state
                 next_state = AWAIT_RESP;
-				$display("Cycle %d DNNDrive %d: Starting and transitioning to AWAIT_RESP", clk_counter, srcApp);
+                $display("Cycle %d DNNDrive %d: Starting and transitioning to AWAIT_RESP", clk_counter, srcApp);
             end
             AWAIT_RESP : begin
                 // wait for the done signal to be asserted
                 //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
                 if (dnn_done == 1'b1) begin
-					$display("Cycle %d DNNDrive %d: DNNWeaver DONE", clk_counter, srcApp);
+                    $display("Cycle %d DNNDrive %d: DNNWeaver DONE", clk_counter, srcApp);
                     next_state = CLEAN_UP1;
-					end_cycle_we = 1'b1;
+                    end_cycle_we = 1'b1;
                 end else begin
                     next_state = AWAIT_RESP;
                 end
@@ -400,9 +400,9 @@ module DNNDrive_SoftReg #(
                     decr_read_resp_credit_cnt = 1'b1;
                     next_state = CLEAN_UP2;
                 end else begin
-					if (clk_counter % 100 == 0) begin
-						$display("Cycle %d DNNDrive %d: Staying in Clean up 1, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
-					end
+                    if (clk_counter % 100 == 0) begin
+                        $display("Cycle %d DNNDrive %d: Staying in Clean up 1, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
+                    end
                     next_state = CLEAN_UP1;
                 end
             end
@@ -414,9 +414,9 @@ module DNNDrive_SoftReg #(
                     next_state = IDLE;
                     $display("Cycle %d DNNDrive %d: DONE", clk_counter, srcApp);
                 end else begin
-					if (clk_counter % 100 == 0) begin
-						$display("Cycle %d DNNDrive %d: Staying in Clean up 2, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
-					end
+                    if (clk_counter % 100 == 0) begin
+                        $display("Cycle %d DNNDrive %d: Staying in Clean up 2, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
+                    end
                     next_state = CLEAN_UP2;
                 end
             end
