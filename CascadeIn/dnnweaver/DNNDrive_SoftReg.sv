@@ -1,7 +1,9 @@
-import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
-
+//import ShellTypes::*;
+`include "ShellTypes.sv"
+//import AMITypes::*;
+`include "AMITypes.sv"
+//import AOSF1Types::*;
+`include "AOSF1Types.sv"
 `include "dw_params.vh"
 `include "common.vh"
 
@@ -100,52 +102,52 @@ module DNNDrive_SoftReg #(
             assign dummy_l_inc = 1'b0;
             assign l_inc = dummy_l_inc;
         end else begin : real_dnn_gen
-          dnnweaver_ami_top #(
-          // TODO: Double check all the parameters
-          // INPUT PARAMETERS
-            .NUM_PE                   ( NUM_PE                   ),
-            .NUM_PU                   ( NUM_PU                   ),
-            .ADDR_W                   ( ADDR_W                   ),
-            .AXI_DATA_W               ( DATA_W                   ),
-            .BASE_ADDR_W              ( BASE_ADDR_W              ),
-            .OFFSET_ADDR_W            ( OFFSET_ADDR_W            ),
-            .RD_LOOP_W                ( RD_LOOP_W                ),
-            .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            ),
-            .D_TYPE_W                 ( D_TYPE_W                 ),
-            .ROM_ADDR_W               ( ROM_ADDR_W               )
-          ) real_accelerator_top ( // PORTS
-            .clk                      ( clk                    ),
-            .reset                    ( rst                    ),
-            .start                    ( dnn_start              ),
-            .done                     ( dnn_done               ),
-
-            // Debug signals
-            /*
-            .dbg_kw (dbg_kw),
-            .dbg_kh(dbg_kh),
-            .dbg_iw(dbg_iw),
-            .dbg_ih(dbg_ih),
-            .dbg_ic(dbg_ic),
-            .dbg_oc(dbg_oc),
-            .buffer_read_count(buffer_read_count),
-            .stream_read_count(stream_read_count),
-            .inbuf_count(inbuf_count),
-            .pu_write_valid(pu_write_valid),
-            .wr_cfg_idx(wr_cfg_idx),
-            .rd_cfg_idx(rd_cfg_idx),
-            .outbuf_push(outbuf_push),
-            .pu_controller_state(pu_controller_state),
-            .vecgen_state(vecgen_state),
-            .vecgen_read_count(vecgen_read_count),        
-            */
-            // Memory signals
-            .flush_buffer (1'b0), // TODO: Actually connect it
-            .mem_req(mem_reqs),
-            .mem_req_grant(mem_req_grants),
-            .mem_resp(mem_resps),
-            .mem_resp_grant(mem_resp_grants),
-            .l_inc(l_inc)
-          );
+            dnnweaver_ami_top #(
+            // TODO: Double check all the parameters
+            // INPUT PARAMETERS
+                .NUM_PE                   ( NUM_PE                   ),
+                .NUM_PU                   ( NUM_PU                   ),
+                .ADDR_W                   ( ADDR_W                   ),
+                .AXI_DATA_W               ( DATA_W                   ),
+                .BASE_ADDR_W              ( BASE_ADDR_W              ),
+                .OFFSET_ADDR_W            ( OFFSET_ADDR_W            ),
+                .RD_LOOP_W                ( RD_LOOP_W                ),
+                .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            ),
+                .D_TYPE_W                 ( D_TYPE_W                 ),
+                .ROM_ADDR_W               ( ROM_ADDR_W               )
+            ) real_accelerator_top ( // PORTS
+                .clk                      ( clk                    ),
+                .reset                    ( rst                    ),
+                .start                    ( dnn_start              ),
+                .done                     ( dnn_done               ),
+                
+                // Debug signals
+                /*
+                .dbg_kw (dbg_kw),
+                .dbg_kh(dbg_kh),
+                .dbg_iw(dbg_iw),
+                .dbg_ih(dbg_ih),
+                .dbg_ic(dbg_ic),
+                .dbg_oc(dbg_oc),
+                .buffer_read_count(buffer_read_count),
+                .stream_read_count(stream_read_count),
+                .inbuf_count(inbuf_count),
+                .pu_write_valid(pu_write_valid),
+                .wr_cfg_idx(wr_cfg_idx),
+                .rd_cfg_idx(rd_cfg_idx),
+                .outbuf_push(outbuf_push),
+                .pu_controller_state(pu_controller_state),
+                .vecgen_state(vecgen_state),
+                .vecgen_read_count(vecgen_read_count),        
+                */
+                // Memory signals
+                .flush_buffer (1'b0), // TODO: Actually connect it
+                .mem_req(mem_reqs),
+                .mem_req_grant(mem_req_grants),
+                .mem_resp(mem_resps),
+                .mem_resp_grant(mem_resp_grants),
+                .l_inc(l_inc)
+            );
         end
     endgenerate
 
