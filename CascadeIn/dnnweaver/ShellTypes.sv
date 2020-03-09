@@ -4,6 +4,8 @@
 `ifndef SHELLTYPES_SV_INCLUDED
 `define SHELLTYPES_SV_INCLUDED
 
+`include "common.vh"
+
 //package ShellTypes;
 
 // 
@@ -31,7 +33,7 @@ parameter UMI_MASK_WIDTH          = UMI_DATA_WIDTH / 8;
 
 parameter PCIE_DATA_WIDTH         = 128;
 parameter PCIE_SLOT_WIDTH         = 16; // 16 bits are available, but only first 6 bits are valid (64 slots)
-parameter PCIE_PAD_WIDTH          = 4;  //$clog2(PCIE_DATA_WIDTH/8);
+parameter PCIE_PAD_WIDTH          = `C_LOG_2(PCIE_DATA_WIDTH/8);
 
 `define MEMREQ_BUS_WIDTH (1 + 1 + UMI_ADDR_WIDTH + UMI_DATA_WIDTH)
 `define MemReq_valid 0:0
