@@ -24,7 +24,7 @@ module dnnweaver_ami_top #(
   parameter integer SERDES_COUNT_W    = 6,
   parameter integer PE_SEL_W          = `C_LOG_2(NUM_PE),
   parameter integer DATA_W            = NUM_PE * OP_WIDTH, // double check this
-   parameter integer LAYER_PARAM_WIDTH  = 10
+  parameter integer LAYER_PARAM_WIDTH  = 10
 ) (
 // ******************************************************************
 // IO
@@ -32,15 +32,15 @@ module dnnweaver_ami_top #(
   input  wire                                        clk,
   input  wire                                        reset,
   input  wire                                        start,
-  input  wire                                         flush_buffer, // TODO: Actually connect it
+  input  wire                                        flush_buffer, // TODO: Actually connect it
   output wire                                        done,
   // Debug
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_kw,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_kh,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_iw,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_ih,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_ic,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_oc,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_kw,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_kh,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_iw,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_ih,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_ic,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_oc,
 
   output wire [ 32                   -1 : 0 ]        buffer_read_count,
   output wire [ 32                   -1 : 0 ]        stream_read_count,
