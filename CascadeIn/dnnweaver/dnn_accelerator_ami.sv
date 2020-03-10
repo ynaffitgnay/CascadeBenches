@@ -57,7 +57,7 @@ module dnn_accelerator_ami #(
   input                               mem_req_grant  ,
   input  AMIResponse                  mem_resp       ,
   output                              mem_resp_grant ,
-  output 							  l_inc
+  output                               l_inc
   
 );
   //localparam integer NUM_PE             = `num_pe;
@@ -209,12 +209,12 @@ module dnn_accelerator_ami #(
     .buffer_read_req          ( buffer_read_req          ),
     .buffer_read_last         ( buffer_read_last         ),
     .buffer_read_data_out     ( buffer_read_data_out     ),
-	.buffer_pu_id             ( buffer_pu_id             ),
-	
+    .buffer_pu_id             ( buffer_pu_id             ),
+    
     .pu_id_buf                ( pu_id_buf                ),
     .d_type_buf               ( d_type_buf               ),
     .next_read                ( next_read                ),
-	
+    
     .mem_req                  (mem_req                   ),
     .mem_req_grant            (mem_req_grant             ),
     .mem_resp                 (mem_resp                  ),
@@ -266,8 +266,8 @@ module dnn_accelerator_ami #(
       assign pu_vecgen_ctrl = 'b0;
       assign stream_pu_pop[i] = 'b0;
 
-	  wire[1:0] pu_vecgen_state;
-	  
+      wire[1:0] pu_vecgen_state;
+      
       vectorgen # (
         .OP_WIDTH                 ( OP_WIDTH                 ),
         .TID_WIDTH                ( PU_TID_WIDTH             ),
@@ -447,7 +447,7 @@ module dnn_accelerator_ami #(
     .bias_read_req            ( bias_read_req            ), //output
     .out_sel                  ( out_sel                  ), //output
     .dst_sel                  ( dst_sel                  ),  //output
-	.l_inc_out                ( l_inc)
+    .l_inc_out                ( l_inc)
     );
   // ==================================================================
 

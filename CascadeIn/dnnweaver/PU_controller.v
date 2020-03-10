@@ -405,7 +405,7 @@ always @(posedge clk)
     wait_timer <= 0;
   else if (!wait_complete)
     wait_timer <= wait_timer + 1'b1;
-	
+  
 reg buffer_read_last_sticky;
 assign buffer_read_req = wait_complete && state == WAIT && !(buffer_read_last_sticky);
 
@@ -583,7 +583,7 @@ assign data_stall = !vecgen_ready && (vectorgen_pop);
       kh_min_stride <= _kh_min_stride;
 
 wire next_iw;
-	  
+    
   always @(posedge clk)
   begin
     if (reset)
@@ -831,7 +831,7 @@ wire next_iw;
       iw_is_max <= (iw_max == 0);
     else if (iw_inc || state_d == RD_CFG_2)
       iw_is_max <= (iw == iw_max_minus_one) || (iw_max == 0);
-	
+  
   /*always @(posedge clk)
     if (reset)
       iw_is_max <= 0;
@@ -839,8 +839,8 @@ wire next_iw;
       iw_is_max <= (iw_max == 0);
     else if (iw_inc || state_d == RD_CFG_2)
       iw_is_max <= (iw == iw_max_minus_one) || (iw_max == 0);
-	*/  
-	  
+  */  
+    
   always @(posedge clk)
     if (reset)
       ih_is_max <= 0;

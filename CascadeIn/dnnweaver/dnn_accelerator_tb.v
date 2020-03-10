@@ -410,7 +410,7 @@ task initialize_stream;
     $display("Initializing stream data at %h", addr);
     $display("Stream dimensions %d, %d, %d, %d", dim0, dim1, dim2, dim3);
     d2_padded = (dim2 < NUM_PE ? 1 : dim2 % NUM_PE == 0 ? dim2/NUM_PE : dim2/NUM_PE+1)  * (NUM_PE < 4 ? 1 : NUM_PE % 4 == 0 ? NUM_PE/4 : NUM_PE/4+1)  * 4;
-	                                                                    
+                                                                      
 
     addr = (addr - 32'h08000000) >> 1;
     $display("Padded dimensions = %d", d2_padded);

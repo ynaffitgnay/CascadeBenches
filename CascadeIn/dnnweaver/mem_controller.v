@@ -57,9 +57,9 @@ localparam integer WR_ROM_DEPTH = 1<<WR_ROM_ADDR_W;
 localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
   BUSY_BUFFER = 3, BUSY_STREAM = 4;
 
-    wire                                        stream_wr_count_inc;
-	wire                                        next_stream_write;
-  // ******************************************************************
+  wire                                        stream_wr_count_inc;
+  wire                                        next_stream_write;
+// ******************************************************************
 // WIRES
 // ******************************************************************
   genvar i;

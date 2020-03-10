@@ -461,7 +461,7 @@ endgenerate
     .IN_COUNT                 ( NUM_PE                   ),
     .OUT_COUNT                ( NUM_PE                   ),
     .OP_WIDTH                 ( OP_WIDTH                 ),
-	.COUNT_W (6)
+    .COUNT_W (6)
   ) u_serdes (
     .clk                      ( clk                      ),
     .reset                    ( reset                    ),

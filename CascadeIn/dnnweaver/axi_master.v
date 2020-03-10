@@ -55,11 +55,11 @@ module axi_master
 // ******************************************************************
 // IO
 // ******************************************************************
-    // System Signals
+  // System Signals
   input  wire                                         clk,
   input  wire                                         reset,
 
-    // Master Interface Write Address
+  // Master Interface Write Address
   output wire  [ TID_WIDTH            -1 : 0 ]        M_AXI_AWID,
   output wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        M_AXI_AWADDR,
   output wire  [ 4                    -1 : 0 ]        M_AXI_AWLEN,
@@ -73,7 +73,7 @@ module axi_master
   output wire                                         M_AXI_AWVALID,
   input  wire                                         M_AXI_AWREADY,
 
-    // Master Interface Write Data
+  // Master Interface Write Data
   output wire  [ TID_WIDTH            -1 : 0 ]        M_AXI_WID,
   output wire  [ AXI_DATA_WIDTH       -1 : 0 ]        M_AXI_WDATA,
   output wire  [ WSTRB_W              -1 : 0 ]        M_AXI_WSTRB,
@@ -82,14 +82,14 @@ module axi_master
   output wire                                         M_AXI_WVALID,
   input  wire                                         M_AXI_WREADY,
 
-    // Master Interface Write Response
+  // Master Interface Write Response
   input  wire  [ TID_WIDTH            -1 : 0 ]        M_AXI_BID,
   input  wire  [ 2                    -1 : 0 ]        M_AXI_BRESP,
   input  wire  [ BUSER_W              -1 : 0 ]        M_AXI_BUSER,
   input  wire                                         M_AXI_BVALID,
   output wire                                         M_AXI_BREADY,
 
-    // Master Interface Read Address
+  // Master Interface Read Address
   output wire  [ TID_WIDTH            -1 : 0 ]        M_AXI_ARID,
   output wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        M_AXI_ARADDR,
   output wire  [ 4                    -1 : 0 ]        M_AXI_ARLEN,
@@ -98,13 +98,13 @@ module axi_master
   output wire  [ 2                    -1 : 0 ]        M_AXI_ARLOCK,
   output wire  [ 4                    -1 : 0 ]        M_AXI_ARCACHE,
   output wire  [ 3                    -1 : 0 ]        M_AXI_ARPROT,
-    // AXI3 output wire [4-1:0]          M_AXI_ARREGION,
+  // AXI3 output wire [4-1:0]          M_AXI_ARREGION,
   output wire  [ 4                    -1 : 0 ]        M_AXI_ARQOS,
   output wire  [ ARUSER_W             -1 : 0 ]        M_AXI_ARUSER,
   output wire                                         M_AXI_ARVALID,
   input  wire                                         M_AXI_ARREADY,
 
-    // Master Interface Read Data
+  // Master Interface Read Data
   input  wire  [ TID_WIDTH            -1 : 0 ]        M_AXI_RID,
   input  wire  [ AXI_DATA_WIDTH       -1 : 0 ]        M_AXI_RDATA,
   input  wire  [ 2                    -1 : 0 ]        M_AXI_RRESP,
@@ -113,25 +113,25 @@ module axi_master
   input  wire                                         M_AXI_RVALID,
   output wire                                         M_AXI_RREADY,
 
-    // NPU Design
-    // WRITE from BRAM to DDR
+  // NPU Design
+  // WRITE from BRAM to DDR
   input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty,
   output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,
   input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,
   input  wire  [ NUM_PU               -1 : 0 ]        write_valid,
 
-    // READ from DDR to BRAM
+  // READ from DDR to BRAM
   output wire  [ AXI_DATA_WIDTH       -1 : 0 ]        data_to_inbuf,
   output wire                                         inbuf_push,
   input  wire                                         inbuf_full,
 
-    // Memory Controller Interface - Read
+  // Memory Controller Interface - Read
   input  wire                                         rd_req,
   output wire                                         rd_ready,
   input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        rd_req_size,
   input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        rd_addr,
 
-    // Memory Controller Interface - Write
+  // Memory Controller Interface - Write
   input  wire                                         wr_req,
   input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id,
   output reg                                          wr_ready,
@@ -141,43 +141,43 @@ module axi_master
 );
 
 // Debug
-	// debug signals
-	// Read requests
-	always@(posedge clk) begin
-		if (rd_req) begin
-			$display("AXIM:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
-		end
-	end
-	// Write requests
-	always@(posedge clk) begin
-		if (wr_req) begin
-			$display("AXIM:============================================================ Accepting macro WRITE request ADDR: %h Size: %d PU: %d",wr_addr,wr_req_size,wr_pu_id);
-		end
-	end
+  // debug signals
+  // Read requests
+  always@(posedge clk) begin
+    if (rd_req) begin
+      $display("AXIM:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
+    end
+  end
+  // Write requests
+  always@(posedge clk) begin
+    if (wr_req) begin
+      $display("AXIM:============================================================ Accepting macro WRITE request ADDR: %h Size: %d PU: %d",wr_addr,wr_req_size,wr_pu_id);
+    end
+  end
 
 
 // Moved around
   wire                                        axi_wr_req;
- wire wchannel_req_buf_empty;
+  wire                                        wchannel_req_buf_empty;
 
-   reg                                         awchannel_state;
+  reg                                         awchannel_state;
   reg                                         next_awchannel_state;
   reg                                         write_awchannel_state_d;
  
-   reg                                         wchannel_state;
+  reg                                         wchannel_state;
   reg                                         next_wchannel_state;
   reg                                         write_wchannel_state_d;
  
- reg  [ TX_SIZE_WIDTH        -1 : 0 ]        rx_size;
+  reg  [ TX_SIZE_WIDTH        -1 : 0 ]        rx_size;
+  
+  reg                                         rd_req_buf_pop_d;
+  reg                                         axi_wr_req_d;
  
- reg                                         rd_req_buf_pop_d;
- reg                                         axi_wr_req_d;
+  wire wchannel_req_buf_full;
  
- wire wchannel_req_buf_full;
+  reg write_buf_almost_full;
  
-   reg write_buf_almost_full;
- 
- parameter WC_IDLE = 0, WC_BUSY = 1;
+  parameter WC_IDLE = 0, WC_BUSY = 1;
  
 // ******************************************************************
 // Internal variables - Regs, Wires and LocalParams
@@ -231,7 +231,7 @@ module axi_master
   wire [ TX_SIZE_WIDTH        -1 : 0 ]        curr_pu_writes_remaining;
   reg  [ TX_SIZE_WIDTH        -1 : 0 ]        curr_pu_writes_remaining_d;
 
-    reg  [ AXI_DATA_WIDTH       -1 : 0 ]        write_buf_data_in;
+  reg  [ AXI_DATA_WIDTH       -1 : 0 ]        write_buf_data_in;
   wire [ AXI_DATA_WIDTH       -1 : 0 ]        _write_buf_data_in;
   wire [ AXI_DATA_WIDTH       -1 : 0 ]        write_buf_data_out;
   reg                                         write_buf_push;
@@ -269,8 +269,8 @@ module axi_master
 wire rd_req_buf_pop, rd_req_buf_push;
 wire rd_req_buf_empty, rd_req_buf_full;
 wire [AXI_ADDR_WIDTH+TX_SIZE_WIDTH-1:0] rd_req_buf_data_in, rd_req_buf_data_out;
-  wire [ TX_SIZE_WIDTH        -1 : 0 ]        rx_req_size_buf;
-  wire [ AXI_ADDR_WIDTH       -1 : 0 ]        rx_addr_buf;
+wire [ TX_SIZE_WIDTH        -1 : 0 ]        rx_req_size_buf;
+wire [ AXI_ADDR_WIDTH       -1 : 0 ]        rx_addr_buf;
 
 assign rd_req_buf_pop       = rx_size == 0 && !rd_req_buf_empty && !rd_req_buf_pop_d;
 assign rd_req_buf_push      = rd_req;
@@ -307,28 +307,28 @@ end
    // READs
   
    //wire [4-1:0] arlen = (rx_size >= 16) ? 15: (rx_size >= 8) ? 7 : (rx_size >= 4) ? 3 : (rx_size >= 2) ? 1 : 0;
-   wire [4-1:0] arlen = (rx_size >= 16) ? 15: (rx_size != 0) ? (rx_size-1) : 0;
+  wire [4-1:0] arlen = (rx_size >= 16) ? 15: (rx_size != 0) ? (rx_size-1) : 0;
   reg  [ 4                    -1 : 0 ]        arlen_d;
 
-   always @(posedge clk)
-   begin
-     if (reset)
-       rx_size <= 0;
-     //else if (rd_req)
-       //    rx_size <= rx_size + rd_req_size;
-       else if (rd_req_buf_pop_d)
-         rx_size <= rx_size + rx_req_size_buf;
-       else if (arvalid && M_AXI_ARREADY)
-         rx_size <= rx_size - arlen - 1;
-     end
+  always @(posedge clk)
+  begin
+    if (reset)
+      rx_size <= 0;
+    //else if (rd_req)
+      //    rx_size <= rx_size + rd_req_size;
+      else if (rd_req_buf_pop_d)
+        rx_size <= rx_size + rx_req_size_buf;
+      else if (arvalid && M_AXI_ARREADY)
+        rx_size <= rx_size - arlen - 1;
+  end
 
-   always @(posedge clk)
-   begin
-     if (reset)
-       arlen_d <= 0;
-     else if (arvalid && M_AXI_ARREADY)
-       arlen_d <= arlen;
-   end
+  always @(posedge clk)
+  begin
+    if (reset)
+      arlen_d <= 0;
+    else if (arvalid && M_AXI_ARREADY)
+      arlen_d <= arlen;
+  end
 
 
 /////////////////
@@ -346,7 +346,7 @@ assign M_AXI_AWID = 'b0;
 //assign M_AXI_AWADDR = {wr_addr_d[AXI_ADDR_WIDTH-1:C_OFFSET_WIDTH],awaddr_offset};
 
 //Burst LENgth is number of transaction beats, minus 1
-  reg  [ 4                    -1 : 0 ]        awlen;
+reg  [ 4                    -1 : 0 ]        awlen;
 assign M_AXI_AWLEN = awlen;
 
 // Size should be AXI_DATA_WIDTH, in 2^SIZE bytes, otherwise narrow bursts are used
@@ -418,9 +418,9 @@ assign M_AXI_RREADY = rready;
 //Write Address Channel
 ///////////////////////
 
-  reg  [ 1                       : 0 ]        write_state;
-  reg  [ 1                       : 0 ]        next_write_state;
-  reg  [ 1                       : 0 ]        write_state_d;
+reg  [ 1                       : 0 ]        write_state;
+reg  [ 1                       : 0 ]        next_write_state;
+reg  [ 1                       : 0 ]        write_state_d;
 always @(posedge clk)
 begin
   if (reset)
@@ -501,7 +501,7 @@ end
 
 // Next address after AWREADY indicates previous address acceptance
 assign M_AXI_AWADDR = awaddr;
-  wire [ AXI_ADDR_WIDTH       -1 : 0 ]        curr_pu_awaddr;
+wire [ AXI_ADDR_WIDTH       -1 : 0 ]        curr_pu_awaddr;
 always @(posedge clk)
 begin
   if (reset)

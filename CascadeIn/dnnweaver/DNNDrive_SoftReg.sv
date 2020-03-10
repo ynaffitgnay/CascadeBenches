@@ -174,7 +174,7 @@ module DNNDrive_SoftReg #(
             read_resp_credit_cnt <= new_read_resp_credit_cnt;
         end
     end   
-	
+    
     // Input queue for PCI-e
     wire             sr_inQ_empty;
     wire             sr_inQ_full;
@@ -250,8 +250,8 @@ module DNNDrive_SoftReg #(
     // Counter
     reg[63:0]  start_cycle;
     logic      start_cycle_we;
-	  reg[63:0]  end_cycle;
-	  logic      end_cycle_we;
+    reg[63:0]  end_cycle;
+    logic      end_cycle_we;
     
     Counter64 
     clk_counter64

@@ -1,5 +1,7 @@
-`timescale 1ns/1ps
-module axi_slave_tb;
+//`timescale 1ns/1ps
+`include "axi_slave_tb_driver.v"
+`include "axi4lite_slave.v"
+module axi_slave_tb(ACLK);
 // ******************************************************************
 // PARAMETERS
 // ******************************************************************
@@ -13,7 +15,7 @@ module axi_slave_tb;
 // Wires and Regs
 // ******************************************************************
 
-    reg                                     ACLK;
+    //reg                                     ACLK;
     reg                                     ARESETN;
 
     wire                                    tx_req;
@@ -62,18 +64,41 @@ initial begin
     @(negedge ACLK);
     @(negedge ACLK);
     ARESETN = 1;
-#100000
+//#100000
 
     wait (ARESETN);
 
     @(negedge ACLK);
     @(negedge ACLK);
 
-    u_axis_driver.test_main;
-    u_axis_driver.test_pass;
+    //u_axis_driver.test_main;
+    reg [AXIS_DATA_WIDTH-1:0] rdata;
+    reg [AXIS_DATA_WIDTH-1:0] wdata;
+    begin
+        repeat (200) begin
+            wdata = $random;
+            write_request(0, wdata);
+            read_request(0, rdata);
+            if (wdata !== rdata)
+                fail_flag = 1;
+        end
+
+        begin
+            $display("%c[1;32m",27);
+            $display ("Test Passed");
+            $display("%c[0m",27);
+            $finish;
+        end
+    end
+
+    //u_axis_driver.test_pass;
+    $display("%c[1;32m",27);
+    $display ("Test Passed");
+    $display("%c[0m",27);
+    $finish;
 end
 
-always #1 ACLK = ~ACLK;
+//always ACLK = ~ACLK;//#1 ACLK = ~ACLK;
 
 always @(posedge ACLK)
 begin

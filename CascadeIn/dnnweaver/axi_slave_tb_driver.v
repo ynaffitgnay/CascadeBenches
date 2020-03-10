@@ -1,4 +1,27 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
+
+module read_request (addr, data);
+    //input  [AXIS_ADDR_WIDTH-1:0] addr;
+    //output [AXIS_DATA_WIDTH-1:0] data;
+    begin
+        wait(ARESETN);
+        S_AXI_ARVALID = 1'b1;
+        S_AXI_ARADDR = addr<<2;
+        S_AXI_RREADY = 1'b1;
+        if (VERBOSITY > 1) $display("Reading from address %h", addr);
+        wait(S_AXI_ARREADY && S_AXI_ARVALID && ~S_AXI_RVALID);
+        @(negedge ACLK);
+        @(negedge ACLK);
+        S_AXI_ARVALID = 1'b0;
+        wait(~S_AXI_RVALID);
+        @(negedge ACLK);
+        S_AXI_RREADY = 1'b0;
+        data = S_AXI_RDATA;
+        if (VERBOSITY > 1) $display ("Read data = %h", data);
+    end
+endmodule
+
+
 module axi_slave_tb_driver
 #(
 // ******************************************************************
@@ -27,8 +50,7 @@ module axi_slave_tb_driver
 
     input  wire                             S_AXI_ACLK,
     input  wire                             S_AXI_ARESETN,
-    output reg [AXIS_ADDR_WIDTH-1 : 0]      S_AXI_AWADDR,
-    output reg [2 : 0]                      S_AXI_AWPROT,
+    output reg [AXIS_ADDR_WIDTH-1 : 0]      S_AXI_AWADDR,    output reg [2 : 0]                      S_AXI_AWPROT,
     output reg                              S_AXI_AWVALID,
     input wire                              S_AXI_AWREADY,
     output reg [AXIS_DATA_WIDTH-1 : 0]      S_AXI_WDATA,
@@ -63,7 +85,14 @@ module axi_slave_tb_driver
 // ******************************************************************
 always @(posedge ACLK)
 begin
-    check_fail;
+    //check_fail;
+    if (fail_flag && ARESETN) 
+    begin
+        $display("%c[1;31m",27);
+        $display ("Test Failed");
+        $display("%c[0m",27);
+        $finish;
+    end
 end
 
 // Initialize regs
@@ -96,63 +125,63 @@ end
 // TASKS
 // ******************************************************************
 //-------------------------------------------------------------------
-task automatic random_delay;
-    input integer MAX_DELAY;
-    reg [3:0] delay;
-    begin
-        delay = $random;
-        delay[0] = 1'b1;
-        repeat (delay) begin
-            @(negedge ACLK);
-        end
-    end
-endtask
+//task automatic random_delay;
+//    input integer MAX_DELAY;
+//    reg [3:0] delay;
+//    begin
+//        delay = $random;
+//        delay[0] = 1'b1;
+//        repeat (delay) begin
+//            @(negedge ACLK);
+//        end
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-task automatic check_fail;
-    if (fail_flag && ARESETN) 
-    begin
-        $display("%c[1;31m",27);
-        $display ("Test Failed");
-        $display("%c[0m",27);
-        $finish;
-    end
-endtask
+//task automatic check_fail;
+//    if (fail_flag && ARESETN) 
+//    begin
+//        $display("%c[1;31m",27);
+//        $display ("Test Failed");
+//        $display("%c[0m",27);
+//        $finish;
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-task automatic test_pass;
-    begin
-        $display("%c[1;32m",27);
-        $display ("Test Passed");
-        $display("%c[0m",27);
-        $finish;
-    end
-endtask
+//task automatic test_pass;
+//    begin
+//        $display("%c[1;32m",27);
+//        $display ("Test Passed");
+//        $display("%c[0m",27);
+//        $finish;
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-task automatic read_request;
-    input  [AXIS_ADDR_WIDTH-1:0] addr;
-    output [AXIS_DATA_WIDTH-1:0] data;
-    begin
-        wait(ARESETN);
-        S_AXI_ARVALID = 1'b1;
-        S_AXI_ARADDR = addr<<2;
-        S_AXI_RREADY = 1'b1;
-        if (VERBOSITY > 1) $display("Reading from address %h", addr);
-        wait(S_AXI_ARREADY && S_AXI_ARVALID && ~S_AXI_RVALID);
-        @(negedge ACLK);
-        @(negedge ACLK);
-        S_AXI_ARVALID = 1'b0;
-        wait(~S_AXI_RVALID);
-        @(negedge ACLK);
-        S_AXI_RREADY = 1'b0;
-        data = S_AXI_RDATA;
-        if (VERBOSITY > 1) $display ("Read data = %h", data);
-    end
-endtask
+//task automatic read_request;
+//    input  [AXIS_ADDR_WIDTH-1:0] addr;
+//    output [AXIS_DATA_WIDTH-1:0] data;
+//    begin
+//        wait(ARESETN);
+//        S_AXI_ARVALID = 1'b1;
+//        S_AXI_ARADDR = addr<<2;
+//        S_AXI_RREADY = 1'b1;
+//        if (VERBOSITY > 1) $display("Reading from address %h", addr);
+//        wait(S_AXI_ARREADY && S_AXI_ARVALID && ~S_AXI_RVALID);
+//        @(negedge ACLK);
+//        @(negedge ACLK);
+//        S_AXI_ARVALID = 1'b0;
+//        wait(~S_AXI_RVALID);
+//        @(negedge ACLK);
+//        S_AXI_RREADY = 1'b0;
+//        data = S_AXI_RDATA;
+//        if (VERBOSITY > 1) $display ("Read data = %h", data);
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
@@ -177,63 +206,71 @@ endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-task automatic start_tabla;
-    begin
-        if (VERBOSITY > 1) $display("Starting Tabla");
-        write_request(0,1);
-        wait(tx_req);
-    end
-endtask
+//task automatic start_tabla;
+//    begin
+//        if (VERBOSITY > 1) $display("Starting Tabla");
+//        write_request(0,1);
+//        wait(tx_req);
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
-task automatic test_main;
-    reg [AXIS_DATA_WIDTH-1:0] rdata;
-    reg [AXIS_DATA_WIDTH-1:0] wdata;
-    begin
-        repeat (200) begin
-            wdata = $random;
-            write_request(0, wdata);
-            read_request(0, rdata);
-            if (wdata !== rdata)
-                fail_flag = 1;
-        end
+//task automatic test_main;
+//    reg [AXIS_DATA_WIDTH-1:0] rdata;
+//    reg [AXIS_DATA_WIDTH-1:0] wdata;
+//    begin
 //        repeat (200) begin
 //            wdata = $random;
-//            tx_done = wdata;
-//            read_request(1, rdata);
-//            if (tx_done != rdata[0])
-//            begin
-//                $display ("TX_DONE = %d", tx_done);
-//                $display ("Read data = %d", rdata[0]);
+//            write_request(0, wdata);
+//            read_request(0, rdata);
+//            if (wdata !== rdata)
 //                fail_flag = 1;
-//            end
 //        end
-//        repeat (200) begin
-//            wdata = $random;
-//            rd_done = wdata;
-//            read_request(2, rdata);
-//            if (rd_done != rdata[0])
-//            begin
-//                $display ("RD_DONE = %d", rd_done);
-//                $display ("Read data = %d", rdata[0]);
-//                fail_flag = 1;
-//            end
+////        repeat (200) begin
+////            wdata = $random;
+////            tx_done = wdata;
+////            read_request(1, rdata);
+////            if (tx_done != rdata[0])
+////            begin
+////                $display ("TX_DONE = %d", tx_done);
+////                $display ("Read data = %d", rdata[0]);
+////                fail_flag = 1;
+////            end
+////        end
+////        repeat (200) begin
+////            wdata = $random;
+////            rd_done = wdata;
+////            read_request(2, rdata);
+////            if (rd_done != rdata[0])
+////            begin
+////                $display ("RD_DONE = %d", rd_done);
+////                $display ("Read data = %d", rdata[0]);
+////                fail_flag = 1;
+////            end
+////        end
+////        repeat (200) begin
+////            wdata = $random;
+////            total_cycles = wdata;
+////            read_request(4, rdata);
+////            if (total_cycles != rdata)
+////            begin
+////                $display ("Cycles = %h", total_cycles);
+////                $display ("Read data = %h", rdata);
+////                fail_flag = 1;
+////            end
+////        end
+//        //test_pass;
+//        begin
+//            $display("%c[1;32m",27);
+//            $display ("Test Passed");
+//            $display("%c[0m",27);
+//            $finish;
 //        end
-//        repeat (200) begin
-//            wdata = $random;
-//            total_cycles = wdata;
-//            read_request(4, rdata);
-//            if (total_cycles != rdata)
-//            begin
-//                $display ("Cycles = %h", total_cycles);
-//                $display ("Read data = %h", rdata);
-//                fail_flag = 1;
-//            end
-//        end
-        test_pass;
-    end
-endtask
+//    end
+//endtask
 //-------------------------------------------------------------------
 
 endmodule
+
+

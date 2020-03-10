@@ -14,9 +14,9 @@ module xilinx_bram_fifo
                          ( (DATA_WIDTH <= 4) ? 13 : (DATA_WIDTH > 4 && DATA_WIDTH <=9) ? 12 : 
                          (DATA_WIDTH > 9 && DATA_WIDTH <= 18) ? 11 : (DATA_WIDTH > 18 && DATA_WIDTH <= 36) ? 10 : 
                          (DATA_WIDTH > 36 && DATA_WIDTH <= 72) ? 9 : 13 ) : 13 )
-	
-	
-	
+    
+    
+    
 )(  // Ports
     input  wire                         RESET,
 

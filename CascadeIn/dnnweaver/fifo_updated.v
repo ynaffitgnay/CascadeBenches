@@ -26,7 +26,7 @@ module fifo
 // ******************************************************************
     reg     [ADDR_WIDTH-1:0]        wr_pointer;             //Write Pointer
     reg     [ADDR_WIDTH-1:0]        rd_pointer;             //Read Pointer
-	//(* ram_style = TYPE *)
+    //(* ram_style = TYPE *)
     reg     [DATA_WIDTH-1:0]        mem[0:FIFO_DEPTH-1]/*synthesis ramstyle = "MLAB" */;     //Memory
 // ******************************************************************
 // INSTANTIATIONS
@@ -39,59 +39,59 @@ module fifo
 
     always @ (fifo_count)
     begin : FIFO_STATUS
-    	empty   = (fifo_count == 0);
-    	full    = (fifo_count == RAM_DEPTH);
+        empty   = (fifo_count == 0);
+        full    = (fifo_count == RAM_DEPTH);
     end
     
     always @ (posedge clk)
     begin : FIFO_COUNTER
-    	if (reset)
-    		fifo_count <= 0;
-    	
-    	else if (push && !pop && !full)
-    		fifo_count <= fifo_count + 1;
-    		
-    	else if (pop && !push && !empty)
-    		fifo_count <= fifo_count - 1;
+        if (reset)
+            fifo_count <= 0;
+        
+        else if (push && !pop && !full)
+            fifo_count <= fifo_count + 1;
+            
+        else if (pop && !push && !empty)
+            fifo_count <= fifo_count - 1;
     end
     
     always @ (posedge clk)
     begin : WRITE_PTR
-    	if (reset) begin
-       		wr_pointer <= 0;
-    	end 
-    	else if (push && !full) begin
-    		wr_pointer <= wr_pointer + 1;
-    	end
+        if (reset) begin
+               wr_pointer <= 0;
+        end 
+        else if (push && !full) begin
+            wr_pointer <= wr_pointer + 1;
+        end
     end
     
     always @ (posedge clk)
     begin : READ_PTR
-    	if (reset) begin
-    		rd_pointer <= 0;
-    	end
-    	else if (pop && !empty) begin
-    		rd_pointer <= rd_pointer + 1;
-    	end
+        if (reset) begin
+            rd_pointer <= 0;
+        end
+        else if (pop && !empty) begin
+            rd_pointer <= rd_pointer + 1;
+        end
     end
     
     always @ (posedge clk)
     begin : WRITE
         if (push & !full) begin
-    		mem[wr_pointer] <= data_in;
+            mem[wr_pointer] <= data_in;
         end
     end
     
     always @ (posedge clk)
     begin : READ
         if (reset) begin
-	    	data_out <= 0;
+            data_out <= 0;
         end
         if (pop && !empty) begin
-    		data_out <= mem[rd_pointer];
+            data_out <= mem[rd_pointer];
         end
         else begin
-    		data_out <= data_out;
+            data_out <= data_out;
         end
     end
 

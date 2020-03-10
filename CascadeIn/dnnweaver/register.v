@@ -29,7 +29,7 @@ begin
         end
     end
     for (i=1; i<NUM_STAGES; i=i+1) 
-	 begin : REGISTER_STAGES
+    begin : REGISTER_STAGES
         always @(posedge CLK)
         begin
             if(RESET)

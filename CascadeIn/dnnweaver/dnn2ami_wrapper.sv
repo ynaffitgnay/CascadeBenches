@@ -85,7 +85,7 @@ DNN2AMI
     .mem_resp_grant           ( mem_resp_grant           ),
     .outbuf_empty             ( outbuf_empty             ), // TODO: ????
     .outbuf_pop               ( outbuf_pop               ),
-    .data_from_outbuf         ( data_from_outbuf     	 ),
+    .data_from_outbuf         ( data_from_outbuf         ),
     .data_to_inbuf            ( data_to_inbuf            ),
     .inbuf_push               ( inbuf_push               ),
     .inbuf_full               ( inbuf_full               ),

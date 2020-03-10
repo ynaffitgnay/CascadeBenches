@@ -43,35 +43,35 @@ parameter PCIE_PAD_WIDTH          = `C_LOG_2(PCIE_DATA_WIDTH/8);
 
 
 //typedef struct packed {
-//	logic                      valid;
-//	logic                      isWrite;
-//	logic [UMI_ADDR_WIDTH-1:0] addr;
-//	logic [UMI_DATA_WIDTH-1:0] data;
+//  logic                      valid;
+//  logic                      isWrite;
+//  logic [UMI_ADDR_WIDTH-1:0] addr;
+//  logic [UMI_DATA_WIDTH-1:0] data;
 //} MemReq;
 //
 //typedef struct packed {
-//	logic                      valid;
-//	logic [UMI_DATA_WIDTH-1:0] data;
+//  logic                      valid;
+//  logic [UMI_DATA_WIDTH-1:0] data;
 //} MemResp;
 //
 //typedef struct packed {
-//	logic                       valid;
-//	logic                       isWrite;
-//	logic [31:0]                addr;
-//	logic [63:0]                data;
+//  logic                       valid;
+//  logic                       isWrite;
+//  logic [31:0]                addr;
+//  logic [63:0]                data;
 //} SoftRegReq;
 //
 //typedef struct packed {
-//	logic                       valid;
-//	logic [63:0]                data;
+//  logic                       valid;
+//  logic [63:0]                data;
 //} SoftRegResp;
 //
 //typedef struct packed {
-//	logic                       valid;
-//	logic [PCIE_DATA_WIDTH-1:0] data;
-//	logic [PCIE_SLOT_WIDTH-1:0] slot;
-//	logic [PCIE_PAD_WIDTH-1:0]  pad;
-//	logic                       last;
+//  logic                       valid;
+//  logic [PCIE_DATA_WIDTH-1:0] data;
+//  logic [PCIE_SLOT_WIDTH-1:0] slot;
+//  logic [PCIE_PAD_WIDTH-1:0]  pad;
+//  logic                       last;
 //} PCIEPacket;
 
 //endpackage

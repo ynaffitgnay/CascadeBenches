@@ -292,23 +292,23 @@ module stratix_wrapper_mar23_2016 #(
     wire [63:0]         HP3_outBuf_Write_wr_data;
     wire                HP3_outBuf_Write_wr_en;
 
-//   	generic_pll pll_PU (
-//		.refclk     (pll_ref_clk),
-//		.rst        (global_reset),
-//		.outclk     (FCLK_CLK0)
-//	);	
+//    generic_pll pll_PU (
+//        .refclk     (pll_ref_clk),
+//        .rst        (global_reset),
+//        .outclk     (FCLK_CLK0)
+//    );    
 
 wire locked;
 assign FCLK_RESET0 = !locked;
 pll_arria10 pll999(
-		.refclk     ( pll_ref_clk   ),   // refclk.clk
-		.rst        ( global_reset  ),   // reset.reset
-		.outclk_0   ( FCLK_CLK0     ),   // outclk0.clk
-		.locked     ( locked        )    // locked.export
-	);
-//	defparam pll_PU.reference_clock_frequency = REF_CLK_FREQ,
-//		     pll_PU.output_clock_frequency = PU_CLK_FREQ,
-//		     pll_PU.duty_cycle = 50;
+        .refclk     ( pll_ref_clk   ),   // refclk.clk
+        .rst        ( global_reset  ),   // reset.reset
+        .outclk_0   ( FCLK_CLK0     ),   // outclk0.clk
+        .locked     ( locked        )    // locked.export
+    );
+//    defparam pll_PU.reference_clock_frequency = REF_CLK_FREQ,
+//             pll_PU.output_clock_frequency = PU_CLK_FREQ,
+//             pll_PU.duty_cycle = 50;
 
 /////////////////////////////////////////////////////////////////////////////
 // Buffers for HP0 interface

@@ -19,7 +19,7 @@ module dnn_accelerator_tb_ami;
   localparam integer D_TYPE_W          = 2;
   localparam integer ROM_ADDR_W        = 3;
 
-   localparam integer LAYER_PARAM_WIDTH  = 10;
+  localparam integer LAYER_PARAM_WIDTH  = 10;
   
   localparam integer ROM_WIDTH = (BASE_ADDR_W + OFFSET_ADDR_W +
     RD_LOOP_W)*2 + D_TYPE_W;
@@ -74,87 +74,87 @@ module dnn_accelerator_tb_ami;
 
 // AMI Stuff
 
-	// Simple Dram instances
-	MemReq  sd_mem_req_in[AMI_NUM_CHANNELS-1:0];
-	MemResp sd_mem_resp_out[AMI_NUM_CHANNELS-1:0];
-	wire    sd_mem_resp_grant_in[AMI_NUM_CHANNELS-1:0];
-	wire    sd_mem_req_grant_out[AMI_NUM_CHANNELS-1:0];
+    // Simple Dram instances
+    MemReq  sd_mem_req_in[AMI_NUM_CHANNELS-1:0];
+    MemResp sd_mem_resp_out[AMI_NUM_CHANNELS-1:0];
+    wire    sd_mem_resp_grant_in[AMI_NUM_CHANNELS-1:0];
+    wire    sd_mem_req_grant_out[AMI_NUM_CHANNELS-1:0];
 
-	genvar channel_num;
-	generate
-		for (channel_num = 0; channel_num < AMI_NUM_CHANNELS; channel_num = channel_num + 1) begin: sd_inst
-			SimSimpleDram
-			#(
-				.DATA_WIDTH(512), // 64 bytes (512 bits)
-				.LOG_SIZE(10),
-				.LOG_Q_SIZE(4)
-			)
-			simpleDramChannel
-			(
-				.clk(clk),
-				.rst(reset),
-				.mem_req_in(sd_mem_req_in[channel_num]),
-				.mem_req_grant_out(sd_mem_req_grant_out[channel_num]),
-				.mem_resp_out(sd_mem_resp_out[channel_num]),
-				.mem_resp_grant_in(sd_mem_resp_grant_in[channel_num])
-			);
-		end
-	endgenerate
+    genvar channel_num;
+    generate
+        for (channel_num = 0; channel_num < AMI_NUM_CHANNELS; channel_num = channel_num + 1) begin: sd_inst
+            SimSimpleDram
+            #(
+                .DATA_WIDTH(512), // 64 bytes (512 bits)
+                .LOG_SIZE(10),
+                .LOG_Q_SIZE(4)
+            )
+            simpleDramChannel
+            (
+                .clk(clk),
+                .rst(reset),
+                .mem_req_in(sd_mem_req_in[channel_num]),
+                .mem_req_grant_out(sd_mem_req_grant_out[channel_num]),
+                .mem_resp_out(sd_mem_resp_out[channel_num]),
+                .mem_resp_grant_in(sd_mem_resp_grant_in[channel_num])
+            );
+        end
+    endgenerate
 
-	// From apps to AMI
-	reg         app_enable[AMI_NUM_APPS-1:0];
-	reg         port_enable[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
-	AMIRequest	mem_req_in[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
-	wire        mem_resp_grant_in[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
-	
-	// From AMI to apps
-	wire        mem_req_grant_out[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];	
-	AMIResponse mem_resp_out[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
-	
-	AmorphOSMem2SDRAM ami_mem_system
-	(
+    // From apps to AMI
+    reg         app_enable[AMI_NUM_APPS-1:0];
+    reg         port_enable[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
+    AMIRequest  mem_req_in[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
+    wire        mem_resp_grant_in[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
+    
+    // From AMI to apps
+    wire        mem_req_grant_out[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];    
+    AMIResponse mem_resp_out[AMI_NUM_APPS-1:0][AMI_NUM_PORTS-1:0];
+    
+    AmorphOSMem2SDRAM ami_mem_system
+    (
     // User clock and reset
-		.clk(clk),
-		.rst(reset),
-		// Enable signals
-		.app_enable (app_enable),
-		.port_enable (port_enable),
-		// SimpleDRAM interface to the apps
-		// Submitting requests
-		.mem_req_in(mem_req_in),
-		.mem_req_grant_out(mem_req_grant_out),
-		// Reading responses
-		.mem_resp_out(mem_resp_out),
-		.mem_resp_grant_in(mem_resp_grant_in),
-		// Interface to SimpleDRAM modules per channel
-		.ch2sdram_req_out(sd_mem_req_in),
-		.ch2sdram_req_grant_in(sd_mem_req_grant_out),
-		.ch2sdram_resp_in(sd_mem_resp_out),
-		.ch2sdram_resp_grant_out(sd_mem_resp_grant_in)
-	);
+        .clk(clk),
+        .rst(reset),
+        // Enable signals
+        .app_enable (app_enable),
+        .port_enable (port_enable),
+        // SimpleDRAM interface to the apps
+        // Submitting requests
+        .mem_req_in(mem_req_in),
+        .mem_req_grant_out(mem_req_grant_out),
+        // Reading responses
+        .mem_resp_out(mem_resp_out),
+        .mem_resp_grant_in(mem_resp_grant_in),
+        // Interface to SimpleDRAM modules per channel
+        .ch2sdram_req_out(sd_mem_req_in),
+        .ch2sdram_req_grant_in(sd_mem_req_grant_out),
+        .ch2sdram_resp_in(sd_mem_resp_out),
+        .ch2sdram_resp_grant_out(sd_mem_resp_grant_in)
+    );
 
-	initial begin
-		app_enable[0] = 1'b1;
-		port_enable[0][0] = 1'b1;
-		port_enable[0][1] = 1'b1;	
-	end
-	
-	
+    initial begin
+        app_enable[0] = 1'b1;
+        port_enable[0][0] = 1'b1;
+        port_enable[0][1] = 1'b1;    
+    end
+    
+    
 // End AMI Stuff  
   
-    always @(posedge clk)
+  always @(posedge clk)
     if (reset || start)
       read_count <= 0;
-   // else if (M_AXI_RVALID && M_AXI_RREADY)
-   else if ((mem_req_in[0][0].valid && mem_req_grant_out[0][0] && !mem_req_in[0][0].isWrite) || (mem_req_in[0][1].valid && mem_req_grant_out[0][1] && !mem_req_in[0][1].isWrite))  
-	read_count <= read_count + 1;
+    // else if (M_AXI_RVALID && M_AXI_RREADY)
+    else if ((mem_req_in[0][0].valid && mem_req_grant_out[0][0] && !mem_req_in[0][0].isWrite) || (mem_req_in[0][1].valid && mem_req_grant_out[0][1] && !mem_req_in[0][1].isWrite))  
+      read_count <= read_count + 1;
 
   always @(posedge clk)
     if (reset || start)
       write_count <= 0;
     //else if (M_AXI_WVALID && M_AXI_WREADY)
     else if ((mem_req_in[0][1].valid && mem_req_grant_out[0][0] && mem_req_in[0][0].isWrite) || (mem_req_in[0][1].valid && mem_req_grant_out[0][1] && mem_req_in[0][1].isWrite))  
-	  write_count <= write_count + 1;
+      write_count <= write_count + 1;
   
 // ==================================================================
   clk_rst_driver
@@ -164,7 +164,7 @@ module dnn_accelerator_tb_ami;
     .reset                    ( reset                    )
   );
 // ==================================================================
-
+    
 // ==================================================================
 // DnnWeaver
 //
@@ -207,29 +207,29 @@ module dnn_accelerator_tb_ami;
     .start                    ( start                    ),
     .done                     ( done                     ),
 
-	// Debug signals
-	.dbg_kw (dbg_kw),
+    // Debug signals
+    .dbg_kw (dbg_kw),
     .dbg_kh(dbg_kh),
-	.dbg_iw(dbg_iw),
-	.dbg_ih(dbg_ih),
-	.dbg_ic(dbg_ic),
-	.dbg_oc(dbg_oc),
-	.buffer_read_count(buffer_read_count),
-	.stream_read_count(stream_read_count),
-	.inbuf_count(inbuf_count),
-	.pu_write_valid(pu_write_valid),
-	.wr_cfg_idx(wr_cfg_idx),
-	.rd_cfg_idx(rd_cfg_idx),
-	.outbuf_push(outbuf_push),
-	.pu_controller_state(pu_controller_state),
-	.vecgen_state(vecgen_state),
-	.vecgen_read_count(vecgen_read_count),		
-	// Memory signals
-	.flush_buffer (1'b0), // TODO: Actually connect it
-	.mem_req(mem_req_in[0]),
-	.mem_req_grant(mem_req_grant_out[0]),
-	.mem_resp(mem_resp_out[0]),
-	.mem_resp_grant(mem_resp_grant_in[0])
+    .dbg_iw(dbg_iw),
+    .dbg_ih(dbg_ih),
+    .dbg_ic(dbg_ic),
+    .dbg_oc(dbg_oc),
+    .buffer_read_count(buffer_read_count),
+    .stream_read_count(stream_read_count),
+    .inbuf_count(inbuf_count),
+    .pu_write_valid(pu_write_valid),
+    .wr_cfg_idx(wr_cfg_idx),
+    .rd_cfg_idx(rd_cfg_idx),
+    .outbuf_push(outbuf_push),
+    .pu_controller_state(pu_controller_state),
+    .vecgen_state(vecgen_state),
+    .vecgen_read_count(vecgen_read_count),        
+    // Memory signals
+    .flush_buffer (1'b0), // TODO: Actually connect it
+    .mem_req(mem_req_in[0]),
+    .mem_req_grant(mem_req_grant_out[0]),
+    .mem_resp(mem_resp_out[0]),
+    .mem_resp_grant(mem_resp_grant_in[0])
   );
 // ==================================================================
 
@@ -270,7 +270,7 @@ wire wr_flush;
     .wr_done                  ( wr_done                  ),
     .wr_req_size              ( wr_req_size              ),
     .wr_addr                  ( wr_addr                  ),
-	.wr_flush                 ( wr_flush)
+    .wr_flush                 ( wr_flush)
   );
 
 // ==================================================================
@@ -397,7 +397,7 @@ task initialize_stream;
     $display("Initializing stream data at %h", addr);
     $display("Stream dimensions %d, %d, %d, %d", dim0, dim1, dim2, dim3);
     d2_padded = (dim2 < NUM_PE ? 1 : dim2 % NUM_PE == 0 ? dim2/NUM_PE : dim2/NUM_PE+1)  * (NUM_PE < 4 ? 1 : NUM_PE % 4 == 0 ? NUM_PE/4 : NUM_PE/4+1)  * 4;
-	                                                                    
+                                                                        
 
     addr = (addr - 32'h08000000) >> 1;
     $display("Padded dimensions = %d", d2_padded);

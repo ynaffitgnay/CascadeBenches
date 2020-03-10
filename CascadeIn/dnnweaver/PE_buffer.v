@@ -27,7 +27,7 @@ module PE_buffer
     reg     [ADDR_WIDTH-1:0]        rd_pointer;             //Read Pointer
     reg     [ADDR_WIDTH-1:0]        rd_pointer_checkpoint;  //Read Pointer
     reg     [ADDR_WIDTH  :0]        fifo_count_checkpoint;  //Read Pointer
-	(* ram_style = TYPE *)
+    (* ram_style = TYPE *)
     reg     [DATA_WIDTH-1:0]        mem[0:RAM_DEPTH-1];     //Memory
 // ******************************************************************
 // INSTANTIATIONS
@@ -35,33 +35,33 @@ module PE_buffer
 
     always @ (FIFO_COUNT)
     begin : FIFO_STATUS
-    	EMPTY   = (FIFO_COUNT == 0);
-    	FULL    = (FIFO_COUNT == RAM_DEPTH);
+        EMPTY   = (FIFO_COUNT == 0);
+        FULL    = (FIFO_COUNT == RAM_DEPTH);
     end
     
     always @ (posedge CLK)
     begin : FIFO_COUNTER
-    	if (RESET)
-    		FIFO_COUNT <= 0;
+        if (RESET)
+            FIFO_COUNT <= 0;
 
         else if (RESTORE_RD_ADDR)
             FIFO_COUNT <= fifo_count_checkpoint;
-    	
-    	else if (PUSH && !POP && !FULL)
-    		FIFO_COUNT <= FIFO_COUNT + 1;
-    		
-    	else if (POP && !PUSH && !EMPTY)
-    		FIFO_COUNT <= FIFO_COUNT - 1;
+        
+        else if (PUSH && !POP && !FULL)
+            FIFO_COUNT <= FIFO_COUNT + 1;
+            
+        else if (POP && !PUSH && !EMPTY)
+            FIFO_COUNT <= FIFO_COUNT - 1;
     end
 
     always @ (posedge CLK)
     begin : WRITE_PTR
-    	if (RESET) begin
-       		wr_pointer <= 0;
-    	end 
+        if (RESET) begin
+               wr_pointer <= 0;
+        end 
         else if (PUSH) begin
-    		wr_pointer <= wr_pointer + 1;
-    	end
+            wr_pointer <= wr_pointer + 1;
+        end
     end
 
     always @ (posedge CLK)
@@ -88,12 +88,12 @@ module PE_buffer
     
     always @ (posedge CLK)
     begin : READ_PTR
-    	if (RESET) begin
-    		rd_pointer <= 0;
-    	end
+        if (RESET) begin
+            rd_pointer <= 0;
+        end
         else if (POP && !RESTORE_RD_ADDR && !EMPTY) begin
-    		rd_pointer <= rd_pointer + 1;
-    	end
+            rd_pointer <= rd_pointer + 1;
+        end
         else if (RESTORE_RD_ADDR) begin
             rd_pointer <= rd_pointer_checkpoint;
         end
@@ -102,20 +102,20 @@ module PE_buffer
     always @ (posedge CLK)
     begin : WRITE
         if (PUSH && !FULL) begin
-    		mem[wr_pointer] <= DATA_IN;
+            mem[wr_pointer] <= DATA_IN;
         end
     end
     
     always @ (posedge CLK)
     begin : READ
         if (RESET) begin
-	    	DATA_OUT <= 0;
+            DATA_OUT <= 0;
         end
         if (POP && !EMPTY) begin
-    		DATA_OUT <= mem[rd_pointer];
+            DATA_OUT <= mem[rd_pointer];
         end
         else begin
-    		DATA_OUT <= DATA_OUT;
+            DATA_OUT <= DATA_OUT;
         end
     end
 

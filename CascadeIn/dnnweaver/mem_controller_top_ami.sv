@@ -329,7 +329,7 @@ endgenerate
 // ==================================================================
 // OutBuf - Output Buffer
 // ==================================================================
-	
+  
 generate
   for (i=0; i<NUM_PU; i=i+1)
   begin: OUTPUT_BUFFER_GEN
@@ -497,12 +497,12 @@ endgenerate
 
   /*
   always @(posedge clk) begin
-	if (buffer_read_pop) begin 
-		$display("MCT: Popping read buffer");
-	end
-	if (buffer_read_push) begin
-		$display("MCT: Pushing read buffer");
-	end
+  if (buffer_read_pop) begin 
+    $display("MCT: Popping read buffer");
+  end
+  if (buffer_read_push) begin
+    $display("MCT: Pushing read buffer");
+  end
   end
   */
   

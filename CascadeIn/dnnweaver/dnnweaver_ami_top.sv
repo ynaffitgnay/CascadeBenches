@@ -1,6 +1,8 @@
 `include "common.vh"
-import ShellTypes::*;
-import AMITypes::*;
+//import ShellTypes::*;
+`include "ShellTypes.sv"
+//import AMITypes::*;
+`include "AMITypes.sv"
 
 module dnnweaver_ami_top #(
 // ******************************************************************
@@ -30,7 +32,7 @@ module dnnweaver_ami_top #(
   input  wire                                        clk,
   input  wire                                        reset,
   input  wire                                        start,
-  input  wire										 flush_buffer, // TODO: Actually connect it
+  input  wire                                         flush_buffer, // TODO: Actually connect it
   output wire                                        done,
   // Debug
   output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_kw,
@@ -61,77 +63,77 @@ module dnnweaver_ami_top #(
   
 );
 
-	// Signals between DNNWeaver and the BlockBuffer
-	AMIRequest reqIn;
-	wire reqIn_grant;
-	AMIResponse respOut;
-	wire respOut_grant;
+    // Signals between DNNWeaver and the BlockBuffer
+    AMIRequest reqIn;
+    wire reqIn_grant;
+    AMIResponse respOut;
+    wire respOut_grant;
 
-	// Block buffer
-	BlockBuffer
-	block_buffer
-	(
-		// General signals
-		.clk (clk),
-		.rst (reset),
-		.flush_buffer (1'b0),
-		// Interface to App
-		.reqIn (reqIn),
-		.reqIn_grant (reqIn_grant),
-		.respOut (respOut),
-		.respOut_grant (respOut_grant),
-		// Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
-		.reqOut(mem_req), // port 0 is the rd port, port 1 is the wr port
-		.reqOut_grant(mem_req_grant),
-		.respIn(mem_resp),
-		.respIn_grant(mem_resp_grant)
-	);
+    // Block buffer
+    BlockBuffer
+    block_buffer
+    (
+        // General signals
+        .clk (clk),
+        .rst (reset),
+        .flush_buffer (1'b0),
+        // Interface to App
+        .reqIn (reqIn),
+        .reqIn_grant (reqIn_grant),
+        .respOut (respOut),
+        .respOut_grant (respOut_grant),
+        // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
+        .reqOut(mem_req), // port 0 is the rd port, port 1 is the wr port
+        .reqOut_grant(mem_req_grant),
+        .respIn(mem_resp),
+        .respIn_grant(mem_resp_grant)
+    );
 
-	
-	dnn_accelerator_ami #(
-	// INPUT PARAMETERS
-	.NUM_PE                   ( NUM_PE                   ),
-	.NUM_PU                   ( NUM_PU                   ),
-	.ADDR_W                   ( ADDR_W                   ),
-	.AXI_DATA_W               ( DATA_W                   ),
-	.BASE_ADDR_W              ( BASE_ADDR_W              ),
-	.OFFSET_ADDR_W            ( OFFSET_ADDR_W            ),
-	.RD_LOOP_W                ( RD_LOOP_W                ),
-	.TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            ),
-	.D_TYPE_W                 ( D_TYPE_W                 ),
-	.ROM_ADDR_W               ( ROM_ADDR_W               )
-	) 
-	accelerator_inst 
-	( // PORTS
-	.clk                      ( clk                      ),
-	.reset                    ( reset                    ),
-	.start                    ( start                    ),
-	.done                     ( done                     ),
-	// Debug
-	.dbg_kw (dbg_kw),
+    
+    dnn_accelerator_ami #(
+    // INPUT PARAMETERS
+    .NUM_PE                   ( NUM_PE                   ),
+    .NUM_PU                   ( NUM_PU                   ),
+    .ADDR_W                   ( ADDR_W                   ),
+    .AXI_DATA_W               ( DATA_W                   ),
+    .BASE_ADDR_W              ( BASE_ADDR_W              ),
+    .OFFSET_ADDR_W            ( OFFSET_ADDR_W            ),
+    .RD_LOOP_W                ( RD_LOOP_W                ),
+    .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            ),
+    .D_TYPE_W                 ( D_TYPE_W                 ),
+    .ROM_ADDR_W               ( ROM_ADDR_W               )
+    ) 
+    accelerator_inst 
+    ( // PORTS
+    .clk                      ( clk                      ),
+    .reset                    ( reset                    ),
+    .start                    ( start                    ),
+    .done                     ( done                     ),
+    // Debug
+    .dbg_kw (dbg_kw),
     .dbg_kh(dbg_kh),
-	.dbg_iw(dbg_iw),
-	.dbg_ih(dbg_ih),
-	.dbg_ic(dbg_ic),
-	.dbg_oc(dbg_oc),
-	.buffer_read_count(buffer_read_count),
-	.stream_read_count(stream_read_count),
-	.inbuf_count(inbuf_count),
-	.pu_write_valid(pu_write_valid),
-	.wr_cfg_idx(wr_cfg_idx),
-	.rd_cfg_idx(rd_cfg_idx),
-	.outbuf_push(outbuf_push),
-	.pu_controller_state(pu_controller_state),
-	.vecgen_state(vecgen_state),
-	.vecgen_read_count(vecgen_read_count),
-	// AMI memory
-	.mem_req                  ( reqIn                    ),
-	.mem_req_grant            ( reqIn_grant              ),
-	.mem_resp                 ( respOut                  ),
-	.mem_resp_grant           ( respOut_grant            ),
-	.l_inc                    ( l_inc)
+    .dbg_iw(dbg_iw),
+    .dbg_ih(dbg_ih),
+    .dbg_ic(dbg_ic),
+    .dbg_oc(dbg_oc),
+    .buffer_read_count(buffer_read_count),
+    .stream_read_count(stream_read_count),
+    .inbuf_count(inbuf_count),
+    .pu_write_valid(pu_write_valid),
+    .wr_cfg_idx(wr_cfg_idx),
+    .rd_cfg_idx(rd_cfg_idx),
+    .outbuf_push(outbuf_push),
+    .pu_controller_state(pu_controller_state),
+    .vecgen_state(vecgen_state),
+    .vecgen_read_count(vecgen_read_count),
+    // AMI memory
+    .mem_req                  ( reqIn                    ),
+    .mem_req_grant            ( reqIn_grant              ),
+    .mem_resp                 ( respOut                  ),
+    .mem_resp_grant           ( respOut_grant            ),
+    .l_inc                    ( l_inc)
  
 
-	);
+    );
 
 endmodule

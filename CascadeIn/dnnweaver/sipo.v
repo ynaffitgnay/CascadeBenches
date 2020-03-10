@@ -32,7 +32,7 @@ module sipo
     assign parallel_load = shift_count == NUM_SHIFTS;
     assign ready = 1'b1;
     wire parallel_load_d;
-	assign out_valid = !parallel_load_d && parallel_load;
+    assign out_valid = !parallel_load_d && parallel_load;
     assign data_out = shift;
 
     always @(posedge clk)
