@@ -77,6 +77,8 @@ parameter PCIE_PAD_WIDTH          = `C_LOG_2(PCIE_DATA_WIDTH/8);
 //endpackage
 `endif
 
+
+// This is how you would use these "structs"
 //wire [`MEMREQ_BUS_WIDTH - 1:0] x;
 //assign x[`MemReq_valid] = 1;
 //assign x[`MemReq_isWrite] = 0;
