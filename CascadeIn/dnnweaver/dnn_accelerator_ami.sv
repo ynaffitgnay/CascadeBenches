@@ -33,12 +33,12 @@ module dnn_accelerator_ami #(
   input  wire                                        start,
   output wire                                        done,
   // Debug
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_kw,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_kh,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_iw,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_ih,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_ic,
-  output wire [ LAYER_PARAM_WIDTH                   -1 : 0 ]        dbg_oc,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_kw,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_kh,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_iw,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_ih,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_ic,
+  output wire [ LAYER_PARAM_WIDTH    -1 : 0 ]        dbg_oc,
 
   output wire [ 32                   -1 : 0 ]        buffer_read_count,
   output wire [ 32                   -1 : 0 ]        stream_read_count,
@@ -57,7 +57,7 @@ module dnn_accelerator_ami #(
   input                               mem_req_grant  ,
   input  AMIResponse                  mem_resp       ,
   output                              mem_resp_grant ,
-  output                               l_inc
+  output                              l_inc
   
 );
   //localparam integer NUM_PE             = `num_pe;
