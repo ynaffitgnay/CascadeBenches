@@ -75,7 +75,7 @@ module test(clk);
 
   reg[31:0] ctr; // Keep track of the current time
 
-  reg loops;  // count the number of loops
+  reg[31:0] loops;  // count the number of loops
 
 
   reg  [383:0]  tv[283:0];  // Test vectors
