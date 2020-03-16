@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 module fifo
 #(  // Parameters
     parameter   DATA_WIDTH          = 64,
@@ -26,13 +26,13 @@ module fifo
 reg     [ADDR_WIDTH-1:0]        wr_pointer;             //Write Pointer
 reg     [ADDR_WIDTH-1:0]        rd_pointer;             //Read Pointer
 //(* ram_style = TYPE *)
-reg     [DATA_WIDTH-1:0]        mem[0:RAM_DEPTH-1]/*synthesis ramstyle = "MLAB" */;     //Memory
+    reg     [DATA_WIDTH-1:0]        mem[RAM_DEPTH-1:0]; //mem[0:RAM_DEPTH-1]/*synthesis ramstyle = "MLAB" */;     //Memory
 // ******************************************************************
 // INSTANTIATIONS
 // ******************************************************************
 initial begin
   if (INITIALIZE_FIFO == "yes") begin
-    $readmemh(INIT, mem, 0, RAM_DEPTH-1);
+    //$readmemh(INIT, mem, 0, RAM_DEPTH-1);  // don't do anything here! Cascade doesn't support readmemh
   end
 end
 
