@@ -21,114 +21,88 @@ module test_status
 //    test_fail;
 //  end
 //endtask
-    reg [31:0] ctr;  // keep track of number of cycles into current loop
-    reg [2:0] state;
 
-    parameter idle = 3'd0;
-    parameter start = 3'd1;
-    parameter check_status = 3'd2;
-    parameter test_fail = 3'd3;
-    parameter test_pass = 3'd4;
-    parameter finish = 3'd5;
 
-    initial begin
-        ctr <= 0;
-        state <= start;
+    // THIS LEADS TO INCORRECT BEHAVIOR!!!!
+    //always @(*) begin
+    //    if (reset) begin
+    //        $write("%c[1;34m",27);
+    //        $display ("***********************************************");
+    //        $display ("%s - Test Begin", PREFIX);
+    //        $display ("***********************************************");
+    //        $write("%c[0m",27);
+    //        $display();
+    //    end else if (!pass && fail) begin
+    //        $display();
+    //        $write("%c[1;31m",27);
+    //        $display ("***********************************************");
+    //        $display ("%s - Test Failed", PREFIX);
+    //        $display ("***********************************************");
+    //        $write("%c[0m",27);
+    //        $display();
+    //    end else if (pass && !fail) begin
+    //        $display();
+    //        $write("%c[1;32m",27);
+    //        $display ("***********************************************");
+    //        $display ("%s - Test Passed", PREFIX);
+    //        $display ("***********************************************");
+    //        $write("%c[0m",27);
+    //        $display();
+    //    end else if (pass && fail) begin
+    //        $display();
+    //        $display ("***********************************************");
+    //        $display ("%s - Test Finished", PREFIX);
+    //        $display ("***********************************************");
+    //        $display();
+    //    end            
+    //end // always @ (*)
+
+    always @(reset) begin
+        if (rst) begin
+            $write("%c[1;34m",27);
+            $display ("***********************************************");
+            $display ("%s - Test Begin", PREFIX);
+            $display ("***********************************************");
+            $write("%c[0m",27);
+            $display();
+        end
     end
 
-    always @(posedge clk) begin
-        ctr <= ctr + 1;
+    always @(pass) begin
+        if (pass && !fail) begin
+            $display();
+            $write("%c[1;32m",27);
+            $display ("***********************************************");
+            $display ("%s - Test Passed", PREFIX);
+            $display ("***********************************************");
+            $write("%c[0m",27);
+            $display();
+        end else if (pass && fail) begin
+            $display();
+            $display ("***********************************************");
+            $display ("%s - Test Finished", PREFIX);
+            $display ("***********************************************");
+            $display();
+        end
+    end
 
-        if (reset) begin
-            ctr <= 0;
-            state <= start;
-        end else begin
-            case(state)
-                idle : begin
-                    // Don't do anything here
-                end
-
-                start : begin
-                    if (ctr == 0) begin
-                        $write("%c[1;34m",27);
-                        $display ("***********************************************");
-                        $display ("%s - Test Begin", PREFIX);
-                        $display ("***********************************************");
-                        $write("%c[0m",27);
-                        $display();
-                    end else begin
-                        ctr <= 0;
-                        state <= check_status;
-                    end // else: !if(ctr == 0)
-                end // case: start
-
-                check_status : begin
-                    if ((!reset) && (pass || fail)) begin
-                        if (fail == 1'b1)
-                            state <= test_fail;
-                        else if (pass == 1'b1)
-                            state <= test_pass;
-
-                        ctr <= 0;
-                    end
-                end
-
-                test_fail : begin
-                    if (ctr == 0) begin
-                        $display();
-                        $write("%c[1;31m",27);
-                        $display ("***********************************************");
-                        $display ("%s - Test Failed", PREFIX);
-                        $display ("***********************************************");
-                        $write("%c[0m",27);
-                        $display();
-                        //$fatal;
-
-                    end else begin
-                        ctr <= 0;
-                        state <= finish;
-                    end // else: !if(ctr == 0)
-                end // case: test_fail
-
-                test_pass : begin
-                    if (ctr == 0) begin
-                        $display();
-                        $write("%c[1;32m",27);
-                        $display ("***********************************************");
-                        $display ("%s - Test Passed", PREFIX);
-                        $display ("***********************************************");
-                        $write("%c[0m",27);
-                        $display();
-                        //$finish;
-
-                    end else begin // if (ctr == 0)
-                        ctr <= 0;
-                        state <= finish;
-                    end // else: !if(ctr == 0)
-                end // case: test_pass
-
-                finish : begin
-                    if (ctr == 0) begin
-                        $display();
-                        $display ("***********************************************");
-                        $display ("%s - Test Finished", PREFIX);
-                        $display ("***********************************************");
-                        $display();
-                        //$finish;
-                        
-                    end else begin
-                        ctr <= 0;
-                        state <= idle;
-                    end
-                end
-
-                default : begin
-                    state <= idle;
-                end
-
-            endcase // case (state)
-        end // else: !if(reset)
-    end // always @ (posedge clk)
+    always @(fail) begin
+        if (!pass && fail) begin
+            $display();
+            $write("%c[1;31m",27);
+            $display ("***********************************************");
+            $display ("%s - Test Failed", PREFIX);
+            $display ("***********************************************");
+            $write("%c[0m",27);
+            $display();
+        end else if (pass && fail) begin
+            $display();
+            $display ("***********************************************");
+            $display ("%s - Test Finished", PREFIX);
+            $display ("***********************************************");
+            $display();
+        end            
+    end
 endmodule
 
 //reg p;
@@ -138,3 +112,34 @@ endmodule
 //initial rst = 0;
 //
 //test_status t(clock.val, rst, f, p);
+//
+//
+//// Start tests
+//initial rst = 1;
+//initial rst = 0;
+//
+//
+//initial p = 1; // get a pass here
+//
+//// Start a new test
+//initial rst = 1;
+//
+//initial rst = 0;
+//
+//// pass a test
+//initial begin  // nothing happens here bc pass and fail haven't actually changed...
+//  p = 1;
+//  f = 0;
+//end
+//
+//// fail a test
+//initial begin
+//  p = 0;
+//  f = 1;
+//end
+//
+//// finish
+//initial begin
+//  p = 1;
+//  f = 1;
+//end
