@@ -1,12 +1,21 @@
-module read_info_tb;
+`include "common.vh"
+`include "test_status.v"
+`include "read_info_tb_driver.v"
+`include "read_info.v"
+
+module read_info_tb
+(
+  input wire clk,
+  input wire reset
+);
 
   parameter integer NUM_PU = 1;
   parameter integer D_TYPE_W = 2;
   parameter integer RD_SIZE_W = 20;
   parameter integer PU_ID_W = `C_LOG_2(NUM_PU)+1;
 
-  wire clk;
-  wire reset;
+  //wire clk;
+  //wire reset;
   wire inbuf_pop;
   wire inbuf_empty;
   wire rd_req;
@@ -19,25 +28,31 @@ module read_info_tb;
   wire stream_push;
   wire buffer_push;
 
-  clk_rst_driver
-  clkgen(
-    .clk                      ( clk                      ),
-    .reset_n                  (                          ),
-    .reset                    ( reset                    )
-  );
+  wire read_info_full;
+  wire buffer_full;
+  wire stream_full;
 
-  initial
-  begin
-    $dumpfile("read_info_tb.vcd");
-    $dumpvars(0,read_info_tb);
-  end
 
-  initial begin
-    driver.status.start;
-    wait (reset == 0);
-    driver.send_random_read_req;
-    #10000 $finish;
-  end
+
+  //clk_rst_driver
+  //clkgen(
+  //  .clk                      ( clk                      ),
+  //  .reset_n                  (                          ),
+  //  .reset                    ( reset                    )
+  //);
+
+  //initial
+  //begin
+  //  $dumpfile("read_info_tb.vcd");
+  //  $dumpvars(0,read_info_tb);
+  //end
+
+  //initial begin
+  //  driver.status.start;
+  //  wait (reset == 0);
+  //  driver.send_random_read_req;
+  //  #10000 $finish;
+  //end
 
 read_info_driver #(
     .NUM_PU                   ( NUM_PU                   ),
@@ -88,3 +103,11 @@ u_read_info
 );
 
 endmodule
+
+reg rst;
+
+initial rst = 0;
+
+
+read_info_tb ritb(clock.val, rst);
+
