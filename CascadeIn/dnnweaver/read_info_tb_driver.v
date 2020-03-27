@@ -37,9 +37,10 @@ localparam integer RD_REQ_D_TYPE_W = 1;
 
   parameter idle = 3'd0;
   parameter start = 3'd1;
-  parameter send_reqs_init = 3'd2;
-  parameter send_reqs_complete = 3'd3;
-  parameter finish = 3'd4;
+  parameter wait_read_info = 3'd2;
+  parameter send_reqs_init = 3'd3;
+  parameter send_reqs_complete = 3'd4;
+  parameter finish = 3'd5;
 
   integer d_0_count;
   integer d_1_count;
@@ -6153,39 +6154,52 @@ localparam integer RD_REQ_D_TYPE_W = 1;
           stream_full_idx <= 0;
 
           ctr <= 0;
-          state <= send_reqs_init;
+          state <= wait_read_info;
           counts_equal <= 0;
           counts_equal_ctr <= 0;
         end
-  
+
+        wait_read_info : begin
+          if (reqs_sent >= TESTCASES) begin
+            ctr <= 0;
+            state <= finish;
+
+          end else if (!read_info_full) begin
+            ctr <= 0;
+            state <= send_reqs_init;
+          end
+        end
+
+
         send_reqs_init : begin
-          if (read_info_full) begin
-            // wait here until it's not full
-            reqs_sent <= reqs_sent;
-          end else if (reqs_sent < TESTCASES) begin
+          //if (read_info_full) begin
+          //  // wait here until it's not full
+          //  reqs_sent <= reqs_sent;
+          //end else 
+          //if (reqs_sent < TESTCASES) begin
             //$display("State: send_reqs_init. Reqs_sent <= %d\n", reqs_sent);
 
             
-            rd_req <= 1;
-            rd_req_size <= rd_req_size_urands[size_idx];
-            rd_req_pu_id <= rd_req_pu_id_urands[pu_id_idx];
-            rd_req_d_type <= rd_req_d_type_urands[d_type_idx];
+          rd_req = 1;
+          rd_req_size = rd_req_size_urands[size_idx];
+          rd_req_pu_id = rd_req_pu_id_urands[pu_id_idx];
+          rd_req_d_type = rd_req_d_type_urands[d_type_idx];
 
-            read_count <= read_count + rd_req_size;
-            //$display ("Requesting %d reads of type %d", rd_req_size, rd_req_d_type);
-            if (rd_req_d_type == 0)
-              d_0_count <= d_0_count + rd_req_size;
-            else
-              d_1_count <= d_1_count + rd_req_size;
+          read_count = read_count + rd_req_size;
+          //$display ("Requesting %d reads of type %d", rd_req_size, rd_req_d_type);
+          if (rd_req_d_type == 0)
+            d_0_count = d_0_count + rd_req_size;
+          else
+            d_1_count = d_1_count + rd_req_size;
 
-            ctr <= 0;
-            state <= send_reqs_complete;
+          ctr <= 0;
+          state <= send_reqs_complete;
 
-          end else begin // if (reqs_sent < 1000)
-            //$display("State: send_reqs_init going to finish. Reqs_sent <= %d\n", reqs_sent);
-            ctr <= 0;
-            state <= finish;
-          end
+          //end else begin // if (reqs_sent < 1000)
+          //  //$display("State: send_reqs_init going to finish. Reqs_sent <= %d\n", reqs_sent);
+          //  ctr <= 0;
+          //  state <= finish;
+          //end
         end // case: send_reqs_init
 
         send_reqs_complete : begin
@@ -6193,7 +6207,7 @@ localparam integer RD_REQ_D_TYPE_W = 1;
           rd_req <= 0;
           reqs_sent <= reqs_sent + 1;
           ctr <= 0;
-          state <= send_reqs_init;
+          state <= wait_read_info;
         end
   
         finish : begin
