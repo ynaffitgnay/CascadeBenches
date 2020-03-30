@@ -25,14 +25,16 @@ module fifo
 // ******************************************************************
 reg     [ADDR_WIDTH-1:0]        wr_pointer;             //Write Pointer
 reg     [ADDR_WIDTH-1:0]        rd_pointer;             //Read Pointer
-//(* ram_style = TYPE *)
-    reg     [DATA_WIDTH-1:0]        mem[RAM_DEPTH-1:0]; //mem[0:RAM_DEPTH-1]/*synthesis ramstyle = "MLAB" */;     //Memory
+(* ram_style = TYPE *)
+reg     [DATA_WIDTH-1:0]        mem[RAM_DEPTH-1:0]; //mem[0:RAM_DEPTH-1]/*synthesis ramstyle = "MLAB" */;     //Memory
 // ******************************************************************
 // INSTANTIATIONS
 // ******************************************************************
 initial begin
   if (INITIALIZE_FIFO == "yes") begin
-    //$readmemh(INIT, mem, 0, RAM_DEPTH-1);  // don't do anything here! Cascade doesn't support readmemh
+    // don't do anything here! since we changed the endianness of the memory declaration,
+    // data this fifo would be initialized with is incorrect
+    //$readmemh(INIT, mem, 0, RAM_DEPTH-1);  
   end
 end
 
