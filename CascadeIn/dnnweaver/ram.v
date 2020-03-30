@@ -18,7 +18,7 @@ module ram
 );
 
   (* RAM_STYLE = RAM_TYPE *)
-  reg  [ DATA_WIDTH -1 : 0 ] mem [ 0 : 1<<ADDR_WIDTH ];
+  reg  [ DATA_WIDTH -1 : 0 ] mem [ 1<<ADDR_WIDTH : 0 ];
   reg[ADDR_WIDTH-1:0] rd_addr;
   reg[ADDR_WIDTH-1:0] wr_addr;
   reg[DATA_WIDTH-1:0] wr_data;
@@ -79,3 +79,15 @@ module ram
       s_read_data <= mem[rd_addr];
   end
 endmodule
+
+//reg rst;
+//reg s_read_req;
+//reg [11:0] s_read_addr;
+//wire [9:0] s_read_data;
+//reg s_write_req;
+//reg [11:0] s_write_addr;
+//reg [9:0] s_write_data;
+//
+//ram tr(clock.val, rst, s_read_req, s_read_addr, s_read_data, s_write_req, s_write_addr, s_write_data);
+
+
