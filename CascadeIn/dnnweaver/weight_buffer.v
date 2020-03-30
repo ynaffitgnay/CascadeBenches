@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
 module weight_buffer
 #(  // PARAMETERS
@@ -31,7 +31,7 @@ module weight_buffer
 // ******************************************************************
 // Wire and Regs
 // ******************************************************************
-  reg  [ MEM_WIDTH      -1 : 0 ] mem [ 0 : (1<<WR_ADDR_WIDTH) - 1 ];
+  reg  [ MEM_WIDTH      -1 : 0 ] mem [ (1<<WR_ADDR_WIDTH) - 1 : 0 ];
   reg  [ MEM_WIDTH      -1 : 0 ] mem_out;
   reg  [ MUX_SEL_WIDTH  -1 : 0 ] mux_sel, mux_sel_d;
 
@@ -95,3 +95,11 @@ module weight_buffer
   end
 
 endmodule
+
+reg rst;
+reg rdreq;
+wire [15:0] rddata;
+reg [6:0] rdaddr;
+reg wrreq;
+reg [63:0] wrdata;
+reg [4:0] wraddr;
