@@ -35,18 +35,12 @@ module ROM #(
     end else begin
       data_out <= 0;
     end
-    //$display("mem[%d] = %h\n", i, mem[i]);
-    //$display("i: %d", i);
-    $display("mem[0] = %h\n", mem[0]);
-    $display("mem[1] = %h\n", mem[1]);
-    $display("mem[2] = %h\n", mem[2]);
-    //$display("hello");
   end
 
 // ******************************************************************
 // Variables for cascade file interface
 // ******************************************************************
-integer lutstream = $fopen(INIT, "r"); //$fopen("input_files/dnnweaver/norm_lut_mif_hex.txt", "r"); //
+integer lutstream = $fopen(INIT, "r"); 
 integer i = 0;
 reg[DATA_WIDTH-1:0] val = 0;
 
@@ -70,9 +64,9 @@ reg[DATA_WIDTH-1:0] val = 0;
 
 endmodule // ROM
 
-reg r;
-reg [15:0] addr;
-reg en;
-wire [15:0] data;
-
-ROM#(.DATA_WIDTH(16), .ADDR_WIDTH(11)) tr(clock.val, r, addr, en, data);
+//reg r;
+//reg [15:0] addr;
+//reg en;
+//wire [15:0] data;
+//
+//ROM#(.DATA_WIDTH(16), .ADDR_WIDTH(11)) tr(clock.val, r, addr, en, data);

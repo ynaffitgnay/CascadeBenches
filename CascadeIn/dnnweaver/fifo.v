@@ -32,9 +32,8 @@ reg     [DATA_WIDTH-1:0]        mem[RAM_DEPTH-1:0]; //mem[0:RAM_DEPTH-1]/*synthe
 // ******************************************************************
 initial begin
   if (INITIALIZE_FIFO == "yes") begin
-    // don't do anything here! since we changed the endianness of the memory declaration,
-    // data this fifo would be initialized with is incorrect
-    //$readmemh(INIT, mem, 0, RAM_DEPTH-1);  
+    // don't do anything here!
+    // Can initialize each entry in mem if you want...
   end
 end
 

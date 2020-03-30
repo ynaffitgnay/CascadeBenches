@@ -141,7 +141,7 @@ module normalization
 
   ROM #(
     .DATA_WIDTH               ( OP_WIDTH                 ),
-    .ADDR_WIDTH               ( 16                        )
+    .ADDR_WIDTH               ( 11 /* 16 */                        )
   ) u_lrn_lut (
     .clk                      ( clk                      ),
     .reset                    ( reset                    ),
