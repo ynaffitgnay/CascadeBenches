@@ -1,5 +1,5 @@
 `include "common.vh"
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 /*
 * supported operations:
   * MULTIPLY      : OP = 000 or 0
@@ -155,4 +155,16 @@ end else begin
 end
 endgenerate
 
-endmodule
+endmodule // macc
+
+//reg rst;
+//reg en;
+//reg clr;
+//reg [2:0] opc;
+//reg [15:0] op0;
+//reg [15:0] op1;
+//reg [47:0] opadd;
+//wire [15:0] out;
+//
+//
+//macc tm(clock.val, rst, en, clr, opc, op0, op1, opadd, out);
