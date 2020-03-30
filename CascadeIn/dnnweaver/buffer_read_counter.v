@@ -1,4 +1,6 @@
 `include "common.vh"
+//`include "fifo.v"
+//`include "counter.v"
 module buffer_read_counter #(
   parameter integer NUM_PU = 1,
   parameter integer PU_LOOP_W = 20,
@@ -129,3 +131,18 @@ module buffer_read_counter #(
 
 
 endmodule
+
+
+// Instantiate a module
+//reg rst;
+//wire b1,b2,b3,b4;
+//wire [1:0] b5;
+//
+//wire b6, b7;
+//wire [19:0] b8;
+//wire [1:0] b9;
+//wire [1:0] b10;
+//
+//
+//buffer_read_counter btest(clock.val, rst, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10);
+
