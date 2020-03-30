@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 module multiplier #(
     parameter WIDTH_0 = 16,
     parameter WIDTH_1 = 16,
@@ -55,3 +55,13 @@ module multiplier #(
     end
 
 endmodule
+
+//reg rst;
+//reg en;
+//reg [15:0] mul0;
+//reg [15:0] mul1;
+//wire [47:0] out;
+//wire outvalid;
+//
+//
+//multiplier tm(clock.val, rst, en, mul0, mul1, out, outvalid);
