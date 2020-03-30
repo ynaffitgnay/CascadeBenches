@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 module register #(
     parameter NUM_STAGES = 1,
     parameter DATA_WIDTH = 1
@@ -47,3 +47,12 @@ endgenerate
 
 
 endmodule
+
+//reg rst;
+//parameter NS = 2;
+//parameter DW = 2;
+//wire[DW-1:0] din;
+//wire[DW-1:0] dout;
+//
+//register#(.NUM_STAGES(NS), .DATA_WIDTH(DW)) r(clock.val, rst, din, dout);
+
