@@ -67,10 +67,10 @@ assign m_unpacked_write_data = data[OUT_WIDTH-1:0];
 
 endmodule
 
-reg rst;
-wire b1;
-wire [127:0] b2;
-wire b3, b4, b5;
-wire [63:0] b6;
-
-data_unpacker dtest(clock.val, rst, b1, b2, b3, b4, b5, b6);
+//reg rst;
+//wire b1;
+//wire [127:0] b2;
+//wire b3, b4, b5;
+//wire [63:0] b6;
+//
+//data_unpacker dtest(clock.val, rst, b1, b2, b3, b4, b5, b6);
