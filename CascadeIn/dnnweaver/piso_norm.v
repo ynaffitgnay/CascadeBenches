@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 module piso_norm 
 #( // INPUT PARAMETERS
     parameter integer DATA_IN_WIDTH  = 64,
@@ -52,3 +52,13 @@ begin: DATA_SHIFT
 end
 
 endmodule
+
+//reg rst;
+//reg en;
+//reg [63:0] din;
+//wire rdy;
+//wire [15:0] dout;
+//wire outvalid;
+//
+//
+//piso_norm tpn(clock.val, rst, en, din, rdy, dout, outvalid);
