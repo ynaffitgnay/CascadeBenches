@@ -2,7 +2,7 @@
 module ROM #(
 // Parameters
   parameter   DATA_WIDTH          = 16,
-  parameter   INIT                = "input_files/dnnweaver/norm_lut_mif_hex.txt",
+  parameter   INIT                = "input_files/dnnweaver/norm_lut.mif",
   parameter   ADDR_WIDTH          = 6,
   parameter   TYPE                = "DISTRIBUTED",
   parameter   INITIALIZE_FIFO     = "yes"
@@ -37,7 +37,9 @@ module ROM #(
     end
     //$display("mem[%d] = %h\n", i, mem[i]);
     //$display("i: %d", i);
-    //$display("mem[0] = %h\n", mem[0]);
+    $display("mem[0] = %h\n", mem[0]);
+    $display("mem[1] = %h\n", mem[1]);
+    $display("mem[2] = %h\n", mem[2]);
     //$display("hello");
   end
 
@@ -54,34 +56,17 @@ reg[DATA_WIDTH-1:0] val = 0;
 // ******************************************************************
 
   initial begin
-    //`ifdef simulation
-    //  $readmemb("./hardware/include/norm_lut.vh", mem);
-    //`else
-    //  $readmemb("norm_lut.mif", mem);
-    //`endif
     for (i = 0; i < ROM_DEPTH; i = i + 1) begin
       if (!($feof(lutstream))) begin
-        //$fscanf(lutstream, "%b", val);
-        $fread(lutstream, val);
-        mem[i] = val;
-        //$display("mem[%d] = %h\n", i, mem[i]);
-        $display("val: %h\n", val);
-        //$display("%d", i);
-
-        //$display("hello\n");
+        $fscanf(lutstream, "%b", val);
+        mem[i] <= val;  
       end 
       else begin
         mem[i] <= 0;
       end // else: !if(!($feof(lutstream)))
-
     end // for (i = 0; i < ROM_DEPTH; i = i + 1)
-
-    for (i = 0; i < ROM_DEPTH; i = i + 1) begin
-      $display("mem[%d] = %h\n", i, mem[i]);
-      //$display("%d", i);
-    end
-  end
-
+  end // initial begin
+  
 
 endmodule // ROM
 
