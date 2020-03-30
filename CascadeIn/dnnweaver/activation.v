@@ -27,3 +27,10 @@ assign out = activation_data;
 
 
 endmodule
+
+reg rst;
+reg en;
+reg [15:0] in;
+reg [15:0] out;
+
+activation ta(clock.val, rst, en, in, out);
