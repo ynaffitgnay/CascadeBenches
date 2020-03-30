@@ -1,5 +1,6 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
+`include "register_1_bit_1_stage.v"
 module sipo
 #( // INPUT PARAMETERS
     parameter  DATA_IN_WIDTH  = 16,
@@ -62,9 +63,7 @@ module sipo
       end
     end
 
-    register #(
-    .NUM_STAGES               ( 1                        )
-    ) push_delay (
+    register_1_bit_1_stage push_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( parallel_load            ),
@@ -72,3 +71,12 @@ module sipo
     );
 
 endmodule
+
+reg rst;
+reg enable;
+reg [15:0] din;
+wire ready;
+wire [15:0] dout;
+wire out_valid;
+
+sipo ts(clock.val, rst, enable, din, ready, dout, out_valid);
