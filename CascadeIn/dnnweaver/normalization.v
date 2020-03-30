@@ -244,12 +244,12 @@ module normalization
 
 endmodule
 
-reg rst;
-reg en;
-reg [63:0] sqsum;
-reg [63:0] lrnctr;
-wire [63:0] nout;
-wire outvalid;
-
-normalization tn(clock.val, rst, sqsum, lrnctr, nout, outvalid);
+//reg rst;
+//reg en;
+//reg [63:0] sqsum;
+//reg [63:0] lrnctr;
+//wire [63:0] nout;
+//wire outvalid;
+//
+//normalization tn(clock.val, rst, sqsum, lrnctr, nout, outvalid);
 
