@@ -110,8 +110,8 @@ module test(clk);
   // NOTE: Cascade does not like input files to be outside of
   // the Cascade home directory. Make sure to copy these into
   // the home directory (at least until the path gets fixed)
-  integer instream = $fopen("test_in_bin.txt", "r");
-  integer encstream = $fopen("test_enc_bin.txt", "r");
+  integer instream = $fopen("input_files/adpcm/test_in_bin.txt", "r");
+  integer encstream = $fopen("input_files/adpcm/test_enc_bin.txt", "r");
   integer decstream = $fopen("test_dec_bin.txt", "r");
   
   initial begin
