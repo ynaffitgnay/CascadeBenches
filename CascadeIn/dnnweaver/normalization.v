@@ -1,9 +1,16 @@
-`timescale 1ns/1ps
+`include "register_1_bit_1_stage.v"
+`include "fifo.v"
+`include "piso_norm.v"
+`include "ROM.v"
+`include "multiplier.v"
+`include "sipo.v"
+
+//`timescale 1ns/1ps
 module normalization
 #( // INPUT PARAMETERS
   parameter integer OP_WIDTH      = 16,
   parameter integer NUM_PE        = 4,
-   parameter integer DATA_IN_WIDTH  = OP_WIDTH * NUM_PE,
+  parameter integer DATA_IN_WIDTH  = OP_WIDTH * NUM_PE,
   parameter integer DATA_OUT_WIDTH = OP_WIDTH * NUM_PE
 )( // PORTS
   input  wire                                         clk,
@@ -72,10 +79,10 @@ module normalization
   assign lrn_center_fifo_in = lrn_center;
   assign lrn_center_fifo_pop = sqsum_valid;
 
-  register #(1, 1)
+  register_1_bit_1_stage
   u_sqsum_vld (clk, reset, sqsum_fifo_pop, sqsum_valid);
 
-  register #(1, 1)
+  register_1_bit_1_stage
   u_lrn_vld (clk, reset, sqsum_valid, lrn_center_valid);
 
   always @(posedge clk)
@@ -236,3 +243,13 @@ module normalization
   assign done = enable_shifter[NUM_PE-1];
 
 endmodule
+
+reg rst;
+reg en;
+reg [63:0] sqsum;
+reg [63:0] lrnctr;
+wire [63:0] nout;
+wire outvalid;
+
+normalization tn(clock.val, rst, sqsum, lrnctr, nout, outvalid);
+
