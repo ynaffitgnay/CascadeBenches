@@ -1,4 +1,6 @@
-//`timescale 1ns/1ps
+`ifndef __register_1_bit_1_stage_v__
+`define __register_1_bit_1_stage_v__
+
 module register_1_bit_1_stage
 (
     input  wire                  CLK,
@@ -26,11 +28,11 @@ endgenerate
 
 
 endmodule
+`endif //  `ifndef __register_1_bit_1_stage_v__
 
 //reg rst;
 //wire din;
 //wire dout;
 //
 //register_1_bit r(clock.val, rst, din, dout);
-
 

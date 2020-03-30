@@ -1,4 +1,8 @@
 `include "common.vh"
+`include "fifo.v"
+`include "counter.v"
+`include "sipo.v"
+
 module serdes #(
 // ******************************************************************
 // Parameters
@@ -242,3 +246,14 @@ assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
 
 endmodule
+
+//reg rst;
+//reg [3:0] count;
+//reg s_write_flush, s_write_req;
+//wire s_write_ready;
+//reg [159:0] s_write_data;
+//wire m_write_req;
+//reg m_write_ready;
+//wire m_write_data;
+//
+//serdes ts(clock.val, rst, count, s_write_flush, s_write_req, s_write_ready, s_write_data, m_write_req, m_write_ready, m_write_data);
