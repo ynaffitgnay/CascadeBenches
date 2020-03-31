@@ -96,10 +96,12 @@ module weight_buffer
 
 endmodule
 
-reg rst;
-reg rdreq;
-wire [15:0] rddata;
-reg [6:0] rdaddr;
-reg wrreq;
-reg [63:0] wrdata;
-reg [4:0] wraddr;
+//reg rst;
+//reg rdreq;
+//wire [15:0] rddata;
+//reg [6:0] rdaddr;
+//reg wrreq;
+//reg [63:0] wrdata;
+//reg [4:0] wraddr;
+//
+//weight_buffer wb(clock.val, rst, rdreq, rddata, rdaddr, wrreq, wrdata, wraddr);
