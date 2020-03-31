@@ -1,7 +1,7 @@
-`ifndef __register_1_bit_1_stage_v__
-`define __register_1_bit_1_stage_v__
+`ifndef __register_1_stage_1_bit_v__
+`define __register_1_stage_1_bit_v__
 
-module register_1_bit_1_stage
+module register_1_stage_1_bit
 (
     input  wire                  CLK,
     input  wire                  RESET,
@@ -28,7 +28,7 @@ endgenerate
 
 
 endmodule
-`endif //  `ifndef __register_1_bit_1_stage_v__
+`endif //  `ifndef __register_1_stage_1_bit_v__
 
 //reg rst;
 //wire din;

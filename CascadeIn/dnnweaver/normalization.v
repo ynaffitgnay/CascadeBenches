@@ -1,4 +1,4 @@
-`include "register_1_bit_1_stage.v"
+`include "register_1_stage_1_bit.v"
 `include "fifo.v"
 `include "piso_norm.v"
 `include "ROM.v"
@@ -79,10 +79,10 @@ module normalization
   assign lrn_center_fifo_in = lrn_center;
   assign lrn_center_fifo_pop = sqsum_valid;
 
-  register_1_bit_1_stage
+  register_1_stage_1_bit
   u_sqsum_vld (clk, reset, sqsum_fifo_pop, sqsum_valid);
 
-  register_1_bit_1_stage
+  register_1_stage_1_bit
   u_lrn_vld (clk, reset, sqsum_valid, lrn_center_valid);
 
   always @(posedge clk)
