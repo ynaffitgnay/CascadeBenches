@@ -1,5 +1,11 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
+//`include "register.v"
+//`include "macc.v"
+//`include "ram.v"
+//`include "activation.v"
+//`include "fifo.v"
+
 module PE #(
   // INPUT PARAMETERS
   parameter integer PE_BUF_ADDR_WIDTH   = 10,
@@ -219,3 +225,25 @@ module PE #(
 
 
 endmodule
+
+//reg rst;
+//reg mask;
+//reg [29:0] ctrl;
+//reg src2sel;
+//reg[15:0] rd0;
+//reg[15:0] rd1;
+//reg[15:0] rd2;
+//wire[15:0] lrnctr;
+//wire[15:0] wrdata;
+//wire[15:0] pbrd;
+//reg pnrr;
+//reg[15:0] pnrd;
+//reg pnwr;
+//reg[9:0] pnwa;
+//wire wrvalid;
+//
+//PE tpe(clock.val, rst, mask, ctrl, src2sel, rd0, rd1, rd2, lrnctr, wrdata, pbrd, pnrr, pnrd, pnwr, pnwa, wrvalid);
+
+
+
+
