@@ -1,17 +1,17 @@
 
 module Counter64
 (
-    input                               clk,
-    input                               rst, 
+  input               clk,
+  input               rst, 
 	input								increment,
-	output[63:0]						count
+	output[63:0]				count
 
 );
 
 	reg[31:0]  lower;
 	reg[31:0]  upper;
-	logic[31:0] new_lower;
-	logic[31:0] new_upper;
+	reg[31:0] new_lower;
+	reg[31:0] new_upper;
 
 	assign count = {upper,lower};
 	
@@ -25,7 +25,7 @@ module Counter64
 		end
 	end
 
-	always_comb begin : counter64_update_logic
+	always @(*) begin : counter64_update_logic
 
 		new_lower = lower;
 		new_upper = upper;
@@ -43,3 +43,9 @@ module Counter64
 	end
 
 endmodule
+
+//reg rst;
+//reg increment;
+//wire [63:0] cnt;
+//
+//Counter64 tc64(clock.val, rst, increment, cnt);
