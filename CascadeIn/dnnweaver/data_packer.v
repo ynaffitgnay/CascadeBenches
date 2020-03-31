@@ -77,3 +77,16 @@ generate
 endgenerate
 
 endmodule
+
+
+//reg rst;
+//reg swrreq;
+//wire swrrdy;
+//reg [63:0] swrdata;
+//wire mwrreq;
+//reg mwrrdy;
+//wire [127:0] mwrdata;
+//
+//
+//data_packer tdp(clock.val, rst, swrreq, swrrdy, swrdata, mwrreq, mwrrdy, mwrdata);
+
