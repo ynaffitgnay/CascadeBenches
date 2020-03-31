@@ -1,4 +1,8 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
+`include "fifo.v"
+`include "register.v"
+`include "sipo.v"
+
 module pooling
 #(  // INPUT PARAMETERS
   parameter integer OP_WIDTH            = 16,
@@ -107,6 +111,8 @@ module pooling
   assign pool_fifo_push = write_req;
   assign write_ready = !pool_fifo_full;
 
+  wire pool_pad_row;
+
   assign {
     pool_pad_row,
     _pool_valid,
@@ -196,6 +202,8 @@ module pooling
       row_fifo_push <= _row_fifo_push;
   end
 
+  wire row_fifo_full;
+
   fifo#(
     .DATA_WIDTH               ( OP_WIDTH                 ),
     .ADDR_WIDTH               ( 7                        )
@@ -217,6 +225,8 @@ module pooling
     else
       pool_valid <= _pool_valid;
 
+  wire sipo_data_valid;
+
   sipo #(
     // INPUT PARAMETERS
     .DATA_IN_WIDTH            ( OP_WIDTH                 ),
@@ -236,3 +246,18 @@ module pooling
   assign read_req = sipo_data_valid;
 
 endmodule
+
+//reg rst;
+//wire rdy;
+//reg[6:0] ctrl;
+//reg[2:0] cfg;
+//reg[63:0] wrdat;
+//reg wrreq;
+//wire wrrdy;
+//wire[63:0] rddat;
+//wire rdreq;
+//reg rdrdy;
+//
+//
+//pooling tp(clock.val, rst, rdy, ctrl, cfg, wrdat, wrreq, wrrdy, rddat, rdreq, rdrdy);
+
