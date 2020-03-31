@@ -24,12 +24,12 @@ module FIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
 //parameter WIDTH     = 64; // bits wide
 //parameter LOG_DEPTH = 9;  // 2^LOG_DEPTH slots
 
-logic[WIDTH-1:0] buffer[(1 << LOG_DEPTH)-1:0];
+reg [WIDTH-1:0] buffer[(1 << LOG_DEPTH)-1:0];
 
-logic[LOG_DEPTH:0] counter;
-logic[LOG_DEPTH:0]  new_counter;
-logic[LOG_DEPTH-1:0] rd_ptr, wr_ptr; 
-logic[LOG_DEPTH-1:0]  new_rd_ptr, new_wr_ptr;
+reg [LOG_DEPTH:0] counter;
+reg [LOG_DEPTH:0]  new_counter;
+reg [LOG_DEPTH-1:0] rd_ptr, wr_ptr; 
+reg [LOG_DEPTH-1:0]  new_rd_ptr, new_wr_ptr;
 
 assign empty = (counter == 0);
 assign full  = (counter == (1 << LOG_DEPTH));
@@ -55,12 +55,12 @@ always @(posedge clock) begin
     end
 end
 
-always_comb begin
+always @(*) begin
     if ((!full && wrreq) && (!empty && rdreq)) begin
         new_counter = counter;
         new_rd_ptr  = rd_ptr + 1;
         new_wr_ptr  = wr_ptr + 1;
-    end    else if (!full && wrreq) begin
+    end else if (!full && wrreq) begin
         new_counter = counter + 1;
         new_rd_ptr  = rd_ptr;
         new_wr_ptr  = wr_ptr + 1;
@@ -76,3 +76,13 @@ always_comb begin
 end
 
 endmodule 
+
+//reg rst_n;
+//reg wrreq;
+//reg[511:0] data;
+//wire full;
+//wire[511:0] q;
+//wire empty;
+//reg rdreq;
+//
+//FIFO tf(clock.val, rst_n, wrreq, data, full, q, empty, rdreq);
