@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
 module vectorgen # (
   parameter integer OP_WIDTH        = 16,
@@ -118,6 +118,9 @@ module vectorgen # (
 // ASSIGN STATEMENTS
 //*********************************************************************
 
+  wire vectorgen_skip;
+
+
   assign {
     vectorgen_nextData,
     vectorgen_lastData,
@@ -151,6 +154,7 @@ module vectorgen # (
 /** State machine
  * valid states: IDLE(Default), BUSY */
 
+  wire test_ready;
 
   assign test_ready = state == READY || state == LAST;//reads_remaining == 0;
   //assign test_ready = reads_remaining == 0;
@@ -490,14 +494,14 @@ module vectorgen # (
   assign ready = test_ready;
 
 
-`ifdef simulation
-  integer vecgen_rd_count;
-  always @(posedge clk)
-    if (reset)
-      vecgen_rd_count <= 0;
-    else if (read_req && read_ready)
-      vecgen_rd_count <= vecgen_rd_count + 1;
-`endif
+//`ifdef simulation
+//  integer vecgen_rd_count;
+//  always @(posedge clk)
+//    if (reset)
+//      vecgen_rd_count <= 0;
+//    else if (read_req && read_ready)
+//      vecgen_rd_count <= vecgen_rd_count + 1;
+//`endif
 
 // This makes sure that the last data is read
 
@@ -512,3 +516,18 @@ module vectorgen # (
       last_data_sticky <= 1'b0;
 
 endmodule
+
+
+//reg rst;
+//reg [8:0] ctrl;
+//reg [5:0] cfg;
+//wire rdy;
+//wire [1:0] state;
+//reg rdrdy;
+//reg [63:0] rddata;
+//wire rdreq;
+//wire wrvalid;
+//wire [63:0] wrdata;
+//
+//
+//vectorgen tv(clock.val, rst, ctrl, cfg, rdy, state, rdrdy, rddata, rdreq, wrvalid, wrdata);
