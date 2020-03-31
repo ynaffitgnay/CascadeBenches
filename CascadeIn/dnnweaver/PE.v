@@ -1,10 +1,10 @@
 //`timescale 1ns/1ps
 `include "common.vh"
-//`include "register.v"
-//`include "macc.v"
-//`include "ram.v"
-//`include "activation.v"
-//`include "fifo.v"
+`include "register.v"
+`include "macc.v"
+`include "ram.v"
+`include "activation.v"
+`include "fifo.v"
 
 module PE #(
   // INPUT PARAMETERS

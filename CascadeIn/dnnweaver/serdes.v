@@ -1,3 +1,6 @@
+`ifndef __serdes_v__
+`define __serdes_v__
+
 `include "common.vh"
 `include "fifo.v"
 `include "counter.v"
@@ -245,7 +248,9 @@ sipo #(
 assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
 
-endmodule
+endmodule // serdes
+
+`endif
 
 //reg rst;
 //reg [3:0] count;

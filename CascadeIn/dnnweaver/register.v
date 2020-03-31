@@ -1,4 +1,7 @@
 //`timescale 1ns/1ps
+`ifndef __register_v__
+`define __register_v__
+
 module register #(
     parameter NUM_STAGES = 1,
     parameter DATA_WIDTH = 1
@@ -46,7 +49,9 @@ end
 endgenerate
 
 
-endmodule
+endmodule // register
+
+`endif
 
 //reg rst;
 //parameter NS = 2;

@@ -1,4 +1,7 @@
 //`timescale 1ns/1ps
+`ifndef __fifo_v__
+`define __fifo_v__
+
 module fifo
 #(  // Parameters
     parameter   DATA_WIDTH          = 64,
@@ -95,7 +98,9 @@ begin : READ
   end
 end
 
-endmodule
+endmodule // fifo
+
+`endif
 
 /*
 FIFO_DUALCLOCK_MACRO  #(

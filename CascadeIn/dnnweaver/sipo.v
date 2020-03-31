@@ -1,4 +1,7 @@
 //`timescale 1ns/1ps
+`ifndef __sipo_v__
+`define __sipo_v__
+
 `include "common.vh"
 `include "register_1_stage_1_bit.v"
 module sipo
@@ -71,6 +74,8 @@ module sipo
     );
 
 endmodule
+
+`endif
 
 //reg rst;
 //reg enable;

@@ -1,5 +1,14 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
+`include "register.v"
+`include "register_1_stage_1_bit.v"
+`include "weight_buffer.v"
+`include "data_packer.v"
+`include "PE.v"
+`include "normalization.v"
+`include "pooling.v"
+`include "serdes.v"
+
 module PU
 #( // INPUT PARAMETERS
   parameter integer PU_ID             = 0,
@@ -152,8 +161,15 @@ wire  [ NUM_PE               -1 : 0 ]        vecgen_mask_d;
 wire  [ PE_SEL_W             -1 : 0 ]        pe_neuron_sel_d;
 wire                                         pe_neuron_bias_d;
 
-register #(1, DATA_IN_WIDTH)
-pu_vg_data_delay (clk, reset, vecgen_wr_data, vecgen_wr_data_d);
+generate
+if (DATA_IN_WIDTH == 1) begin
+  register_1_stage_1_bit
+  pu_vg_data_delay (clk, reset, vecgen_wr_data, vecgen_wr_data_d);
+end else begin 
+  register #(1, DATA_IN_WIDTH)
+  pu_vg_data_delay (clk, reset, vecgen_wr_data, vecgen_wr_data_d);
+end
+endgenerate
 register #(3, PE_CTRL_WIDTH)
 pu_ctrl_delay (clk, reset, pe_ctrl, pe_ctrl_d);
 register #(3, RD_ADDR_WIDTH)
@@ -166,8 +182,16 @@ register #(3, `SRC_1_SEL_WIDTH)
 src_1_sel_delay (clk, reset, src_1_sel, src_1_sel_d);
 register #(3, `SRC_2_SEL_WIDTH)
 src_2_sel_delay (clk, reset, src_2_sel, src_2_sel_d);
-register #(1, `OUT_SEL_WIDTH)
-out_sel_delay (clk, reset, out_sel, out_sel_d);
+
+generate
+if (`OUT_SEL_WIDTH == 1) begin
+  register_1_stage_1_bit
+  out_sel_delay (clk, reset, out_sel, out_sel_d);
+end else begin
+  register #(1, `OUT_SEL_WIDTH)
+  out_sel_delay (clk, reset, out_sel, out_sel_d);
+end
+endgenerate
 register #(3, `DST_SEL_WIDTH)
 dst_sel_delay (clk, reset, dst_sel, dst_sel_d);
 register #(3, NUM_PE)
@@ -180,10 +204,16 @@ vg_mask_delay (clk, reset, vecgen_mask, vecgen_mask_d);
   register #(3, POOL_CFG_WIDTH)
   pool_cfg_delay (clk, reset, pool_cfg, pool_cfg_d);
 
-
-register #(1, PE_SEL_W)
-pe_neuron_sel_delay (clk, reset, pe_neuron_sel, pe_neuron_sel_d);
-register #(1, 1)
+generate
+if (PE_SEL_W == 1) begin
+  register_1_stage_1_bit
+  pe_neuron_sel_delay (clk, reset, pe_neuron_sel, pe_neuron_sel_d);
+end else begin
+  register #(1, PE_SEL_W)
+  pe_neuron_sel_delay (clk, reset, pe_neuron_sel, pe_neuron_sel_d);
+end
+endgenerate
+register_1_stage_1_bit
 pe_neuron_bias_delay (clk, reset, pe_neuron_bias, pe_neuron_bias_d);
 
 // ==================================================================
@@ -271,6 +301,10 @@ pe_neuron_bias_delay (clk, reset, pe_neuron_bias, pe_neuron_bias_d);
 // Neuron Read/Write
 // ==================================================================
 
+wire pe_enable;
+wire pe_write_req;
+
+
 assign pe_enable = 1'b1;
 assign pe_write_req = PE_GENBLK[0].pe_write_valid;
 
@@ -285,7 +319,7 @@ for (i=0; i<NUM_PE; i=i+1)
 begin: NEURON_SEL_GEN
   assign pe_read_neuron = pe_neuron_bias_d ? 1'b1 :
     (pe_neuron_sel_d == i) ? pe_buffer_read_data[i*OP_WIDTH+:OP_WIDTH]
-    : 'bz;
+    : 1'b0;
 end
 endgenerate
 
@@ -457,6 +491,9 @@ endgenerate
     out_sel_d == `OUT_POOL ?
     pool_serdes_count : pu_serdes_count;
 
+  reg s_write_flush;
+  reg m_write_ready;
+
   serdes #(
     .IN_COUNT                 ( NUM_PE                   ),
     .OUT_COUNT                ( NUM_PE                   ),
@@ -486,4 +523,64 @@ assign write_req = pu_write_valid_local && !(lrn_enable && PU_ID != 0);
         pu_write_count <= pu_write_count + 1;
   `endif
 
-endmodule
+endmodule // PU
+
+//reg                                         rst;
+//reg                                         lrn_enable;
+//reg  [ 6 - 1 : 0 ]        pu_serdes_count;
+//reg  [ 30 - 1 : 0 ]        pe_ctrl;
+//reg                                         bias_read_req;
+//reg                                         wb_read_req;
+//reg  [ 9        -1 : 0 ]        wb_read_addr;
+//reg  [ `SRC_0_SEL_WIDTH     -1 : 0 ]        src_0_sel;
+//reg  [ `SRC_1_SEL_WIDTH     -1 : 0 ]        src_1_sel;
+//reg  [ `SRC_2_SEL_WIDTH     -1 : 0 ]        src_2_sel;
+//reg  [ `OUT_SEL_WIDTH       -1 : 0 ]        out_sel;
+//reg  [ `DST_SEL_WIDTH       -1 : 0 ]        dst_sel;
+//reg  [ 2             -1 : 0 ]        pe_neuron_sel;
+//reg                                         pe_neuron_bias;
+//reg                                         pe_neuron_read_req;
+//reg  [ 4               -1 : 0 ]        vecgen_mask;
+//reg  [ 64        -1 : 0 ]        vecgen_wr_data;
+//reg  [ 7      -1 : 0 ]        pool_ctrl;
+//reg  [ 3       -1 : 0 ]        pool_cfg;
+//reg  [ 64       -1 : 0 ]        read_data;
+//reg  [ 10            -1 : 0 ]        read_id;
+//reg  [ 2             -1 : 0 ]        read_d_type;
+//reg                                         buffer_read_data_valid;
+//wire                                         read_req;
+//reg                                         write_ready;
+//wire  [ 64       -1 : 0 ]        write_data;
+//wire                                         write_req;
+//
+//
+//PU tpu(
+//  clock.val,
+//  rst,
+//  lrn_enable,
+//  pu_serdes_count,
+//  pe_ctrl,
+//  bias_read_req,
+//  wb_read_req,
+//  wb_read_addr,
+//  src_0_sel,
+//  src_1_sel,
+//  src_2_sel,
+//  out_sel,
+//  dst_sel,
+//  pe_neuron_sel,
+//  pe_neuron_bias,
+//  pe_neuron_read_req,
+//  vecgen_mask,
+//  vecgen_wr_data,
+//  pool_ctrl,
+//  pool_cfg,
+//  read_data,
+//  read_id,
+//  read_d_type,
+//  buffer_read_data_valid,
+//   read_req,
+//  write_ready,
+//   write_data,
+//   write_req
+//       );
