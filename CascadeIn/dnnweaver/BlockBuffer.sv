@@ -1,3 +1,4 @@
+`include "common.vh"
 import ShellTypes::*;
 import AMITypes::*;
 
@@ -12,7 +13,7 @@ module BlockSector
     input[WIDTH-1:0] rdInput,
     input            inMuxSel,
     input            sector_we,
-    output logic[WIDTH-1:0] dataout
+    output wire[WIDTH-1:0] dataout
 );
 
     reg[WIDTH-1:0]  data_reg;
@@ -37,10 +38,10 @@ module we_decoder(
     input we_all,
     input we_specific,
     input[2:0]  index,
-    output logic[7:0] we_out
+    output reg[7:0] we_out
 );
 
-    always_comb begin
+    always @(*) begin
         we_out =  8'b0000_0000;
         if (we_all) begin
             we_out = 8'b1111_1111;
@@ -61,7 +62,7 @@ module block_rotate
 (
     input[2:0] rotate_amount,
     input[WIDTH-1:0]  inData[NUM_SECTORS-1:0],
-    output logic[WIDTH-1:0] outData[NUM_SECTORS-1:0]
+    output reg[WIDTH-1:0] outData[NUM_SECTORS-1:0]
 );
 
     always_comb begin
@@ -144,14 +145,14 @@ module BlockBuffer
     input               flush_buffer,
     // Interface to App
     input  AMIRequest   reqIn,
-    output logic        reqIn_grant,
+    output wire         reqIn_grant,
     output AMIResponse  respOut,
     input               respOut_grant,
     // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
     output AMIRequest   reqOut[AMI_NUM_PORTS-1:0], // port 0 is the rd port, port 1 is the wr port
     input               reqOut_grant[AMI_NUM_PORTS-1:0],
     input  AMIResponse  respIn[AMI_NUM_PORTS-1:0],
-    output logic        respIn_grant[AMI_NUM_PORTS-1:0]
+    output reg          respIn_grant[AMI_NUM_PORTS-1:0]
     
 );
 
@@ -169,13 +170,13 @@ module BlockBuffer
     // Queue for incoming AMIRequests
     wire             reqInQ_empty;
     wire             reqInQ_full;
-    logic            reqInQ_enq;
-    logic            reqInQ_deq;
+    wire             reqInQ_enq;
+    reg              reqInQ_deq;
     AMIRequest       reqInQ_in;
     AMIRequest       reqInQ_out;
     
     // Following signals will be controlled by the FSM
-    logic inMuxSel; // 0 for RdInput, 1 for WrInput
+    reg inMuxSel; // 0 for RdInput, 1 for WrInput
 
     genvar sector_num;
     generate 
@@ -202,17 +203,17 @@ module BlockBuffer
     endgenerate
 
     // Read data out of the block
-    logic[SECTOR_WIDTH-1:0] rd_output;
-    logic[$clog2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
+    wire [SECTOR_WIDTH-1:0] rd_output;
+    reg [`C_LOG_2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
 
     assign rd_output = dataout[rd_mux_sel];
 
     // Write enables per sector
 
     // FSM signals
-    logic wr_all_sectors;
-    logic wr_specific_sector;
-    logic[$clog2(NUM_SECTORS)-1:0] wr_sector_index;
+    reg wr_all_sectors;
+    reg wr_specific_sector;
+    reg[`C_LOG_2(NUM_SECTORS)-1:0] wr_sector_index;
     
     we_decoder
     writes_decoder
@@ -268,8 +269,8 @@ module BlockBuffer
     // Queue for outgoing AMIResponses
     wire             respOutQ_empty;
     wire             respOutQ_full;
-    logic            respOutQ_enq;
-    logic            respOutQ_deq;
+    reg              respOutQ_enq;
+    wire             respOutQ_deq;
     AMIResponse      respOutQ_in;
     AMIResponse      respOutQ_out;    
 
@@ -326,7 +327,7 @@ module BlockBuffer
 
     // FSM registers
     reg[2:0]   current_state;
-    logic[2:0] next_state;
+    reg[2:0]   next_state;
 
     // FSM reset/update
     always@(posedge clk) begin : fsm_update
@@ -339,8 +340,8 @@ module BlockBuffer
     
     // Current request info
     reg[AMI_ADDR_WIDTH-6:0]   current_block_index;
-    logic[AMI_ADDR_WIDTH-6:0] new_block_index;
-    logic                     block_index_we;
+    reg[AMI_ADDR_WIDTH-6:0]   new_block_index;
+    reg                       block_index_we;
 
     always@(posedge clk) begin : current_block_update
         if (rst) begin
@@ -370,7 +371,7 @@ module BlockBuffer
     // respOutQ_enq
     // respOutQ_in
 
-    always_comb begin
+    always @(*) begin
         // Signals controlling writing into the block
         inMuxSel           = 1'b0;
         wr_all_sectors     = 1'b0;
