@@ -1,7 +1,12 @@
 //`timescale 1ns/1ps
-//`include "common.vh" // TODO: Uncomment when not testing
-import ShellTypes::*;
-import AMITypes::*;
+`include "AMITypes.sv"
+
+`include "common.vh" // TODO: Uncomment when not testing
+`include "Counter64.sv"
+`include "SoftFIFO.sv"
+`include "FIFO.sv"
+//import ShellTypes::*;
+//import AMITypes::*;
 
 module DNN2AMI_WRPath
 #(
@@ -41,7 +46,7 @@ module DNN2AMI_WRPath
   parameter integer C_OFFSET_WIDTH                     = TX_SIZE_WIDTH,
  
   parameter integer WSTRB_W  = AXI_DATA_WIDTH/8,
-  parameter integer NUM_PU_W = $clog2(NUM_PU)+1,
+  parameter integer NUM_PU_W = `C_LOG_2(NUM_PU)+1,
   parameter integer OUTBUF_DATA_W = NUM_PU * AXI_DATA_WIDTH
  
 )
@@ -51,7 +56,7 @@ module DNN2AMI_WRPath
     input                               rst,
 
     // Connection to rest of memory system
-    output logic                        reqValid,
+    output wire                         reqValid,
     input                               reqOut_grant,
 
     // Writes
@@ -59,16 +64,16 @@ module DNN2AMI_WRPath
     input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty, // no data in the output buffer
     input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,  // data to write from, portion per PU
     input  wire  [ NUM_PU               -1 : 0 ]        write_valid,       // value is ready to be written back
-    output logic   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
+    output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
     
     // Memory Controller Interface - Write
     input  wire                                         wr_req,   // assert when submitting a wr request
     input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
     input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
     input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
-    output reg                                          wr_ready, // ready for more writes
-    output reg                                          wr_done,  // no writes left to submit
-    output AMIRequest                   reqOut
+    output wire                                         wr_ready, // ready for more writes
+    output wire                                         wr_done,  // no writes left to submit
+    output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
 
     genvar pu_num;
@@ -95,16 +100,16 @@ module DNN2AMI_WRPath
     // Queue to buffer Write requests
     wire             macroWrQ_empty;
     wire             macroWrQ_full;
-    logic            macroWrQ_enq;
-    logic            macroWrQ_deq;
-    DNNWeaverMemReq  macroWrQ_in;
-    DNNWeaverMemReq  macroWrQ_out;
+    wire            macroWrQ_enq;
+    reg             macroWrQ_deq;
+    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_in;
+    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_out;
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_macroWriteQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_macroWriteQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(DNNWeaverMemReq)),
+                .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_MACRO_WR_Q_DEPTH)
             )
             macroWriteQ
@@ -121,7 +126,7 @@ module DNN2AMI_WRPath
         end else begin : FIFO_macroWriteQ
             FIFO
             #(
-                .WIDTH                    ($bits(DNNWeaverMemReq)),
+                .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_MACRO_WR_Q_DEPTH)
             )
             macroWriteQ
@@ -139,10 +144,16 @@ module DNN2AMI_WRPath
     endgenerate    
 
     // Inputs to the MacroWriteQ
-    assign macroWrQ_in  = '{valid: wr_req, isWrite: 1'b1, addr: wr_addr, size: wr_req_size, pu_id: wr_pu_id, time_stamp: current_timestamp};
+    //assign macroWrQ_in  = '{valid: wr_req, isWrite: 1'b1, addr: wr_addr, size: wr_req_size, pu_id: wr_pu_id, time_stamp: current_timestamp};
+    assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
+    assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
+    assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
+    assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
+    assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
+    assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
-    // Debug
+    // Debug  // TODO: comment this out
     always@(posedge clk) begin
         if (macroWrQ_enq) begin
             $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
@@ -155,16 +166,16 @@ module DNN2AMI_WRPath
     // reqOut queue to simplify the sequencing logic
     wire             reqQ_empty;
     wire             reqQ_full;
-    logic            reqQ_enq;
-    logic            reqQ_deq;
-    AMIRequest       reqQ_in;
-    AMIRequest       reqQ_out;
+    reg              reqQ_enq;
+    wire             reqQ_deq;
+    reg[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqQ_in;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]      reqQ_out;
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_reqQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_reqQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_WR_REQ_Q_DEPTH)
             )
             reqQ
@@ -181,7 +192,7 @@ module DNN2AMI_WRPath
         end else begin : FIFO_reqQ
             FIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_WR_REQ_Q_DEPTH)
             )
             reqQ
@@ -197,9 +208,9 @@ module DNN2AMI_WRPath
             );    
         end
     endgenerate        
-        
+
     // Interface to the memory system
-    assign reqValid = reqQ_out.valid && !reqQ_empty;
+    assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
     assign reqOut   = reqQ_out;
     assign reqQ_deq = reqOut_grant && reqValid;
     /*
@@ -216,15 +227,15 @@ module DNN2AMI_WRPath
     reg wr_ready_reg;
     reg wr_done_reg;
 
-    logic new_wr_ready_reg;
-    logic new_wr_done_reg;
+    reg new_wr_ready_reg;
+    reg new_wr_done_reg;
     
     // Sequencer logic
     // Arbiter
-    logic accept_new_active_req;
-    DNNWeaverMemReq macro_arbiter_output;
+    reg accept_new_active_req;
+    reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
 
-    always_comb begin
+    always @(*) begin
         macroWrQ_deq = 1'b0;
         macro_arbiter_output = macroWrQ_out;
         if (accept_new_active_req) begin
@@ -235,7 +246,7 @@ module DNN2AMI_WRPath
             end
         end
     end
-    
+
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
     reg[AXI_ADDR_WIDTH-1:0] current_address;
@@ -243,11 +254,11 @@ module DNN2AMI_WRPath
     reg                     current_isWrite;
     reg[NUM_PU_W-1:0]       current_pu_id;
 
-    logic new_macro_req_active;
-    logic[AXI_ADDR_WIDTH-1:0] new_current_address;
-    logic[TX_SIZE_WIDTH-1:0]  new_requests_left;
-    logic                     new_current_isWrite;
-    logic[NUM_PU_W-1:0]       new_current_pu_id;
+    reg new_macro_req_active;
+    reg[AXI_ADDR_WIDTH-1:0] new_current_address;
+    reg[TX_SIZE_WIDTH-1:0]  new_requests_left;
+    reg                     new_current_isWrite;
+    reg[NUM_PU_W-1:0]       new_current_pu_id;
     
     always@(posedge clk) begin
         if (rst) begin
@@ -267,8 +278,10 @@ module DNN2AMI_WRPath
 
     assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
     assign wr_done  = wr_done_reg;
+
+    integer i = 0;
     
-    always_comb begin
+    always @(*) begin
         accept_new_active_req = 1'b0;
         new_macro_req_active  = macro_req_active;
         new_current_address   = current_address;
@@ -280,19 +293,29 @@ module DNN2AMI_WRPath
         new_wr_done_reg  = 1'b0;
     
         reqQ_enq = 1'b0;
-        reqQ_in  = '{valid: 1'b0, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
+        //reqQ_in  = '{valid: 1'b0, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
+        reqQ_in[`AMIRequest_valid] = 1'b0;
+        reqQ_in[`AMIRequest_isWrite] = 1'b1;
+        reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
+        reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
+        reqQ_in[`AMIRequest_size] = 8; // double check this size
     
-        for (int i = 0; i < NUM_PU; i = i + 1) begin
+        for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
         end
-
+        
         // An operation is being sequenced
         if (macro_req_active) begin
             // issue write requests
             if (current_isWrite == 1'b1) begin
                 if (!outbuf_empty[current_pu_id] && !reqQ_full) begin // TODO: Not sure about this write_valid signal
                     outbuf_pop[current_pu_id] = 1'b1;
-                    reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
+                    //reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
+                    reqQ_in[`AMIRequest_valid] = 1'b1;
+                    reqQ_in[`AMIRequest_isWrite] = 1'b1;
+                    reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
+                    reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
+                    reqQ_in[`AMIRequest_size] = 8; // double check this size
                     reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
@@ -310,13 +333,14 @@ module DNN2AMI_WRPath
                 accept_new_active_req = 1'b1;
                 new_macro_req_active  = 1'b1;
                 // Select the output of the arbiter
-                new_current_address = macro_arbiter_output.addr;
-                new_requests_left   = macro_arbiter_output.size;
-                new_current_isWrite = macro_arbiter_output.isWrite;
-                new_current_pu_id   = macro_arbiter_output.pu_id;
+                new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
+                new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
+                new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
+                new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
             end
         end
-    end
+    end // always @ (*)
+
 /*
     always@(posedge clk) begin
         if (wr_ready && !wr_done) begin
@@ -355,3 +379,25 @@ module DNN2AMI_WRPath
     end
     
 endmodule
+
+DNN2AMI_WRPath tdw
+(
+    .clk(clock.val),
+    .rst(),
+
+    .reqValid(),
+    .reqOut_grant(),
+
+    .outbuf_empty(), // no data in the output buffer
+    .data_from_outbuf(),  // data to write from(), portion per PU
+    .write_valid(),       // value is ready to be written back
+    .outbuf_pop(),   // dequeue a data item(), why is this registered?
+    
+    .wr_req(),   // assert when submitting a wr request
+    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
+    .wr_req_size(), // size of request in bytes (I assume)
+    .wr_addr(), // address to write to(), look like 32 bit addresses
+    .wr_ready(), // ready for more writes
+    .wr_done(),  // no writes left to submit
+    .reqOut()
+);
