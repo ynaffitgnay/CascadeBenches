@@ -3,9 +3,6 @@
 `include "SoftFIFO.sv"
 `include "FIFO.sv"
 
-//import ShellTypes::*;
-//import AMITypes::*;
-
 module BlockSector
 #(
     parameter integer WIDTH = 64
@@ -69,8 +66,6 @@ module block_rotate
     input[2:0] rotate_amount,
     input [((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? (NUM_SECTORS * WIDTH) + -1 : (NUM_SECTORS * (2 - WIDTH)) + ((WIDTH - 1) - 1)) : ((WIDTH - 1) >= 0 ? ((2 - NUM_SECTORS) * WIDTH) + (((NUM_SECTORS - 1) * WIDTH) - 1) : ((2 - NUM_SECTORS) * (2 - WIDTH)) + (((WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))) - 1))):((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) : ((WIDTH - 1) >= 0 ? (NUM_SECTORS - 1) * WIDTH : (WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))))] inData,
 	  output reg [((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? (NUM_SECTORS * WIDTH) + -1 : (NUM_SECTORS * (2 - WIDTH)) + ((WIDTH - 1) - 1)) : ((WIDTH - 1) >= 0 ? ((2 - NUM_SECTORS) * WIDTH) + (((NUM_SECTORS - 1) * WIDTH) - 1) : ((2 - NUM_SECTORS) * (2 - WIDTH)) + (((WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))) - 1))):((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) : ((WIDTH - 1) >= 0 ? (NUM_SECTORS - 1) * WIDTH : (WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))))] outData
-    //input[WIDTH-1:0]  inData[NUM_SECTORS-1:0],
-    //output reg[WIDTH-1:0] outData[NUM_SECTORS-1:0]
 );
 
     always @(*) begin
@@ -410,23 +405,24 @@ module BlockBuffer
         block_index_we  = 1'b0;
         // requests to the memory system
         // Read port
-        //reqOut0[`AMIRequest_valid] = 1'b0;
-        //reqOut0[`AMIRequest_isWrite] = 1'b0;
-        //reqOut0[`AMIRequest_addr] = 64'b0;
-        //reqOut0[`AMIRequest_data] = 512'b0;
-        //reqOut0[`AMIRequest_size] = 6'd64;
         //reqOut0 = '{1'b0, 1'b0, 64'b0, 512'b0, 6'd64}; // read port
-        reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        //reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        reqOut0[`AMIRequest_valid] = 1'b0;
+        reqOut0[`AMIRequest_isWrite] = 1'b0;
+        reqOut0[`AMIRequest_addr] = 64'b0;
+        reqOut0[`AMIRequest_data] = 512'b0;
+        reqOut0[`AMIRequest_size] = 6'd64;
 
 
         // Write port
-        //reqOut1[`AMIRequest_valid] = 1'b0;
-        //reqOut1[`AMIRequest_isWrite] = 1'b0;
-        //reqOut1[`AMIRequest_addr] = 64'b0;
-        //reqOut1[`AMIRequest_data] = 512'b0;
-        //reqOut1[`AMIRequest_size] = 6'd64;
         //reqOut1 = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 6'd64}; // write port
-        reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        //reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        reqOut1[`AMIRequest_valid] = 1'b0;
+        reqOut1[`AMIRequest_isWrite] = 1'b0;
+        reqOut1[`AMIRequest_addr] = 64'b0;
+        reqOut1[`AMIRequest_data] = 512'b0;
+        reqOut1[`AMIRequest_size] = 6'd64;
+        
 
         // response from memory system
         respIn0_grant = 1'b0;
