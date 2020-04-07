@@ -224,10 +224,10 @@ module DNN2AMI_WRPath
     //assign wr_done  = 1'b0; // probably not correct
     
     // Two important output signals
-    reg wr_ready_reg;
+    //reg wr_ready_reg;
     reg wr_done_reg;
 
-    reg new_wr_ready_reg;
+    //reg new_wr_ready_reg;
     reg new_wr_done_reg;
     
     // Sequencer logic
@@ -280,7 +280,9 @@ module DNN2AMI_WRPath
     assign wr_done  = wr_done_reg;
 
     integer i = 0;
-    
+
+
+    /* Something seems weird about this always block, I guess */
     always @(*) begin
         accept_new_active_req = 1'b0;
         new_macro_req_active  = macro_req_active;
@@ -291,7 +293,7 @@ module DNN2AMI_WRPath
 
 
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        /* new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); */
+        new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); 
         new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
@@ -332,7 +334,6 @@ module DNN2AMI_WRPath
         else begin
             // See if there is a new operation available
             /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
-            /*
             if (!macroWrQ_empty) begin
                 // A new operation can become active
                 accept_new_active_req = 1'b1;
@@ -343,7 +344,6 @@ module DNN2AMI_WRPath
                 new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
                 new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
             end
-            */
         end
     end // always @ (*)
 
@@ -376,10 +376,10 @@ module DNN2AMI_WRPath
     // WR_DONE is asserted when all the PUs no writes remaining.
     always@(posedge clk) begin
         if (rst) begin
-            wr_ready_reg <= 1'b1;
+            //wr_ready_reg <= 1'b1;
             wr_done_reg  <= 1'b0;
         end else begin
-            wr_ready_reg <= new_wr_ready_reg;
+            //wr_ready_reg <= new_wr_ready_reg;
             wr_done_reg  <= new_wr_done_reg;
         end
     end
