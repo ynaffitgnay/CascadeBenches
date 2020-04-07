@@ -548,21 +548,21 @@ module BlockBuffer
     
 endmodule
 
-reg rst;
-reg flush_buffer;
-reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
-wire reqIn_grant;
-wire [`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
-reg respOut_grant;
-wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut0;
-reg reqOut0_grant;
-wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut1;
-reg reqOut1_grant;
-reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
-wire respIn0_grant;
-reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
-wire respIn1_grant;
-
-BlockBuffer tbb(clock.val, rst, flush_buffer, reqIn, reqIn_grant, respOut, respOut_grant, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
+//reg rst;
+//reg flush_buffer;
+//reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
+//wire reqIn_grant;
+//wire [`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
+//reg respOut_grant;
+//wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut0;
+//reg reqOut0_grant;
+//wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut1;
+//reg reqOut1_grant;
+//reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
+//wire respIn0_grant;
+//reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
+//wire respIn1_grant;
+//
+//BlockBuffer tbb(clock.val, rst, flush_buffer, reqIn, reqIn_grant, respOut, respOut_grant, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
 
 
