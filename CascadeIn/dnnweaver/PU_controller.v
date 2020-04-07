@@ -1,6 +1,10 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "dw_params.vh"
 `include "common.vh"
+`include "counter.v"
+`include "register.v"
+`include "register_1_stage_1_bit.v"
+
 module PU_controller
 #(  // PARAMETERS
   parameter integer PE_BUF_ADDR_WIDTH       = 10,
@@ -23,7 +27,7 @@ module PU_controller
   parameter integer KERNEL_SIZE_W           = 3,
   parameter integer SERDES_COUNT_W          = 6,
   parameter integer PE_SEL_W                = `C_LOG_2(NUM_PE),
-   parameter CFG_DEPTH = MAX_LAYERS,
+  parameter CFG_DEPTH = MAX_LAYERS,
   parameter L_TYPE_WIDTH = 2,
   parameter CFG_WIDTH =
     SERDES_COUNT_W +
@@ -223,7 +227,7 @@ module PU_controller
   reg  [ 3                    -1 : 0 ]        state_dd;
   reg  [ 3                    -1 : 0 ]        state_ddd;
   reg  [ 3                    -1 : 0 ]        next_state;
-  reg  [ CFG_WIDTH            -1 : 0 ]        cfg_rom[0:CFG_DEPTH-1];
+  reg  [ CFG_WIDTH            -1 : 0 ]        cfg_rom[CFG_DEPTH-1:0];
   reg  [ CFG_WIDTH            -1 : 0 ]        layer_params;
 
   wire [ SERDES_COUNT_W       -1 : 0 ]        serdes_count;
@@ -266,7 +270,7 @@ module PU_controller
 
   // Write Mask Logic
   wire [ NUM_PE               -1 : 0 ]        _pe_write_mask;
-  reg  [TID_WIDTH - 1:0]                      tid  [0:NUM_PE-1];
+  reg  [TID_WIDTH - 1:0]                      tid  [NUM_PE-1 : 0];
   reg  [ NUM_PE               -1 : 0 ]        mask;
 
   wire                                        tid_reset;
@@ -302,13 +306,28 @@ module PU_controller
 
   assign GND = 256'd0;
 
+  // Variables to initialize from cascade file interface
+  integer pucstream = $fopen("input_files/dnnweaver/pu_controller_bin.mif", "r");
+  integer pu_rom_idx = 0;
+  reg[CFG_WIDTH-1:0] pucval = 0;
+
+
   initial begin
     max_layers = `max_layers;
-    `ifdef simulation
-      $readmemb("./include/pu_controller_bin.vh", cfg_rom);
-    `else
-      $readmemb("pu_controller_bin.mif", cfg_rom);
-    `endif
+    //`ifdef simulation
+    //  $readmemb("./include/pu_controller_bin.vh", cfg_rom);
+    //`else
+    //  $readmemb("pu_controller_bin.mif", cfg_rom);
+    //`endif
+    for (pu_rom_idx = 0; pu_rom_idx < CFG_DEPTH; pu_rom_idx = pu_rom_idx + 1) begin
+      if (!($feof(pucstream))) begin
+        $fscanf(pucstream, "%b", pucval);
+        cfg_rom[pu_rom_idx] <= pucval;  
+      end 
+      else begin
+        cfg_rom[pu_rom_idx] <= 0;
+      end // else: !if(!($feof(pucstream)))
+    end
   end
 
   always @(posedge clk)
@@ -620,6 +639,7 @@ wire next_iw;
 // ==================================================================
 // Convolution stride count
 // ==================================================================
+  wire conv_stride_inc;
   assign conv_stride_inc = ih_inc && !data_stall;
   assign conv_stride_clear = state_d == RD_CFG_1 || ic_inc;
   assign conv_stride_default = 1'b1;
@@ -687,6 +707,8 @@ wire next_iw;
       flush <= 1'b1;
   end
 
+  wire next_ic;
+
   counter #(
     .COUNT_WIDTH              ( LAYER_PARAM_WIDTH        )
   )
@@ -712,6 +734,9 @@ wire next_iw;
   assign ic_max = param_ic;
   wire [ PARAM_C_WIDTH    -1 : 0 ]        ic_min;
   assign ic_min = GND[PARAM_C_WIDTH-1:0];
+
+  wire next_oc;
+
   counter #(
     .COUNT_WIDTH              ( PARAM_C_WIDTH        )
   )
@@ -736,6 +761,8 @@ wire next_iw;
   assign oc_inc = next_oc && ic_inc && state == BUSY;
   assign oc_max = param_oc;
   assign oc_min = GND[PARAM_C_WIDTH-1:0];
+
+  wire next_l;
   counter #(
     .COUNT_WIDTH              ( PARAM_C_WIDTH        )
   )
@@ -958,40 +985,34 @@ wire next_iw;
     .DOUT                     ( vectorgen_shift_dd       )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) nextfm_delay (
+  register_1_stage_1_bit
+  nextfm_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( vectorgen_nextfm         ),
     .DOUT                     ( vectorgen_nextfm_dd      )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) ih_inc_delay (
+  register_1_stage_1_bit 
+  ih_inc_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( ih_inc                   ),
     .DOUT                     ( ih_inc_d                 )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) iw_inc_delay (
+  register_1_stage_1_bit 
+  iw_inc_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( iw_inc                   ),
     .DOUT                     ( iw_inc_d                 )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) iw_inc_delay2 (
+  wire iw_inc_dd;
+
+  register_1_stage_1_bit 
+  iw_inc_delay2 (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( iw_inc_d                 ),
@@ -1084,10 +1105,8 @@ wire next_iw;
     .DOUT                     ( pe_fifo_push             )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) pe_fifo_pop_delay (
+  register_1_stage_1_bit 
+  pe_fifo_pop_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( _pe_fifo_pop             ),
@@ -1511,10 +1530,8 @@ wire next_iw;
     .DOUT                     ( scratch_switch_write     )
   );
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( 1                        )
-  ) scratch_sw_wr_delay (
+  register_1_stage_1_bit 
+  scratch_sw_wr_delay (
     .CLK                      ( clk                      ),
     .RESET                    ( reset                    ),
     .DIN                      ( _scratch_switch_read     ),
@@ -1621,15 +1638,29 @@ wire next_iw;
 
   assign _pe_write_mask = mask;
 
-  register #(
-    .NUM_STAGES               ( 1                        ),
-    .DATA_WIDTH               ( NUM_PE                   )
-  ) pe_write_mask_delay (
-    .CLK                      ( clk                      ),
-    .RESET                    ( reset                    ),
-    .DIN                      ( _pe_write_mask           ),
-    .DOUT                     ( pe_write_mask            )
-  );
+  generate
+  if (NUM_PE == 1) begin
+    register_1_stage_1_bit
+    pe_write_mask_delay (
+      .CLK                      ( clk                      ),
+      .RESET                    ( reset                    ),
+      .DIN                      ( _pe_write_mask           ),
+      .DOUT                     ( pe_write_mask            )
+    );
+  end
+
+  else begin
+    register #(
+      .NUM_STAGES               ( 1                        ),
+      .DATA_WIDTH               ( NUM_PE                   )
+    ) pe_write_mask_delay (
+      .CLK                      ( clk                      ),
+      .RESET                    ( reset                    ),
+      .DIN                      ( _pe_write_mask           ),
+      .DOUT                     ( pe_write_mask            )
+    );
+  end // else: !if(NUM_PE == 1)
+  endgenerate
 
   // Debug
   wire [TID_WIDTH-1:0]      pe0_tid = tid[0];
@@ -1641,6 +1672,8 @@ wire next_iw;
 // ==================================================================
 // Pooling control logic
 // ==================================================================
+
+  wire p_dec;
 
   assign p_min = 'b0;
   assign p_max = (1<<4)-1;
@@ -1783,6 +1816,8 @@ wire next_iw;
   assign pool_ready = (p_count != 0) || pad_iw || pool_ready_last;
   assign pad_iw = pool_iw_count == pool_iw_max && pool_iw_count!=pe_iw_max;
 
+  wire row_fifo_en;
+
 
   always @(posedge clk)
     if (reset)
@@ -1815,10 +1850,10 @@ wire next_iw;
   assign _pool_pad_row = (stride_count == stride_max) &&
                          (pool_iw_count == pe_iw_max) &&
                          (pe_iw_max != pool_iw_max);
-  register#(1, 1)
+  register_1_stage_1_bit
   pool_pad_row_delay (clk, reset, _pool_pad_row, pool_pad_row);
   wire                                        pool_pad_d;
-  register#(1, 1)
+  register_1_stage_1_bit
   pool_pad_delay (clk, reset, _pool_pad_row && stride_inc, pool_pad_d);
 
   assign pool_ctrl = {
@@ -1875,3 +1910,46 @@ always @(posedge clk)
 // ==================================================================
 
 endmodule
+
+
+//PU_controller tpu
+//( 
+//  .clk (clock.val),
+//  .reset (),
+//  .start (),
+//  .done (),
+//  .l_type (),
+//  .lrn_enable (),
+//  .pu_serdes_count (),
+//  .pe_neuron_sel (),
+//  .pe_neuron_bias (),
+//  .pe_neuron_read_req (),
+//  .buffer_read_empty (),
+//  .buffer_read_req (),
+//  .buffer_read_last (),
+//  .vectorgen_ready (),
+//  .pu_vecgen_ready (),
+//  .vectorgen_ctrl (),
+//  .pe_ctrl (),
+//  .vectorgen_cfg (),
+//  .wb_read_addr (),
+//  .wb_read_req (),
+//  .pe_piso_read_req (),
+//  .pe_write_mask (),
+//  .pool_ctrl (),
+//  .pool_cfg (),
+//  .state (),
+//  .out_sel (),
+//  .dst_sel (),
+//  .src_0_sel (),
+//  .src_1_sel (),
+//  .src_2_sel (),
+//  .bias_read_req (),
+//  .dbg_kw (),
+//  .dbg_kh (),
+//  .dbg_iw (),
+//  .dbg_ih (),
+//  .dbg_ic (),
+//  .dbg_oc (),
+//  .l_inc_out()
+//);
