@@ -293,7 +293,7 @@ module DNN2AMI_WRPath
 
 
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); 
+        //new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); 
         new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
