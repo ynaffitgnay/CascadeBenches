@@ -1,7 +1,6 @@
 `define AMI_ADDR_WIDTH 64
 `define AMI_DATA_WIDTH (512 + 64)
 `define AMI_REQ_SIZE_WIDTH 6
-
 `define AMI_REQUEST_BUS_WIDTH  (1 + 1 + `AMI_ADDR_WIDTH + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
 `define AMIRequest_valid       0:0
 `define AMIRequest_isWrite     1:1
@@ -28,20 +27,14 @@ module we_decoder(
     end
     
 endmodule
-
 module BlockBuffer
 (
     // General signals
     input               clk,
     input               rst
 );
-
-
-    // Params
-    localparam NUM_SECTORS  = 8;
-    
     // Sectors
-    wire[NUM_SECTORS-1:0] sector_we;
+    wire[7:0] sector_we;
     
     // Queue for incoming AMIRequests
     wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;    
@@ -52,7 +45,6 @@ module BlockBuffer
     // FSM signals
     reg wr_all_sectors;
     reg wr_specific_sector;
-
     /*-------------------------- VAR WE CARE ABOUT------------------------- */
     reg[2:0] wr_sector_index;
     //wire [2:0] wr_sector_index;
@@ -83,7 +75,4 @@ module BlockBuffer
 endmodule
 
 reg rst;
-
 BlockBuffer tbb(clock.val, rst);
-
-
