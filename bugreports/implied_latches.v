@@ -130,25 +130,6 @@ module BlockBuffer
     /////////////////////
     // FSM
     /////////////////////
-
-    // FSM States
-    parameter INVALID     = 3'b000;
-    parameter PENDING     = 3'b001;
-    parameter CLEAN       = 3'b010;
-    parameter MODIFIED    = 3'b011;
-
-    // FSM registers
-    reg[2:0]   current_state;
-    reg[2:0]   next_state;
-
-    // FSM reset/update
-    always@(posedge clk) begin : fsm_update
-        if (rst) begin
-            current_state <= INVALID;
-        end else begin
-            current_state <= next_state;
-        end
-    end
     
     wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
     assign reqInQ_out_addr = reqInQ_out[`AMIRequest_addr];
@@ -173,8 +154,6 @@ module BlockBuffer
         respIn0_grant = 1'b0;
         respIn1_grant = 1'b0;
 
-        // state control
-        next_state = current_state;
     end // FSM state transitions
     
 endmodule
