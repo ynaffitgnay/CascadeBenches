@@ -30,8 +30,7 @@ endmodule
 module BlockBuffer
 (
     // General signals
-    input               clk,
-    input               rst
+    input               clk
 );
     // Sectors
     wire[7:0] sector_we;
@@ -74,5 +73,4 @@ module BlockBuffer
     
 endmodule
 
-reg rst;
-BlockBuffer tbb(clock.val, rst);
+BlockBuffer tbb(clock.val);
