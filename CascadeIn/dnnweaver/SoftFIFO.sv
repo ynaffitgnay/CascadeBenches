@@ -7,6 +7,9 @@
 
 */
 
+`ifndef __SoftFIFO_sv__
+`define __SoftFIFO_sv__
+
 module SoftFIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
 (
     // General signals
@@ -75,7 +78,9 @@ always @(*) begin
     end
 end
 
-endmodule 
+endmodule // SoftFIFO
+
+`endif
 
 //reg rst_n;
 //reg wrreq;

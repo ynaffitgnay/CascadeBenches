@@ -7,6 +7,9 @@
 
 */
 
+`ifndef __FIFO_sv__
+`define __FIFO_sv__
+
 module FIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
 (
     // General signals
@@ -75,7 +78,8 @@ always @(*) begin
     end
 end
 
-endmodule 
+endmodule // FIFO
+`endif
 
 //reg rst_n;
 //reg wrreq;
