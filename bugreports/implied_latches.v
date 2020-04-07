@@ -59,16 +59,6 @@ module BlockBuffer
     input               clk,
     input               rst,
     input               flush_buffer,
-    // Interface to App
-    //input  [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqIn,
-    //output wire         reqIn_grant,
-    output [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respOut,
-    input               respOut_grant,
-    // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
-    output reg [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqOut0, // port 0 is the rd port, port 1 is the wr port
-    input               reqOut0_grant,
-    output reg [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqOut1, // port 0 is the rd port, port 1 is the wr port
-    input               reqOut1_grant,
     input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn0,
     output reg          respIn0_grant,
     input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn1,
@@ -110,7 +100,10 @@ module BlockBuffer
     // FSM signals
     reg wr_all_sectors;
     reg wr_specific_sector;
+
+    /*-------------------------- VAR WE CARE ABOUT------------------------- */
     reg[`C_LOG_2(NUM_SECTORS)-1:0] wr_sector_index;
+    //wire [`C_LOG_2(NUM_SECTORS)-1:0] wr_sector_index;
     
     we_decoder
     writes_decoder
@@ -128,6 +121,7 @@ module BlockBuffer
     
     wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
     assign reqInQ_out_addr = reqInQ_out[`AMIRequest_addr];
+    //assign wr_sector_index    = reqInQ_out_addr[5:3];
 
     always @(*) begin
         // Signals controlling writing into the block
@@ -139,11 +133,11 @@ module BlockBuffer
         rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // requests to the memory system
         // Read port
-        reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        //reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
 
 
         // Write port
-        reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        //reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
 
         // response from memory system
         respIn0_grant = 1'b0;
@@ -155,19 +149,11 @@ endmodule
 
 reg rst;
 reg flush_buffer;
-//reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
-//wire reqIn_grant;
-//wire [`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
-//reg respOut_grant;
-wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut0;
-reg reqOut0_grant;
-wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut1;
-reg reqOut1_grant;
 reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
 wire respIn0_grant;
 reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
 wire respIn1_grant;
 
-BlockBuffer tbb(clock.val, rst, flush_buffer, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
+BlockBuffer tbb(clock.val, rst, flush_buffer, respIn0, respIn0_grant, respIn1, respIn1_grant);
 
 
