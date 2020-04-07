@@ -58,11 +58,11 @@ module BlockBuffer
     // General signals
     input               clk,
     input               rst,
-    input               flush_buffer,
-    input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn0,
-    output reg          respIn0_grant,
-    input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn1,
-    output reg          respIn1_grant
+    input               flush_buffer
+    //input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn0,
+    //output reg          respIn0_grant,
+    //input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn1,
+    //output reg          respIn1_grant
 );
 
 
@@ -81,10 +81,10 @@ module BlockBuffer
     wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;
     // necessary for doing bitslicing of AMIReq bus
     wire[`AMI_DATA_WIDTH - 1:0] reqInQ_out_data;  
-    wire[`AMI_DATA_WIDTH - 1:0] respIn0_data;
+    //wire[`AMI_DATA_WIDTH - 1:0] respIn0_data;
 
     assign reqInQ_out_data = reqInQ_out[`AMIRequest_data];
-    assign respIn0_data = respIn0[`AMIResponse_data];
+    //assign respIn0_data = respIn0[`AMIResponse_data];
     
     // Following signals will be controlled by the FSM
     reg inMuxSel; // 0 for RdInput, 1 for WrInput
@@ -140,8 +140,8 @@ module BlockBuffer
         //reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
 
         // response from memory system
-        respIn0_grant = 1'b0;
-        respIn1_grant = 1'b0;
+        //respIn0_grant = 1'b0;
+        //respIn1_grant = 1'b0;
 
     end // FSM state transitions
     
@@ -149,11 +149,11 @@ endmodule
 
 reg rst;
 reg flush_buffer;
-reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
-wire respIn0_grant;
-reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
-wire respIn1_grant;
+//reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
+//wire respIn0_grant;
+//reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
+//wire respIn1_grant;
 
-BlockBuffer tbb(clock.val, rst, flush_buffer, respIn0, respIn0_grant, respIn1, respIn1_grant);
+BlockBuffer tbb(clock.val, rst, flush_buffer);
 
 
