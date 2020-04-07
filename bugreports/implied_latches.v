@@ -126,23 +126,6 @@ module BlockBuffer
         .we_out      (sector_we)
     );
 
-    //assign reqInQ_in   = reqIn;
-    //assign reqInQ_enq  = reqIn[`AMIRequest_valid] && !reqInQ_full;
-    //assign reqIn_grant = reqInQ_enq;
-
-    // Queue for outgoing AMIResponses
-    wire             respOutQ_empty;
-    wire             respOutQ_full;
-    reg              respOutQ_enq;
-    wire             respOutQ_deq;
-    reg [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_in;
-    wire [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_out;    
-    
-    //assign respOut = '{valid: (!respOutQ_empty && respOutQ_out.valid), data: respOutQ_out.data, size: respOutQ_out.size};
-    assign respOut[`AMIResponse_valid] = (!respOutQ_empty && respOutQ_out[`AMIResponse_valid]);
-    assign respOut[`AMIResponse_data] = respOutQ_out[`AMIResponse_data];
-    assign respOut[`AMIResponse_size] =  respOutQ_out[`AMIResponse_size];
-    assign respOutQ_deq = respOut_grant;
     
     /////////////////////
     // FSM
@@ -167,41 +150,6 @@ module BlockBuffer
         end
     end
     
-    // Current request info
-    reg[`AMI_ADDR_WIDTH-6:0]   current_block_index;
-    reg[`AMI_ADDR_WIDTH-6:0]   new_block_index;
-    reg                       block_index_we;
-
-    always@(posedge clk) begin : current_block_update
-        if (rst) begin
-            current_block_index <= 0;
-        end else begin
-            if (block_index_we) begin
-                current_block_index <= new_block_index;
-            end else begin
-                current_block_index <= current_block_index;
-            end
-        end
-    end
-    // FSM state transitions
-    // FSM controlled signals
-    // inMuxSel 0 for RdInput, 1 for WrInput
-    // wr_all_sectors
-    // wr_specific_sector
-    // wr_sector_index
-    // rd_mux_sel
-    // reqOut0 for issuing reads
-    // reqOut1 for issuing writes
-    // respIn0_grant , read port
-    // respIn1_grant , no responses should come back on the write port
-    // reqIn_grant
-    // respOut
-    // block_index_we
-    // new_block_index
-    // reqInQ_deq
-    // respOutQ_enq
-    // respOutQ_in
-
     wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
     assign reqInQ_out_addr = reqInQ_out[`AMIRequest_addr];
 
@@ -213,39 +161,18 @@ module BlockBuffer
         wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // mux out correct sector
         rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
-        // block index
-        new_block_index = current_block_index;
-        block_index_we  = 1'b0;
         // requests to the memory system
         // Read port
-        //reqOut0[`AMIRequest_valid] = 1'b0;
-        //reqOut0[`AMIRequest_isWrite] = 1'b0;
-        //reqOut0[`AMIRequest_addr] = 64'b0;
-        //reqOut0[`AMIRequest_data] = 512'b0;
-        //reqOut0[`AMIRequest_size] = 6'd64;
-        //reqOut0 = '{1'b0, 1'b0, 64'b0, 512'b0, 6'd64}; // read port
         reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
 
 
         // Write port
-        //reqOut1[`AMIRequest_valid] = 1'b0;
-        //reqOut1[`AMIRequest_isWrite] = 1'b0;
-        //reqOut1[`AMIRequest_addr] = 64'b0;
-        //reqOut1[`AMIRequest_data] = 512'b0;
-        //reqOut1[`AMIRequest_size] = 6'd64;
-        //reqOut1 = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 6'd64}; // write port
         reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
 
         // response from memory system
         respIn0_grant = 1'b0;
         respIn1_grant = 1'b0;
-        // control the queues to 
-        //reqInQ_deq   = 1'b0;
-        respOutQ_enq = 1'b0;
-        //respOutQ_in  = '{valid: 0, data: 512'b0, size: 64};
-        respOutQ_in[`AMIResponse_valid]  = 0;
-        respOutQ_in[`AMIResponse_data] = 512'b0;
-        respOutQ_in[`AMIResponse_size] = 64; 
+
         // state control
         next_state = current_state;
     end // FSM state transitions
