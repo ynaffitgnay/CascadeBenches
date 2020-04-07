@@ -1,4 +1,7 @@
 //`timescale 1ns/1ps
+`ifndef __counter_v__
+`define __counter_v__
+
 module counter #(
     // INPUT PARAMETERS
     parameter COUNT_WIDTH               = 3
@@ -50,3 +53,4 @@ module counter #(
         end
     end
 endmodule
+`endif //  `ifndef __counter_v__

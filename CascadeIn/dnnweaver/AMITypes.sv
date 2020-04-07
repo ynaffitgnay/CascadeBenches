@@ -5,6 +5,8 @@
 `ifndef AMITYPES_SV_INCLUDED
 `define AMITYPES_SV_INCLUDED
 
+`include "common.vh"
+
 //package AMITypes;
 
 // For Heterogenous config
@@ -12,8 +14,8 @@
 // 1 - Bitcoin
 // 2 - MemDrive
 // 3 - Unused
-parameter AMI_HETERO_TOTAL  = 4;
-parameter bit[1:0] AMI_HETERO_CONFIG[AMI_HETERO_TOTAL-1:0] = '{2 , 0 , 0 , 0};
+//parameter AMI_HETERO_TOTAL  = 4;
+//parameter bit[1:0] AMI_HETERO_CONFIG[AMI_HETERO_TOTAL-1:0] = '{2 , 0 , 0 , 0};
 
 /*AMI_HETERO_CONFIG[0] = 2; // app 0 MemDrive
 AMI_HETERO_CONFIG[1] = 0; // app 1 DNNWeaver
@@ -25,15 +27,16 @@ parameter AMI_NUM_APPS     = 8;
 parameter AMI_NUM_PORTS    = 2;
 parameter AMI_NUM_CHANNELS = 4;
 
-parameter AMI_CHANNEL_BITS = (AMI_NUM_CHANNELS > 1 ? $clog2(AMI_NUM_CHANNELS) : 1);
-parameter AMI_APP_BITS     = (AMI_NUM_APPS  > 1 ? $clog2(AMI_NUM_APPS)  : 1);
-parameter AMI_PORT_BITS    = (AMI_NUM_PORTS > 1 ? $clog2(AMI_NUM_PORTS) : 1);
+parameter AMI_CHANNEL_BITS = (AMI_NUM_CHANNELS > 1 ? `C_LOG_2(AMI_NUM_CHANNELS) : 1);
+parameter AMI_APP_BITS     = (AMI_NUM_APPS  > 1 ? `C_LOG_2(AMI_NUM_APPS)  : 1);
+parameter AMI_PORT_BITS    = (AMI_NUM_PORTS > 1 ? `C_LOG_2(AMI_NUM_PORTS) : 1);
 
 parameter AMI_ADDR_WIDTH = 64;
-parameter AMI_DATA_WDITH = 512 + 64;
+parameter AMI_DATA_WIDTH = 512 + 64;
 parameter AMI_REQ_SIZE_WIDTH = 6; // enables 64 byte size
 
 parameter USE_SOFT_FIFO = 1;
+`define USE_SOFT_FIFO 1
 
 parameter DISABLE_INTERLEAVE = 1'b0;
 
@@ -62,21 +65,38 @@ parameter AMI2DNN_READ_TAG_Q_DEPTH   = (USE_SOFT_FIFO ? 3 : 9);
 parameter BLOCK_BUFFER_REQ_IN_Q_DEPTH   = (USE_SOFT_FIFO ? 3 : 9);
 parameter BLOCK_BUFFER_RESP_OUT_Q_DEPTH = (USE_SOFT_FIFO ? 3 : 9);
 
-typedef struct packed
-{
-    logic                          valid;
-    logic                          isWrite;
-    logic [AMI_ADDR_WIDTH-1:0]     addr;
-    logic [AMI_DATA_WDITH-1:0]        data;
-    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
-} AMIRequest;
+`define AMI_ADDR_WIDTH 64
+`define AMI_DATA_WIDTH (512 + 64)
+`define AMI_REQ_SIZE_WIDTH 6
 
-typedef struct packed {
-    logic                          valid;
-    logic [AMI_DATA_WDITH-1:0]     data;
-    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
-} AMIResponse;
+`define AMI_REQUEST_BUS_WIDTH  (1 + 1 + `AMI_ADDR_WIDTH + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
+`define AMIRequest_valid       0:0
+`define AMIRequest_isWrite     1:1
+`define AMIRequest_addr        (`AMI_ADDR_WIDTH + 2 - 1):2
+`define AMIRequest_data        (`AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2 - 1):(`AMI_ADDR_WIDTH + 2)
+`define AMIRequest_size        (`AMI_REQ_SIZE_WIDTH + `AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2 - 1):(`AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2)
 
+//typedef struct packed
+//{
+//    logic                          valid;
+//    logic                          isWrite;
+//    logic [AMI_ADDR_WIDTH-1:0]     addr;
+//    logic [AMI_DATA_WIDTH-1:0]        data;
+//    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
+//} AMIRequest;
+
+`define AMI_RESPONSE_BUS_WIDTH  (1 + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
+`define AMIResponse_valid       0:0
+`define AMIResponse_data        (`AMI_DATA_WIDTH + 1 - 1):1
+`define AMIResponse_size        (`AMI_REQ_SIZE_WIDTH + `AMI_DATA_WIDTH + 1 - 1):(`AMI_DATA_WIDTH + 1)
+
+//typedef struct packed {
+//    logic                          valid;
+//    logic [AMI_DATA_WIDTH-1:0]     data;
+//    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
+//} AMIResponse;
+
+/*
 typedef struct packed
 {
     logic                          valid;
@@ -85,7 +105,7 @@ typedef struct packed
     logic [AMI_APP_BITS-1:0]       srcApp;
     logic [AMI_CHANNEL_BITS-1:0]   channel;
     logic [AMI_ADDR_WIDTH-1:0]     addr;
-    logic [AMI_DATA_WDITH-1:0]     data;
+    logic [AMI_DATA_WIDTH-1:0]     data;
     logic [AMI_REQ_SIZE_WIDTH-1:0] size;
 } AMIReq;
 
@@ -94,7 +114,7 @@ typedef struct packed {
     logic [AMI_PORT_BITS-1:0]    srcPort;
     logic [AMI_APP_BITS-1:0]     srcApp;
     logic [AMI_CHANNEL_BITS-1:0] channel;
-    logic [AMI_DATA_WDITH-1:0]   data;
+    logic [AMI_DATA_WIDTH-1:0]   data;
     logic [AMI_REQ_SIZE_WIDTH-1:0] size;    
 } AMIResp;
 
@@ -131,16 +151,26 @@ typedef struct packed {
     logic [31:0] addr;
     logic [19:0]  size;
 } DNNMicroRdTag;
+*/
 
-typedef struct packed {
-    logic valid;
-    logic isWrite;
-    logic [31:0] addr;
-    logic [19:0]  size;
-    logic [9:0]  pu_id;
-    logic [63:0] time_stamp;
-} DNNWeaverMemReq;
+`define DNNWEAVER_MEMREQ_BUS_WIDTH  (1 + 1 + 32 + 20 + 10 + 64)
+`define DNNWeaverMemReq_valid       0:0
+`define DNNWeaverMemReq_isWrite     1:1
+`define DNNWeaverMemReq_addr        (32 + 2 - 1):2
+`define DNNWeaverMemReq_size        (20 + 32 + 2 - 1):(32 + 2)
+`define DNNWeaverMemReq_pu_id       (10 + 20 + 32 + 2 - 1):(20 + 32 + 2)
+`define DNNWeaverMemReq_time_stamp  (64 + 10 + 20 + 32 + 2 - 1):(10 + 20 + 32 + 2)
 
+//typedef struct packed {
+//    logic valid;
+//    logic isWrite;
+//    logic [31:0] addr;
+//    logic [19:0]  size;
+//    logic [9:0]  pu_id;
+//    logic [63:0] time_stamp;
+//} DNNWeaverMemReq;
+
+/*
 // Bulk Data
 // AmorphOS Big Bulk Data packet format
 typedef struct packed {
@@ -154,11 +184,12 @@ typedef struct packed {
     logic[15:0] app_id;
     ABDPacket data_packet;
 } ABDInternalPacket;
+*/
 
 // Soft Reg virtualiztion
 
 parameter VIRT_SOFTREG_RESP_Q_SIZE = (USE_SOFT_FIFO ? 4 : 9);
-parameter VIRT_SOFTREG_RESV_BITS   = (AMI_NUM_APPS  > 1 ? $clog2(AMI_NUM_APPS)  : 1);
+parameter VIRT_SOFTREG_RESV_BITS   = (AMI_NUM_APPS  > 1 ? `C_LOG_2(AMI_NUM_APPS)  : 1);
 
 // PCI-E virtualization
 
@@ -166,7 +197,7 @@ parameter VIRT_PCIE_IN_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
 parameter VIRT_PCIE_UNIFIED_IN_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
 parameter VIRT_PCIE_RESP_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
 parameter VIRT_PCIE_UNIFIED_RESP_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
-parameter VIRT_PCIE_RESV_BITS = (AMI_NUM_APPS  > 1 ? $clog2(AMI_NUM_APPS)  : 1);
+parameter VIRT_PCIE_RESV_BITS = (AMI_NUM_APPS  > 1 ? `C_LOG_2(AMI_NUM_APPS)  : 1);
 
 //endpackage
 `endif

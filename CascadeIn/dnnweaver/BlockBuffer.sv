@@ -1,6 +1,10 @@
 `include "common.vh"
-import ShellTypes::*;
-import AMITypes::*;
+`include "AMITypes.sv"
+`include "SoftFIFO.sv"
+`include "FIFO.sv"
+
+//import ShellTypes::*;
+//import AMITypes::*;
 
 module BlockSector
 #(
@@ -25,7 +29,9 @@ module BlockSector
         end else begin
             if (sector_we) begin
                 data_reg <= new_data;
-            end
+            end else begin
+                data_reg <= data_reg;
+            end            
         end
     end
 
@@ -61,80 +67,81 @@ module block_rotate
 )
 (
     input[2:0] rotate_amount,
-    input[WIDTH-1:0]  inData[NUM_SECTORS-1:0],
-    output reg[WIDTH-1:0] outData[NUM_SECTORS-1:0]
+    input [((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? (NUM_SECTORS * WIDTH) + -1 : (NUM_SECTORS * (2 - WIDTH)) + ((WIDTH - 1) - 1)) : ((WIDTH - 1) >= 0 ? ((2 - NUM_SECTORS) * WIDTH) + (((NUM_SECTORS - 1) * WIDTH) - 1) : ((2 - NUM_SECTORS) * (2 - WIDTH)) + (((WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))) - 1))):((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) : ((WIDTH - 1) >= 0 ? (NUM_SECTORS - 1) * WIDTH : (WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))))] inData,
+	  output reg [((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? (NUM_SECTORS * WIDTH) + -1 : (NUM_SECTORS * (2 - WIDTH)) + ((WIDTH - 1) - 1)) : ((WIDTH - 1) >= 0 ? ((2 - NUM_SECTORS) * WIDTH) + (((NUM_SECTORS - 1) * WIDTH) - 1) : ((2 - NUM_SECTORS) * (2 - WIDTH)) + (((WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))) - 1))):((NUM_SECTORS - 1) >= 0 ? ((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) : ((WIDTH - 1) >= 0 ? (NUM_SECTORS - 1) * WIDTH : (WIDTH - 1) + ((NUM_SECTORS - 1) * (2 - WIDTH))))] outData
+    //input[WIDTH-1:0]  inData[NUM_SECTORS-1:0],
+    //output reg[WIDTH-1:0] outData[NUM_SECTORS-1:0]
 );
 
-    always_comb begin
+    always @(*) begin
         outData = inData;
         if (rotate_amount == 0) begin
             outData = inData;
         end else if (rotate_amount == 1) begin 
-            outData[0] = inData[1];
-            outData[1] = inData[2];
-            outData[2] = inData[3];
-            outData[3] = inData[4];
-            outData[4] = inData[5];
-            outData[5] = inData[6];
-            outData[6] = inData[7];
-            outData[7] = inData[0];
-        end else if (rotate_amount == 2) begin 
-            outData[0] = inData[2];
-            outData[1] = inData[3];
-            outData[2] = inData[4];
-            outData[3] = inData[5];
-            outData[4] = inData[6];
-            outData[5] = inData[7];
-            outData[6] = inData[0];
-            outData[7] = inData[1];
-        end else if (rotate_amount == 3) begin 
-            outData[0] = inData[3];
-            outData[1] = inData[4];
-            outData[2] = inData[5];
-            outData[3] = inData[6];
-            outData[4] = inData[7];
-            outData[5] = inData[0];
-            outData[6] = inData[1];
-            outData[7] = inData[2];
-        end else if (rotate_amount == 4) begin 
-            outData[0] = inData[4];
-            outData[1] = inData[5];
-            outData[2] = inData[6];
-            outData[3] = inData[7];
-            outData[4] = inData[0];
-            outData[5] = inData[1];
-            outData[6] = inData[2];
-            outData[7] = inData[3];
-        end else if (rotate_amount == 5) begin 
-            outData[0] = inData[5];
-            outData[1] = inData[6];
-            outData[2] = inData[7];
-            outData[3] = inData[0];
-            outData[4] = inData[1];
-            outData[5] = inData[2];
-            outData[6] = inData[3];
-            outData[7] = inData[4];
-        end else if (rotate_amount == 6) begin 
-            outData[0] = inData[6];
-            outData[1] = inData[7];
-            outData[2] = inData[0];
-            outData[3] = inData[1];
-            outData[4] = inData[2];
-            outData[5] = inData[3];
-            outData[6] = inData[4];
-            outData[7] = inData[5];
-        end else if (rotate_amount == 7) begin 
-            outData[0] = inData[7];
-            outData[1] = inData[0];
-            outData[2] = inData[1];
-            outData[3] = inData[2];
-            outData[4] = inData[3];
-            outData[5] = inData[4];
-            outData[6] = inData[5];
-            outData[7] = inData[6];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+      			outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 2) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 3) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 4) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 5) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 6) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+        end else if (rotate_amount == 7) begin
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 0 : NUM_SECTORS - 1) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 1 : -1 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 2 : -2 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 3 : -3 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 4 : -4 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 5 : -5 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
+            outData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 7 : -7 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)] = inData[((WIDTH - 1) >= 0 ? 0 : WIDTH - 1) + (((NUM_SECTORS - 1) >= 0 ? 6 : -6 + (NUM_SECTORS - 1)) * ((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH))+:((WIDTH - 1) >= 0 ? WIDTH : 2 - WIDTH)];
         end
-    end
-
+    end // always @ (*)
 endmodule
 
 module BlockBuffer
@@ -144,17 +151,21 @@ module BlockBuffer
     input               rst,
     input               flush_buffer,
     // Interface to App
-    input  AMIRequest   reqIn,
+    input  [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqIn,
     output wire         reqIn_grant,
-    output AMIResponse  respOut,
+    output [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respOut,
     input               respOut_grant,
     // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
-    output AMIRequest   reqOut[AMI_NUM_PORTS-1:0], // port 0 is the rd port, port 1 is the wr port
-    input               reqOut_grant[AMI_NUM_PORTS-1:0],
-    input  AMIResponse  respIn[AMI_NUM_PORTS-1:0],
-    output reg          respIn_grant[AMI_NUM_PORTS-1:0]
-    
+    output reg [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqOut0, // port 0 is the rd port, port 1 is the wr port
+    input               reqOut0_grant,
+    output reg [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqOut1, // port 0 is the rd port, port 1 is the wr port
+    input               reqOut1_grant,
+    input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn0,
+    output reg          respIn0_grant,
+    input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respIn1,
+    output reg          respIn1_grant
 );
+
 
     // Params
     localparam NUM_SECTORS  = 8;
@@ -172,11 +183,18 @@ module BlockBuffer
     wire             reqInQ_full;
     wire             reqInQ_enq;
     reg              reqInQ_deq;
-    AMIRequest       reqInQ_in;
-    AMIRequest       reqInQ_out;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_in;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;
+    // necessary for doing bitslicing of AMIReq bus
+    wire[`AMI_DATA_WIDTH - 1:0] reqInQ_out_data;  
+    wire[`AMI_DATA_WIDTH - 1:0] respIn0_data;
+
+    assign reqInQ_out_data = reqInQ_out[`AMIRequest_data];
+    assign respIn0_data = respIn0[`AMIResponse_data];
     
     // Following signals will be controlled by the FSM
     reg inMuxSel; // 0 for RdInput, 1 for WrInput
+
 
     genvar sector_num;
     generate 
@@ -196,8 +214,8 @@ module BlockBuffer
                 .dataout(dataout[sector_num])
             );
             
-            assign wrInput[sector_num] = reqInQ_out.data[SECTOR_WIDTH-1:0];
-            assign rdInput[sector_num] = respIn[0].data[((sector_num+1)*SECTOR_WIDTH)-1:(sector_num*SECTOR_WIDTH)];
+            assign wrInput[sector_num] = reqInQ_out_data[SECTOR_WIDTH-1:0];
+            assign rdInput[sector_num] = respIn0_data[((sector_num+1)*SECTOR_WIDTH)-1:(sector_num*SECTOR_WIDTH)];
             assign wr_output[((sector_num+1)*SECTOR_WIDTH)-1:(sector_num*SECTOR_WIDTH)] = dataout[sector_num];
         end
     endgenerate
@@ -225,10 +243,10 @@ module BlockBuffer
     );
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_reqIn_memReqQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_reqIn_memReqQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (BLOCK_BUFFER_REQ_IN_Q_DEPTH)
             )
             reqIn_memReqQ
@@ -245,7 +263,7 @@ module BlockBuffer
         end else begin : FIFO_reqIn_memReqQ
             FIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (BLOCK_BUFFER_REQ_IN_Q_DEPTH)
             )
             reqIn_memReqQ
@@ -263,7 +281,7 @@ module BlockBuffer
     endgenerate        
 
     assign reqInQ_in   = reqIn;
-    assign reqInQ_enq  = reqIn.valid && !reqInQ_full;
+    assign reqInQ_enq  = reqIn[`AMIRequest_valid] && !reqInQ_full;
     assign reqIn_grant = reqInQ_enq;
 
     // Queue for outgoing AMIResponses
@@ -271,14 +289,14 @@ module BlockBuffer
     wire             respOutQ_full;
     reg              respOutQ_enq;
     wire             respOutQ_deq;
-    AMIResponse      respOutQ_in;
-    AMIResponse      respOutQ_out;    
+    reg [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_in;
+    wire [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_out;    
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_respOut_memReqQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_respOut_memReqQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(AMIResponse)),
+                .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
                 .LOG_DEPTH                (BLOCK_BUFFER_RESP_OUT_Q_DEPTH)
             )
             respOut_memReqQ
@@ -295,7 +313,7 @@ module BlockBuffer
         end else begin : FIFO_respOut_memReqQ
             FIFO
             #(
-                .WIDTH                    ($bits(AMIResponse)),
+                .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
                 .LOG_DEPTH                (BLOCK_BUFFER_RESP_OUT_Q_DEPTH)
             )
             respOut_memReqQ
@@ -312,7 +330,10 @@ module BlockBuffer
         end
     endgenerate
     
-    assign respOut = '{valid: (!respOutQ_empty && respOutQ_out.valid), data: respOutQ_out.data, size: respOutQ_out.size};
+    //assign respOut = '{valid: (!respOutQ_empty && respOutQ_out.valid), data: respOutQ_out.data, size: respOutQ_out.size};
+    assign respOut[`AMIResponse_valid] = (!respOutQ_empty && respOutQ_out[`AMIResponse_valid]);
+    assign respOut[`AMIResponse_data] = respOutQ_out[`AMIResponse_data];
+    assign respOut[`AMIResponse_size] =  respOutQ_out[`AMIResponse_size];
     assign respOutQ_deq = respOut_grant;
     
     /////////////////////
@@ -339,8 +360,8 @@ module BlockBuffer
     end
     
     // Current request info
-    reg[AMI_ADDR_WIDTH-6:0]   current_block_index;
-    reg[AMI_ADDR_WIDTH-6:0]   new_block_index;
+    reg[`AMI_ADDR_WIDTH-6:0]   current_block_index;
+    reg[`AMI_ADDR_WIDTH-6:0]   new_block_index;
     reg                       block_index_we;
 
     always@(posedge clk) begin : current_block_update
@@ -349,6 +370,8 @@ module BlockBuffer
         end else begin
             if (block_index_we) begin
                 current_block_index <= new_block_index;
+            end else begin
+                current_block_index <= current_block_index;
             end
         end
     end
@@ -359,10 +382,10 @@ module BlockBuffer
     // wr_specific_sector
     // wr_sector_index
     // rd_mux_sel
-    // reqOut[0] for issuing reads
-    // reqOut[1] for issuing writes
-    // respIn_grant[0] , read port
-    // respIn_grant[1] , no responses should come back on the write port
+    // reqOut0 for issuing reads
+    // reqOut1 for issuing writes
+    // respIn0_grant , read port
+    // respIn1_grant , no responses should come back on the write port
     // reqIn_grant
     // respOut
     // block_index_we
@@ -371,38 +394,67 @@ module BlockBuffer
     // respOutQ_enq
     // respOutQ_in
 
+    wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
+    assign reqInQ_out_addr = reqInQ_out[`AMIRequest_data];
+
     always @(*) begin
         // Signals controlling writing into the block
         inMuxSel           = 1'b0;
         wr_all_sectors     = 1'b0;
         wr_specific_sector = 1'b0;
-        wr_sector_index    = reqInQ_out.addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
+        wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // mux out correct sector
-        rd_mux_sel         = reqInQ_out.addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
+        rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // block index
         new_block_index = current_block_index;
         block_index_we  = 1'b0;
         // requests to the memory system
-        reqOut[0] = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 64}; // read port
-        reqOut[1] = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 64}; // write port
+        // Read port
+        //reqOut0[`AMIRequest_valid] = 1'b0;
+        //reqOut0[`AMIRequest_isWrite] = 1'b0;
+        //reqOut0[`AMIRequest_addr] = 64'b0;
+        //reqOut0[`AMIRequest_data] = 512'b0;
+        //reqOut0[`AMIRequest_size] = 6'd64;
+        //reqOut0 = '{1'b0, 1'b0, 64'b0, 512'b0, 6'd64}; // read port
+        reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+
+
+        // Write port
+        //reqOut1[`AMIRequest_valid] = 1'b0;
+        //reqOut1[`AMIRequest_isWrite] = 1'b0;
+        //reqOut1[`AMIRequest_addr] = 64'b0;
+        //reqOut1[`AMIRequest_data] = 512'b0;
+        //reqOut1[`AMIRequest_size] = 6'd64;
+        //reqOut1 = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 6'd64}; // write port
+        reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+
         // response from memory system
-        respIn_grant[0] = 1'b0;
-        respIn_grant[1] = 1'b0;
+        respIn0_grant = 1'b0;
+        respIn1_grant = 1'b0;
         // control the queues to 
         reqInQ_deq   = 1'b0;
         respOutQ_enq = 1'b0;
-        respOutQ_in  = '{valid: 0, data: 512'b0, size: 64}; 
+        //respOutQ_in  = '{valid: 0, data: 512'b0, size: 64};
+        respOutQ_in[`AMIResponse_valid]  = 0;
+        respOutQ_in[`AMIResponse_data] = 512'b0;
+        respOutQ_in[`AMIResponse_size] = 64; 
         // state control
         next_state = current_state;
 
         case (current_state)
             INVALID : begin
                 // valid  request waiting to be serviced, but no valid block in the buffer
-                if (!reqInQ_empty && reqInQ_out.valid)  begin
-                    reqOut[0] = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out.addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
-                    if (reqOut_grant[0] == 1'b1) begin
+                //if (!reqInQ_empty && reqInQ_out.valid)  begin
+                if (!reqInQ_empty && reqInQ_out[`AMIRequest_valid])  begin
+                    //reqOut0 = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out_addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
+                    reqOut0[`AMIRequest_valid] = 1;
+                    reqOut0[`AMIRequest_isWrite] = 1'b0;
+                    reqOut0[`AMIRequest_addr] = {reqInQ_out_addr[63:6],6'b00_0000};
+                    reqOut0[`AMIRequest_data] = 512'b0;
+                    reqOut0[`AMIRequest_size] = 64; // read port
+                    if (reqOut0_grant == 1'b1) begin
                         // block is being read
-                        new_block_index = reqInQ_out.addr[63:6];
+                        new_block_index = reqInQ_out_addr[63:6];
                         block_index_we  = 1'b1;
                         // go to pending state
                         next_state = PENDING;
@@ -411,20 +463,20 @@ module BlockBuffer
             end
             PENDING : begin
                 // waiting for a block to be read from memory and into the block buffer
-                if (respIn[0].valid) begin
+                if (respIn0[`AMIResponse_valid]) begin
                     inMuxSel = 1'b0; //rdInput
                     wr_all_sectors  = 1'b1; // write every sector
-                    respIn_grant[0] = 1'b1; // accept the response
+                    respIn0_grant = 1'b1; // accept the response
                     next_state = CLEAN;
                 end
             end
             CLEAN : begin
                 // we have a valid block, can service a request if the block index matches
-                if (!reqInQ_empty && reqInQ_out.valid) begin
+                if (!reqInQ_empty && reqInQ_out[`AMIRequest_valid]) begin
                     // go ahead and service the request from the local block buffer
-                    if (reqInQ_out.addr[63:6] == current_block_index) begin
+                    if (reqInQ_out_addr[63:6] == current_block_index) begin
                         // service a write operation
-                        if (reqInQ_out.isWrite) begin
+                        if (reqInQ_out[`AMIRequest_isWrite]) begin
                             inMuxSel = 1'b1; // wrInput
                             wr_specific_sector = 1'b1;
                             reqInQ_deq = 1'b1;
@@ -433,15 +485,23 @@ module BlockBuffer
                         end else begin
                             reqInQ_deq   = 1'b1;
                             respOutQ_enq = 1'b1;
-                            respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8}; 
+                            //respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8};
+                            respOutQ_in[`AMIResponse_valid] = 1;
+                            respOutQ_in[`AMIResponse_data] = {448'b0,rd_output};
+                            respOutQ_in[`AMIResponse_size] = 8; 
                         end
                     // a new block must be fetched, but this one does not need to be written back since it is CLEAN
                     end else begin
                         // fetch a different block
-                        reqOut[0] = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out.addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
-                        if (reqOut_grant[0] == 1'b1) begin
+                        //reqOut0 = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out.addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
+                        reqOut0[`AMIRequest_valid] = 1;
+                        reqOut0[`AMIRequest_isWrite] = 1'b0;
+                        reqOut0[`AMIRequest_addr] = {reqInQ_out_addr[63:6],6'b00_0000};
+                        reqOut0[`AMIRequest_data] = 512'b0;
+                        reqOut0[`AMIRequest_size] = 64; // read port
+                        if (reqOut0_grant == 1'b1) begin
                             // block is being read
-                            new_block_index = reqInQ_out.addr[63:6];
+                            new_block_index = reqInQ_out_addr[63:6];
                             block_index_we  = 1'b1;
                             // go to pending state
                             next_state = PENDING;
@@ -452,11 +512,11 @@ module BlockBuffer
             end
             MODIFIED : begin
                 // we have a valid block, can service a request if the block index matches
-                if (!reqInQ_empty && reqInQ_out.valid) begin
+                if (!reqInQ_empty && reqInQ_out[`AMIRequest_valid]) begin
                     // go ahead and service the request from the local block buffer
-                    if (reqInQ_out.addr[63:6] == current_block_index) begin
+                    if (reqInQ_out_addr[63:6] == current_block_index) begin
                         // service a write operation
-                        if (reqInQ_out.isWrite) begin
+                        if (reqInQ_out[`AMIRequest_isWrite]) begin
                             inMuxSel = 1'b1; // wrInput
                             wr_specific_sector = 1'b1;
                             reqInQ_deq = 1'b1;
@@ -464,13 +524,21 @@ module BlockBuffer
                         end else begin
                             reqInQ_deq   = 1'b1;
                             respOutQ_enq = 1'b1;
-                            respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8}; 
+                            //respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8};
+                            respOutQ_in[`AMIResponse_valid] = 1;
+                            respOutQ_in[`AMIResponse_data] = {448'b0,rd_output};
+                            respOutQ_in[`AMIResponse_size] = 8; 
                         end
                     // a new block must be fetched, but this one is DIRTY, so it must be written back first
                     end else begin
                         // issue a write and go to CLEAN state
-                        reqOut[1] = '{valid: 1, isWrite: 1'b1, addr: {current_block_index,6'b00_0000} , data: wr_output, size: 64}; // write port
-                        if (reqOut_grant[1] == 1'b1) begin
+                        //reqOut1 = '{valid: 1, isWrite: 1'b1, addr: {current_block_index,6'b00_0000} , data: wr_output, size: 64}; // write port
+                        reqOut1[`AMIRequest_valid] = 1;
+                        reqOut1[`AMIRequest_isWrite] = 1'b1;
+                        reqOut1[`AMIRequest_addr] = {current_block_index,6'b00_0000};
+                        reqOut1[`AMIRequest_data] = wr_output;
+                        reqOut1[`AMIRequest_size] = 64; // write port
+                        if (reqOut1_grant == 1'b1) begin
                             next_state = CLEAN;
                         end
                     end
@@ -483,3 +551,22 @@ module BlockBuffer
     end // FSM state transitions
     
 endmodule
+
+reg rst;
+reg flush_buffer;
+reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
+wire reqIn_grant;
+wire [`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
+reg respOut_grant;
+wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut0;
+reg reqOut0_grant;
+wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut1;
+reg reqOut1_grant;
+reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn0;
+wire respIn0_grant;
+reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
+wire respIn1_grant;
+
+BlockBuffer tbb(clock.val, rst, flush_buffer, reqIn, reqIn_grant, respOut, respOut_grant, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
+
+
