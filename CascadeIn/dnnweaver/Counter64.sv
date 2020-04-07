@@ -1,4 +1,5 @@
-
+`ifndef __Counter64_sv__
+`define __Counter64_sv__
 module Counter64
 (
   input               clk,
@@ -42,7 +43,8 @@ module Counter64
 
 	end
 
-endmodule
+endmodule // Counter64
+`endif
 
 //reg rst;
 //reg increment;
