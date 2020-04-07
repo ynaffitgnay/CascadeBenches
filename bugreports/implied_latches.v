@@ -57,8 +57,7 @@ module BlockBuffer
 (
     // General signals
     input               clk,
-    input               rst,
-    input               flush_buffer
+    input               rst
 );
 
 
@@ -71,17 +70,11 @@ module BlockBuffer
     wire[NUM_SECTORS-1:0] sector_we;
     
     // Queue for incoming AMIRequests
-    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;
-    // necessary for doing bitslicing of AMIReq bus
-    wire[`AMI_DATA_WIDTH - 1:0] reqInQ_out_data;  
-    assign reqInQ_out_data = reqInQ_out[`AMIRequest_data];
-    
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;    
 
     // Read data out of the block
-    wire [SECTOR_WIDTH-1:0] rd_output;
+    //wire [SECTOR_WIDTH-1:0] rd_output;
     reg [`C_LOG_2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
-
-    // Write enables per sector
 
     // FSM signals
     reg wr_all_sectors;
@@ -121,8 +114,7 @@ module BlockBuffer
 endmodule
 
 reg rst;
-reg flush_buffer;
 
-BlockBuffer tbb(clock.val, rst, flush_buffer);
+BlockBuffer tbb(clock.val, rst);
 
 
