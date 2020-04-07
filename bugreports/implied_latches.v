@@ -74,11 +74,8 @@ module BlockBuffer
     wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;
     // necessary for doing bitslicing of AMIReq bus
     wire[`AMI_DATA_WIDTH - 1:0] reqInQ_out_data;  
-
     assign reqInQ_out_data = reqInQ_out[`AMIRequest_data];
     
-    // Following signals will be controlled by the FSM
-    reg inMuxSel; // 0 for RdInput, 1 for WrInput
 
     // Read data out of the block
     wire [SECTOR_WIDTH-1:0] rd_output;
@@ -114,7 +111,6 @@ module BlockBuffer
 
     always @(*) begin
         // Signals controlling writing into the block
-        inMuxSel           = 1'b0;
         wr_all_sectors     = 1'b0;
         wr_specific_sector = 1'b0;
         wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
