@@ -289,9 +289,11 @@ module DNN2AMI_WRPath
         new_current_isWrite   = current_isWrite;
         new_current_pu_id     = current_pu_id;
 
-        new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty);
+
+        /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
+        /* new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); */
         new_wr_done_reg  = 1'b0;
-    
+        
         reqQ_enq = 1'b0;
         //reqQ_in  = '{valid: 1'b0, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
         reqQ_in[`AMIRequest_valid] = 1'b0;
@@ -299,7 +301,7 @@ module DNN2AMI_WRPath
         reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
         reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
         reqQ_in[`AMIRequest_size] = 8; // double check this size
-    
+        
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
         end
@@ -326,8 +328,11 @@ module DNN2AMI_WRPath
                 new_macro_req_active = 1'b0;
                 new_wr_done_reg = 1'b1;
             end
-        end else begin
+        end // if (macro_req_active)
+        else begin
             // See if there is a new operation available
+            /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
+            /*
             if (!macroWrQ_empty) begin
                 // A new operation can become active
                 accept_new_active_req = 1'b1;
@@ -338,6 +343,7 @@ module DNN2AMI_WRPath
                 new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
                 new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
             end
+            */
         end
     end // always @ (*)
 
