@@ -231,7 +231,7 @@ module BlockBuffer
     // FSM signals
     reg wr_all_sectors;
     reg wr_specific_sector;
-    reg[`C_LOG_2(NUM_SECTORS)-1:0] wr_sector_index;
+    wire[`C_LOG_2(NUM_SECTORS)-1:0] wr_sector_index;
     
     we_decoder
     writes_decoder
@@ -395,14 +395,14 @@ module BlockBuffer
     // respOutQ_in
 
     wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
-    assign reqInQ_out_addr = reqInQ_out[`AMIRequest_data];
+    assign reqInQ_out_addr = reqInQ_out[`AMIRequest_addr];
+    assign wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
 
     always @(*) begin
         // Signals controlling writing into the block
         inMuxSel           = 1'b0;
         wr_all_sectors     = 1'b0;
         wr_specific_sector = 1'b0;
-        wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // mux out correct sector
         rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
         // block index
