@@ -18,7 +18,6 @@
 //-----------------------------------------------------------
 
 
-`define USE_SOFT_FIFO 1
 `define AMI_ADDR_WIDTH 64
 `define AMI_DATA_WIDTH (512 + 64)
 `define AMI_REQ_SIZE_WIDTH 6
@@ -33,190 +32,6 @@
 `define AMIResponse_valid       0:0
 `define AMIResponse_data        (`AMI_DATA_WIDTH + 1 - 1):1
 `define AMIResponse_size        (`AMI_REQ_SIZE_WIDTH + `AMI_DATA_WIDTH + 1 - 1):(`AMI_DATA_WIDTH + 1)
-
-parameter BLOCK_BUFFER_REQ_IN_Q_DEPTH   = (`USE_SOFT_FIFO ? 3 : 9);
-parameter BLOCK_BUFFER_RESP_OUT_Q_DEPTH = (`USE_SOFT_FIFO ? 3 : 9);
-
-
-
-module SoftFIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
-(
-    // General signals
-    input  clock,
-    input  reset_n,
-    // Data in and write enable
-    input  wrreq, //enq                    
-    input[WIDTH-1:0] data,// data in            
-    output full,                   
-    output[WIDTH-1:0] q, // data out
-    output empty,              
-    input  rdreq // deq    
-);
-
-//parameter WIDTH     = 64; // bits wide
-//parameter LOG_DEPTH = 9;  // 2^LOG_DEPTH slots
-
-reg [WIDTH-1:0] buffer[(1 << LOG_DEPTH)-1:0];
-
-reg [LOG_DEPTH:0] counter;
-reg [LOG_DEPTH:0]  new_counter;
-reg [LOG_DEPTH-1:0] rd_ptr, wr_ptr; 
-reg [LOG_DEPTH-1:0]  new_rd_ptr, new_wr_ptr;
-
-assign empty = (counter == 0);
-assign full  = (counter == (1 << LOG_DEPTH));
-assign q     = buffer[rd_ptr];
-
-always @(posedge clock) begin
-    if (!reset_n) begin
-        counter <= 0;
-        rd_ptr  <= 0;
-        wr_ptr  <= 0;
-    end else begin
-        counter <= new_counter;
-        rd_ptr  <= new_rd_ptr;
-        wr_ptr  <= new_wr_ptr;
-    end
-end
-
-always @(posedge clock) begin
-    if (!full && wrreq) begin
-        buffer[wr_ptr] <= data;
-    end else begin
-        buffer[wr_ptr] <= buffer[wr_ptr];
-    end
-end
-
-always @(*) begin
-    if ((!full && wrreq) && (!empty && rdreq)) begin
-        new_counter = counter;
-        new_rd_ptr  = rd_ptr + 1;
-        new_wr_ptr  = wr_ptr + 1;
-    end else if (!full && wrreq) begin
-        new_counter = counter + 1;
-        new_rd_ptr  = rd_ptr;
-        new_wr_ptr  = wr_ptr + 1;
-    end else if (!empty && rdreq) begin
-        new_counter = counter - 1;
-        new_rd_ptr  = rd_ptr + 1;
-        new_wr_ptr  = wr_ptr;
-    end else begin
-        new_counter = counter;
-        new_rd_ptr = rd_ptr;
-        new_wr_ptr = wr_ptr;
-    end
-end
-
-endmodule 
-
-
-module FIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
-(
-    // General signals
-    input  clock,
-    input  reset_n,
-    // Data in and write enable
-    input  wrreq, //enq                    
-    input[WIDTH-1:0] data,// data in            
-    output full,                   
-    output[WIDTH-1:0] q, // data out
-    output empty,              
-    input  rdreq // deq    
-);
-
-//parameter WIDTH     = 64; // bits wide
-//parameter LOG_DEPTH = 9;  // 2^LOG_DEPTH slots
-
-reg [WIDTH-1:0] buffer[(1 << LOG_DEPTH)-1:0];
-
-reg [LOG_DEPTH:0] counter;
-reg [LOG_DEPTH:0]  new_counter;
-reg [LOG_DEPTH-1:0] rd_ptr, wr_ptr; 
-reg [LOG_DEPTH-1:0]  new_rd_ptr, new_wr_ptr;
-
-assign empty = (counter == 0);
-assign full  = (counter == (1 << LOG_DEPTH));
-assign q     = buffer[rd_ptr];
-
-always @(posedge clock) begin
-    if (!reset_n) begin
-        counter <= 0;
-        rd_ptr  <= 0;
-        wr_ptr  <= 0;
-    end else begin
-        counter <= new_counter;
-        rd_ptr  <= new_rd_ptr;
-        wr_ptr  <= new_wr_ptr;
-    end
-end
-
-always @(posedge clock) begin
-    if (!full && wrreq) begin
-        buffer[wr_ptr] <= data;
-    end else begin
-        buffer[wr_ptr] <= buffer[wr_ptr];
-    end
-end
-
-always @(*) begin
-    if ((!full && wrreq) && (!empty && rdreq)) begin
-        new_counter = counter;
-        new_rd_ptr  = rd_ptr + 1;
-        new_wr_ptr  = wr_ptr + 1;
-    end else if (!full && wrreq) begin
-        new_counter = counter + 1;
-        new_rd_ptr  = rd_ptr;
-        new_wr_ptr  = wr_ptr + 1;
-    end else if (!empty && rdreq) begin
-        new_counter = counter - 1;
-        new_rd_ptr  = rd_ptr + 1;
-        new_wr_ptr  = wr_ptr;
-    end else begin
-        new_counter = counter;
-        new_rd_ptr = rd_ptr;
-        new_wr_ptr = wr_ptr;
-    end
-end
-
-endmodule 
-
-
-//import ShellTypes::*;
-//import AMITypes::*;
-
-module BlockSector
-#(
-    parameter integer WIDTH = 64
-)
-(
-    input            clk,
-    input            rst,
-    input[WIDTH-1:0] wrInput,
-    input[WIDTH-1:0] rdInput,
-    input            inMuxSel,
-    input            sector_we,
-    output wire[WIDTH-1:0] dataout
-);
-
-    reg[WIDTH-1:0]  data_reg;
-    wire[WIDTH-1:0] new_data;
-    
-    always@(posedge clk) begin
-        if (rst) begin
-            data_reg <= 0;
-        end else begin
-            if (sector_we) begin
-                data_reg <= new_data;
-            end else begin
-                data_reg <= data_reg;
-            end            
-        end
-    end
-
-    assign dataout  = data_reg;
-    assign new_data = (inMuxSel == 1'b1) ? wrInput : rdInput;
-    
-endmodule
 
 module we_decoder(
     input we_all,
@@ -373,31 +188,6 @@ module BlockBuffer
     // Following signals will be controlled by the FSM
     reg inMuxSel; // 0 for RdInput, 1 for WrInput
 
-
-    genvar sector_num;
-    generate 
-        for (sector_num = 0; sector_num < NUM_SECTORS; sector_num = sector_num + 1) begin : sector_inst
-            BlockSector
-            #(
-                .WIDTH(SECTOR_WIDTH)
-            )
-            block_sector
-            (
-                .clk (clk),
-                .rst (rst),
-                .wrInput(wrInput[sector_num]),
-                .rdInput(rdInput[sector_num]),
-                .inMuxSel(inMuxSel),
-                .sector_we(sector_we[sector_num]),
-                .dataout(dataout[sector_num])
-            );
-            
-            assign wrInput[sector_num] = reqInQ_out_data[SECTOR_WIDTH-1:0];
-            assign rdInput[sector_num] = respIn0_data[((sector_num+1)*SECTOR_WIDTH)-1:(sector_num*SECTOR_WIDTH)];
-            assign wr_output[((sector_num+1)*SECTOR_WIDTH)-1:(sector_num*SECTOR_WIDTH)] = dataout[sector_num];
-        end
-    endgenerate
-
     // Read data out of the block
     wire [SECTOR_WIDTH-1:0] rd_output;
     reg [`C_LOG_2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
@@ -420,44 +210,6 @@ module BlockBuffer
         .we_out      (sector_we)
     );
 
-    //generate
-    //    if (`USE_SOFT_FIFO) begin : SoftFIFO_reqIn_memReqQ
-    //        SoftFIFO
-    //        #(
-    //            .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
-    //            .LOG_DEPTH                (BLOCK_BUFFER_REQ_IN_Q_DEPTH)
-    //        )
-    //        reqIn_memReqQ
-    //        (
-    //            .clock                    (clk),
-    //            .reset_n                  (~rst),
-    //            .wrreq                    (reqInQ_enq),
-    //            .data                     (reqInQ_in),
-    //            .full                     (reqInQ_full),
-    //            .q                        (reqInQ_out),
-    //            .empty                    (reqInQ_empty),
-    //            .rdreq                    (reqInQ_deq)
-    //        );
-    //    end else begin : FIFO_reqIn_memReqQ
-    //        FIFO
-    //        #(
-    //            .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
-    //            .LOG_DEPTH                (BLOCK_BUFFER_REQ_IN_Q_DEPTH)
-    //        )
-    //        reqIn_memReqQ
-    //        (
-    //            .clock                    (clk),
-    //            .reset_n                  (~rst),
-    //            .wrreq                    (reqInQ_enq),
-    //            .data                     (reqInQ_in),
-    //            .full                     (reqInQ_full),
-    //            .q                        (reqInQ_out),
-    //            .empty                    (reqInQ_empty),
-    //            .rdreq                    (reqInQ_deq)
-    //        );
-    //    end
-    //endgenerate        
-
     assign reqInQ_in   = reqIn;
     assign reqInQ_enq  = reqIn[`AMIRequest_valid] && !reqInQ_full;
     assign reqIn_grant = reqInQ_enq;
@@ -469,44 +221,6 @@ module BlockBuffer
     wire             respOutQ_deq;
     reg [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_in;
     wire [`AMI_RESPONSE_BUS_WIDTH - 1:0]      respOutQ_out;    
-
-    //generate
-    //    if (`USE_SOFT_FIFO) begin : SoftFIFO_respOut_memReqQ
-    //        SoftFIFO
-    //        #(
-    //            .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
-    //            .LOG_DEPTH                (BLOCK_BUFFER_RESP_OUT_Q_DEPTH)
-    //        )
-    //        respOut_memReqQ
-    //        (
-    //            .clock                    (clk),
-    //            .reset_n                  (~rst),
-    //            .wrreq                    (respOutQ_enq),
-    //            .data                     (respOutQ_in),
-    //            .full                     (respOutQ_full),
-    //            .q                        (respOutQ_out),
-    //            .empty                    (respOutQ_empty),
-    //            .rdreq                    (respOutQ_deq)
-    //        );
-    //    end else begin : FIFO_respOut_memReqQ
-    //        FIFO
-    //        #(
-    //            .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
-    //            .LOG_DEPTH                (BLOCK_BUFFER_RESP_OUT_Q_DEPTH)
-    //        )
-    //        respOut_memReqQ
-    //        (
-    //            .clock                    (clk),
-    //            .reset_n                (~rst),
-    //            .wrreq                    (respOutQ_enq),
-    //            .data                   (respOutQ_in),
-    //            .full                   (respOutQ_full),
-    //            .q                      (respOutQ_out),
-    //            .empty                  (respOutQ_empty),
-    //            .rdreq                  (respOutQ_deq)
-    //        );
-    //    end
-    //endgenerate
     
     //assign respOut = '{valid: (!respOutQ_empty && respOutQ_out.valid), data: respOutQ_out.data, size: respOutQ_out.size};
     assign respOut[`AMIResponse_valid] = (!respOutQ_empty && respOutQ_out[`AMIResponse_valid]);
