@@ -16,7 +16,7 @@ module BlockBuffer
     wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;    
 
     // Read data out of the block
-    reg [2:0] rd_mux_sel;
+    //reg [2:0] rd_mux_sel;
 
     reg wr_specific_sector;
     
@@ -27,7 +27,6 @@ module BlockBuffer
         // Signals controlling writing into the block
         wr_specific_sector = 1'b0;
 
-        // mux out correct sector
         //rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
     end // FSM state transitions
     
