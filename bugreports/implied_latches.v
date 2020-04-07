@@ -60,8 +60,8 @@ module BlockBuffer
     input               rst,
     input               flush_buffer,
     // Interface to App
-    input  [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqIn,
-    output wire         reqIn_grant,
+    //input  [`AMI_REQUEST_BUS_WIDTH - 1:0]   reqIn,
+    //output wire         reqIn_grant,
     output [`AMI_RESPONSE_BUS_WIDTH - 1:0]  respOut,
     input               respOut_grant,
     // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
@@ -88,11 +88,6 @@ module BlockBuffer
     wire[NUM_SECTORS-1:0] sector_we;
     
     // Queue for incoming AMIRequests
-    //wire             reqInQ_empty;
-    //wire             reqInQ_full;
-    //wire             reqInQ_enq;
-    //reg              reqInQ_deq;
-    //wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_in;
     wire[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqInQ_out;
     // necessary for doing bitslicing of AMIReq bus
     wire[`AMI_DATA_WIDTH - 1:0] reqInQ_out_data;  
@@ -160,8 +155,8 @@ endmodule
 
 reg rst;
 reg flush_buffer;
-reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
-wire reqIn_grant;
+//reg [`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
+//wire reqIn_grant;
 wire [`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
 reg respOut_grant;
 wire [`AMI_REQUEST_BUS_WIDTH - 1:0] reqOut0;
@@ -173,6 +168,6 @@ wire respIn0_grant;
 reg [`AMI_RESPONSE_BUS_WIDTH - 1:0] respIn1;
 wire respIn1_grant;
 
-BlockBuffer tbb(clock.val, rst, flush_buffer, reqIn, reqIn_grant, respOut, respOut_grant, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
+BlockBuffer tbb(clock.val, rst, flush_buffer, respOut, respOut_grant, reqOut0, reqOut0_grant, reqOut1, reqOut1_grant, respIn0, respIn0_grant, respIn1, respIn1_grant);
 
 
