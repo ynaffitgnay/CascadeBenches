@@ -1,6 +1,6 @@
 `include "common.vh"
-\\`include "fifo.v"
-\\`include "counter.v"
+//`include "fifo.v"
+//`include "counter.v"
 module read_info #(
   parameter integer NUM_PU = 1,
   parameter integer PU_LOOP_W = 20,
