@@ -146,12 +146,19 @@ typedef enum {
     ENABLED
 } APP_TLB_STATE;
 
-typedef struct packed {
-    logic          valid;
-    logic [31:0] addr;
-    logic [19:0]  size;
-} DNNMicroRdTag;
 */
+
+`define DNNMICRORD_TAG_BUS_WIDTH  (1 + 32 + 20)
+`define DNNMicroRdTag_valid       0:0
+`define DNNMicroRdTag_addr        (32 + 1 - 1):1
+`define DNNMicroRdTag_size        (20 + 32 + 1 - 1):(32 + 1)
+
+//typedef struct packed {
+//    logic          valid;
+//    logic [31:0] addr;
+//    logic [19:0]  size;
+//} DNNMicroRdTag;
+
 
 `define DNNWEAVER_MEMREQ_BUS_WIDTH  (1 + 1 + 32 + 20 + 10 + 64)
 `define DNNWeaverMemReq_valid       0:0

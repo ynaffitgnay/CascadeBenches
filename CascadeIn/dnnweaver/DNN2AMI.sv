@@ -1,7 +1,13 @@
 //`timescale 1ns/1ps
-//`include "common.vh" // TODO: Uncomment when not testing
-import ShellTypes::*;
-import AMITypes::*;
+`include "common.vh" // TODO: Uncomment when not testing
+`include "AMITypes.sv"
+`include "Counter64.sv"
+`include "SoftFIFO.sv"
+`include "FIFO.sv"
+`include "DNN2AMI_WRPath.sv"
+
+//import ShellTypes::*;
+//import AMITypes::*;
 
 module DNN2AMI
 #(
@@ -39,21 +45,21 @@ module DNN2AMI
 
   // Number of address bits to test before wrapping
   parameter integer C_OFFSET_WIDTH                     = TX_SIZE_WIDTH,
- 
+
   parameter integer WSTRB_W  = AXI_DATA_WIDTH/8,
-  parameter integer NUM_PU_W = $clog2(NUM_PU)+1,
+  parameter integer NUM_PU_W = `C_LOG_2(NUM_PU)+1,
   parameter integer OUTBUF_DATA_W = NUM_PU * AXI_DATA_WIDTH
- 
+
 )
 (
-    input                               clk,
-    input                               rst,
+    input                                               clk,
+    input                                               rst,
 
     // AMI signals
-    output AMIRequest                   mem_req        ,
-    input                               mem_req_grant  ,
-    input  AMIResponse                  mem_resp       ,
-    output                              mem_resp_grant ,
+    output [`AMI_REQUEST_BUS_WIDTH - 1:0]               mem_req,
+    input                                               mem_req_grant,
+    input  [`AMI_RESPONSE_BUS_WIDTH - 1:0]              mem_resp,
+    output                                              mem_resp_grant,
 
     // Reads
     // READ from DDR to BRAM
@@ -73,7 +79,7 @@ module DNN2AMI
     input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,  // data to write from, portion per PU
     input  wire  [ NUM_PU               -1 : 0 ]        write_valid,       // value is ready to be written back
     output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item
-    
+
     // Memory Controller Interface - Write
     input  wire                                         wr_req,   // assert when submitting a wr request
     input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
@@ -84,10 +90,10 @@ module DNN2AMI
 
 );
 
-    AMIRequest reqWrPath;
-    logic reqWrPath_grant;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0] reqWrPath;
+    reg reqWrPath_grant;
     wire wrReqValid;
-    
+
     // Instantiate Write path
     DNN2AMI_WRPath
     #(
@@ -127,7 +133,7 @@ module DNN2AMI
         .data_from_outbuf(data_from_outbuf),  // data to write from, portion per PU
         .write_valid(write_valid),       // value is ready to be written back
         .outbuf_pop(outbuf_pop),   // dequeue a data item
-        
+
         // Memory Controller Interface - Write
         .wr_req(wr_req),   // assert when submitting a wr request
         .wr_pu_id(wr_pu_id), // determine where to write, I assume ach PU has a different region to write
@@ -144,24 +150,24 @@ module DNN2AMI
     time_stamp_counter
     (
         .clk (clk),
-        .rst (rst), 
+        .rst (rst),
         .increment (1'b1),
         .count (current_timestamp)
     );
-    
+
     // Queue to buffer Read requests
     wire             macroRdQ_empty;
     wire             macroRdQ_full;
-    logic            macroRdQ_enq;
-    logic            macroRdQ_deq;
-    DNNWeaverMemReq  macroRdQ_in;
-    DNNWeaverMemReq  macroRdQ_out;
+    wire             macroRdQ_enq;
+    reg              macroRdQ_deq;
+    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroRdQ_in;
+    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroRdQ_out;
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_macroReadQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_macroReadQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(DNNWeaverMemReq)),
+                .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_MACRO_RD_Q_DEPTH)
             )
             macroReadQ
@@ -174,11 +180,11 @@ module DNN2AMI
                 .q                      (macroRdQ_out),
                 .empty                  (macroRdQ_empty),
                 .rdreq                  (macroRdQ_deq)
-            );    
+            );
         end else begin : FIFO_macroReadQ
             FIFO
             #(
-                .WIDTH                    ($bits(DNNWeaverMemReq)),
+                .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_MACRO_RD_Q_DEPTH)
             )
             macroReadQ
@@ -191,23 +197,23 @@ module DNN2AMI
                 .q                      (macroRdQ_out),
                 .empty                  (macroRdQ_empty),
                 .rdreq                  (macroRdQ_deq)
-            );    
+            );
         end
     endgenerate
 
     // reqOut queue to simplify the sequencing logic
     wire             reqQ_empty;
     wire             reqQ_full;
-    logic            reqQ_enq;
-    logic            reqQ_deq;
-    AMIRequest       reqQ_in;
-    AMIRequest       reqQ_out;
+    reg              reqQ_enq;
+    reg              reqQ_deq;
+    reg[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqQ_in;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]      reqQ_out;
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_reqQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_reqQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_REQ_Q_DEPTH)
             )
             reqQ
@@ -220,11 +226,11 @@ module DNN2AMI
                 .q                      (reqQ_out),
                 .empty                  (reqQ_empty),
                 .rdreq                  (reqQ_deq)
-            );    
+            );
         end else begin : FIFO_reqQ
             FIFO
             #(
-                .WIDTH                    ($bits(AMIRequest)),
+                .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_REQ_Q_DEPTH)
             )
             reqQ
@@ -237,23 +243,23 @@ module DNN2AMI
                 .q                      (reqQ_out),
                 .empty                  (reqQ_empty),
                 .rdreq                  (reqQ_deq)
-            );    
+            );
         end
-    endgenerate    
+    endgenerate
 
-    // Tag queue to correctly order reads by port 
+    // Tag queue to correctly order reads by port
     wire             tagQ_empty;
     wire             tagQ_full;
-    logic            tagQ_enq;
-    logic            tagQ_deq;
-    DNNMicroRdTag    tagQ_in;
-    DNNMicroRdTag    tagQ_out;
+    reg              tagQ_enq;
+    wire             tagQ_deq;
+    reg[`DNNMICRORD_TAG_BUS_WIDTH - 1:0]     tagQ_in;
+    wire[`DNNMICRORD_TAG_BUS_WIDTH - 1:0]    tagQ_out;
 
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_readtagQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_readtagQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(DNNMicroRdTag)),
+                .WIDTH                    (`DNNMICRORD_TAG_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_READ_TAG_Q_DEPTH)
             )
             readtagQ
@@ -266,11 +272,11 @@ module DNN2AMI
                 .q                      (tagQ_out),
                 .empty                  (tagQ_empty),
                 .rdreq                  (tagQ_deq)
-            );    
+            );
         end else begin : FIFO_readtagQ
             FIFO
             #(
-                .WIDTH                    ($bits(DNNMicroRdTag)),
+                .WIDTH                    (`DNNMICRORD_TAG_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_READ_TAG_Q_DEPTH)
             )
             readtagQ
@@ -283,23 +289,23 @@ module DNN2AMI
                 .q                      (tagQ_out),
                 .empty                  (tagQ_empty),
                 .rdreq                  (tagQ_deq)
-            );    
+            );
         end
-    endgenerate    
-    
+    endgenerate
+
     // Response path for reads
     wire             respQ_empty;
     wire             respQ_full;
-    logic            respQ_enq;
-    logic            respQ_deq;
-    AMIResponse      respQ_in;
-    AMIResponse      respQ_out;    
-    
+    wire             respQ_enq;
+    wire             respQ_deq;
+    wire[`AMI_RESPONSE_BUS_WIDTH - 1:0]      respQ_in;
+    wire[`AMI_RESPONSE_BUS_WIDTH - 1:0]      respQ_out;
+
     generate
-        if (USE_SOFT_FIFO) begin : SoftFIFO_respQ
+        if (`USE_SOFT_FIFO) begin : SoftFIFO_respQ
             SoftFIFO
             #(
-                .WIDTH                    ($bits(AMIResponse)),
+                .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_RESP_IN_Q_DEPTH)
             )
             respQ
@@ -316,7 +322,7 @@ module DNN2AMI
         end else begin : FIFO_respQ
             FIFO
             #(
-                .WIDTH                    ($bits(AMIResponse)),
+                .WIDTH                    (`AMI_RESPONSE_BUS_WIDTH),
                 .LOG_DEPTH                (AMI2DNN_RESP_IN_Q_DEPTH)
             )
             respQ
@@ -334,23 +340,34 @@ module DNN2AMI
     endgenerate
 
     // Inputs to the MacroReadQ
-    assign macroRdQ_in  = '{valid: rd_req, isWrite: 1'b0, addr: rd_addr , size: rd_req_size, pu_id: 0, time_stamp: current_timestamp};
+    //assign macroRdQ_in  = '{valid: rd_req, isWrite: 1'b0, addr: rd_addr , size: rd_req_size, pu_id: 0, time_stamp: current_timestamp};
+    assign macroRdQ_in[`DNNWeaverMemReq_valid] = rd_req;
+    assign macroRdQ_in[`DNNWeaverMemReq_isWrite] = 1'b0;
+    assign macroRdQ_in[`DNNWeaverMemReq_addr] = rd_addr;
+    assign macroRdQ_in[`DNNWeaverMemReq_size] = rd_req_size;
+    assign macroRdQ_in[`DNNWeaverMemReq_pu_id] = 0;
+    assign macroRdQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroRdQ_enq = rd_req && !macroRdQ_full; // no back pressure mechanism, so assume its never full
 
     // Accept responses from the block buffer
     assign respQ_in  = mem_resp;
-    assign respQ_enq = mem_resp.valid && !respQ_full;
+    assign respQ_enq = mem_resp[`AMIResponse_valid] && !respQ_full;
     assign mem_resp_grant = respQ_enq;
-    
+
     // Merge responses from the read tag queue and the response queue
     // and push them onto the inBuf
     wire   merge_possible;
-    assign merge_possible = !inbuf_full && (tagQ_out.valid && !tagQ_empty) && (respQ_out.valid && !respQ_empty);
+    assign merge_possible = !inbuf_full && (tagQ_out[`DNNMicroRdTag_valid] && !tagQ_empty) && (respQ_out[`AMIResponse_valid] && !respQ_empty);
     assign inbuf_push     = merge_possible;
     assign tagQ_deq       = merge_possible;
     assign respQ_deq      = merge_possible;
-    assign data_to_inbuf  = respQ_out.data[AXI_DATA_WIDTH-1:0];
-    
+
+    wire[`AMI_DATA_WIDTH - 1:0] respQ_out_data;
+    assign respQ_out_data = respQ_out[`AMIResponse_data];
+    assign data_to_inbuf  = respQ_out_data[AXI_DATA_WIDTH-1:0];
+
+
+    // TODO: comment this out
     // debug signals
     always@(posedge clk) begin
         if (macroRdQ_enq) begin
@@ -366,11 +383,11 @@ module DNN2AMI
                 $display("DNN2AMI:                                              inBuf is full");
             end
         end
-        
+
         if (merge_possible) begin
             $display("DNN2AMI: Filling inBuf Size: %d",respQ_out.size);
         end
-            
+
     end
 */
 /*
@@ -381,15 +398,15 @@ module DNN2AMI
             $display("DNN2AMI: Receiving response back from the BlockBuffer Size: %d",respQ_in.size);
         end
     end
-    
+
     // Requests
-    
+
     always@(posedge clk) begin
         if (reqQ_enq) begin
             $display("DNN2AMI: Queuing request to BB, addr: %h, size: %d isWrite: %h Valid: %h", reqQ_in.addr, reqQ_in.size, reqQ_in.isWrite, reqQ_in.valid);
-        end    
+        end
     end
-        
+
     always@(posedge clk) begin
         if (reqQ_deq) begin
             $display("DNN2AMI: BlockBuffer accepting request.");
@@ -412,12 +429,12 @@ module DNN2AMI
     // outbuf_empty
     // data_from_outbuf
     // reqQ_full
-    
-    // Arbiter
-    logic accept_new_active_req;
-    DNNWeaverMemReq macro_arbiter_output;
 
-    always_comb begin
+    // Arbiter
+    reg accept_new_active_req;
+    reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
+
+    always @(*) begin
         macroRdQ_deq = 1'b0;
         macro_arbiter_output = macroRdQ_out;
         if (accept_new_active_req) begin
@@ -454,7 +471,7 @@ module DNN2AMI
         end
         */
     end
-    
+
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
     reg[AXI_ADDR_WIDTH-1:0] current_address;
@@ -462,12 +479,12 @@ module DNN2AMI
     reg                     current_isWrite;
     reg[NUM_PU_W-1:0]       current_pu_id;
 
-    logic new_macro_req_active;
-    logic[AXI_ADDR_WIDTH-1:0] new_current_address;
-    logic[TX_SIZE_WIDTH-1:0]  new_requests_left;
-    logic                     new_current_isWrite;
-    logic[NUM_PU_W-1:0]       new_current_pu_id;
-    
+    reg new_macro_req_active;
+    reg[AXI_ADDR_WIDTH-1:0] new_current_address;
+    reg[TX_SIZE_WIDTH-1:0]  new_requests_left;
+    reg                     new_current_isWrite;
+    reg[NUM_PU_W-1:0]       new_current_pu_id;
+
     always@(posedge clk) begin
         if (rst) begin
             macro_req_active <= 1'b0;
@@ -484,7 +501,7 @@ module DNN2AMI
         end
     end
 
-    always_comb begin
+    always @(*) begin
         accept_new_active_req = 1'b0;
         new_macro_req_active  = macro_req_active;
         new_current_address   = current_address;
@@ -492,10 +509,18 @@ module DNN2AMI
         new_current_isWrite   = current_isWrite;
         new_current_pu_id     = current_pu_id;
         tagQ_enq              = 1'b0;
-        tagQ_in               = '{valid: 0, addr: 0, size: 0};
-        reqQ_in               = '{valid: 0, isWrite: 1'b0, addr: 0 , data: 512'b0, size: 64};;
+        //tagQ_in               = '{valid: 0, addr: 0, size: 0};
+        tagQ_in[`DNNMicroRdTag_valid] = 0;
+        tagQ_in[`DNNMicroRdTag_addr] = 0;
+        tagQ_in[`DNNMicroRdTag_size] = 0;
+        //reqQ_in               = '{valid: 0, isWrite: 1'b0, addr: 0 , data: 512'b0, size: 64};;
+        reqQ_in[`AMIRequest_valid] = 0;
+        reqQ_in[`AMIRequest_isWrite] = 1'b0;
+        reqQ_in[`AMIRequest_addr] = 0;
+        reqQ_in[`AMIRequest_data] = 512'b0;
+        reqQ_in[`AMIRequest_size] = 64;
         reqQ_enq              = 1'b0;
-        
+
         /*
         for (int i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
@@ -514,13 +539,21 @@ module DNN2AMI
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
                 end
-            end else begin 
+            end else begin
             // issue read requests
             // tag queue and request queue need to have room
                 if (!tagQ_full && !reqQ_full) begin
-                    tagQ_in  = '{valid: 1'b1, addr: {{32{1'b0}},current_address}, size: 8}; // size here is in bytes
+                    //tagQ_in  = '{valid: 1'b1, addr: {{32{1'b0}},current_address}, size: 8}; // size here is in bytes
+                    tagQ_in[`DNNMicroRdTag_valid] = 1'b1;
+                    tagQ_in[`DNNMicroRdTag_addr] = {{32{1'b0}},current_address};
+                    tagQ_in[`DNNMicroRdTag_size] = 8; // size here is in bytes
                     tagQ_enq = 1'b1;
-                    reqQ_in  = '{valid: 1'b1, isWrite: 1'b0, addr: {{32{1'b0}},current_address} , data: 512'b0, size: 8}; // double check this size
+                    //reqQ_in  = '{valid: 1'b1, isWrite: 1'b0, addr: {{32{1'b0}},current_address} , data: 512'b0, size: 8}; // double check this size
+                    reqQ_in[`AMIRequest_valid] = 1'b1;
+                    reqQ_in[`AMIRequest_isWrite] = 1'b0;
+                    reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
+                    reqQ_in[`AMIRequest_data] = 512'b0;
+                    reqQ_in[`AMIRequest_size] = 8; // double check this size
                     reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
@@ -537,10 +570,10 @@ module DNN2AMI
                 accept_new_active_req = 1'b1;
                 new_macro_req_active  = 1'b1;
                 // Select the output of the arbiter
-                new_current_address = macro_arbiter_output.addr;
-                new_requests_left   = macro_arbiter_output.size;
-                new_current_isWrite = macro_arbiter_output.isWrite;
-                new_current_pu_id   = macro_arbiter_output.pu_id;
+                new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
+                new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
+                new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
+                new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
             end
         end
     end
@@ -566,10 +599,10 @@ module DNN2AMI
     */
     // Output responses to the block buffer
     // Arbitrate between the reqQ (read requests) and requests from DNN1AMI_WRPath
-    AMIRequest arbWinner;
-    logic valid_final_arb;
-    
-    always_comb begin
+    reg[`AMI_REQUEST_BUS_WIDTH - 1:0] arbWinner;
+    reg valid_final_arb;
+
+    always @(*) begin
         valid_final_arb = 1'b0;
         arbWinner = reqWrPath;
         reqWrPath_grant = 1'b0;
@@ -580,7 +613,7 @@ module DNN2AMI
             if (mem_req_grant) begin
                 reqWrPath_grant = 1'b1;
             end
-        end else if (reqQ_out.valid && !reqQ_empty) begin
+        end else if (reqQ_out[`AMIRequest_valid] && !reqQ_empty) begin
             valid_final_arb = 1'b1;
             arbWinner = reqQ_out;
             if (mem_req_grant) begin
@@ -590,8 +623,13 @@ module DNN2AMI
             end*/
         end
     end
-    
-    assign mem_req   = '{valid: (arbWinner.valid && valid_final_arb), isWrite: arbWinner.isWrite, addr: arbWinner.addr  , data: arbWinner.data , size: arbWinner.size};
+
+    //assign mem_req   = '{valid: (arbWinner.valid && valid_final_arb), isWrite: arbWinner.isWrite, addr: arbWinner.addr  , data: arbWinner.data , size: arbWinner.size};
+    assign mem_req[`AMIRequest_valid] = (arbWinner[`AMIRequest_valid] && valid_final_arb);
+    assign mem_req[`AMIRequest_isWrite] = arbWinner[`AMIRequest_isWrite];
+    assign mem_req[`AMIRequest_addr] = arbWinner[`AMIRequest_addr];
+    assign mem_req[`AMIRequest_data] = arbWinner[`AMIRequest_data];
+    assign mem_req[`AMIRequest_size] = arbWinner[`AMIRequest_size];
     /*
     always@(posedge clk) begin
         if (valid_final_arb) begin
@@ -600,6 +638,33 @@ module DNN2AMI
         $display("RDPATH: Read requests left: %d", requests_left);
     end
     */
-    
-    
+
+
 endmodule
+
+//DNN2AMI td2a
+//(
+//    .clk(clock.val),
+//    .rst(),
+//    .mem_req(),
+//    .mem_req_grant(),
+//    .mem_resp(),
+//    .mem_resp_grant(),
+//    .inbuf_full(), // can the buffer accept new data
+//    .data_to_inbuf(), // data to be written
+//    .inbuf_push(), // write the data
+//    .rd_req(), // read request
+//    .rd_req_size(), // size of the read request in bytes
+//    .rd_addr(),     // address of the read request
+//    .rd_ready(), // able to accept a new read
+//    .outbuf_empty(), // no data in the output buffer
+//    .data_from_outbuf(),  // data to write from(), portion per PU
+//    .write_valid(),       // value is ready to be written back
+//    .outbuf_pop(),   // dequeue a data item
+//    .wr_req(),   // assert when submitting a wr request
+//    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
+//    .wr_req_size(), // size of request in bytes (I assume)
+//    .wr_addr(), // address to write to(), look like 32 bit addresses
+//    .wr_ready(), // ready for more writes
+//    .wr_done()  // no writes left to submit
+//);
