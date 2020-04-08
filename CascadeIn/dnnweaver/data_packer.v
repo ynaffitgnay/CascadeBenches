@@ -1,3 +1,6 @@
+`ifndef __data_packer_v__
+`define __data_packer_v__
+
 `include "common.vh"
 module data_packer #(
 // ******************************************************************
@@ -77,7 +80,7 @@ generate
 endgenerate
 
 endmodule
-
+`endif
 
 //reg rst;
 //reg swrreq;
