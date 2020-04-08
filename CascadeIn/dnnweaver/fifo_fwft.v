@@ -1,4 +1,5 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
+`include "fifo.v"
 module fifo_fwft 
 // ******************************************************************
 // Parameters
@@ -83,3 +84,17 @@ fifo #(
 );   
 
 endmodule
+
+
+//fifo_fwft tff
+//(
+//    .clk(clock.val),
+//    .reset(),
+//    .push(),
+//    .pop(),
+//    .data_in(),
+//    .data_out(),
+//    .empty(),
+//    .full(),
+//    .fifo_count()
+//);    
