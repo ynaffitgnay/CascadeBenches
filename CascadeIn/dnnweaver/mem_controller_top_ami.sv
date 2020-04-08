@@ -261,6 +261,75 @@ assign rd_ready = !buffer_counter_full && axi_rd_ready;
 
 genvar i;
 generate
+if (NUM_PU == 1) begin
+    `ifdef simulation
+      integer push_count = 0;
+      integer packer_push_count = 0;
+      always @(posedge clk)
+      begin
+        if (reset) begin
+          push_count <= 0;
+          packer_push_count <= 0;
+        end else begin
+          push_count <= push_count + stream_pu_push_local;
+          packer_push_count <= packer_push_count + stream_pu_fifo_push;
+        end
+      end
+    `endif
+
+    
+    wire stream_pu_push_local;
+    assign stream_pu_push_local = stream_pu_push && stream_pu_id == 0;
+    
+    wire [AXI_DATA_W-1:0] stream_pu_data_in;
+    
+    wire [ PU_DATA_W               -1 : 0 ]     stream_pu_fifo_data_in;
+    wire [ PU_DATA_W               -1 : 0 ]     stream_pu_fifo_data_out;
+    wire                                        stream_pu_fifo_push;
+    wire                                        stream_pu_fifo_pop;
+    wire                                        stream_pu_fifo_full;
+    wire                                        stream_pu_fifo_empty;
+    
+    wire [STREAM_PU_FIFO_ADDR_W - 1:0] stream_pu_fifo_count; // TODO big change
+    
+    assign stream_pu_data_in = axi_rd_buffer_data_out_d;
+    
+    assign stream_pu_fifo_pop = stream_pu_pop;
+    assign stream_pu_empty = stream_pu_fifo_empty;
+    assign stream_pu_data_out[0*PU_DATA_W+:PU_DATA_W] = stream_pu_fifo_data_out;
+    
+    data_packer #(
+      .IN_WIDTH                 ( AXI_DATA_W               ),
+      .OUT_WIDTH                ( PU_DATA_W                )
+    ) packer (
+      .clk                      ( clk                      ),  //input
+      .reset                    ( reset                    ),  //input
+      .s_write_req              ( stream_pu_push_local     ),  //input
+      .s_write_data             ( stream_pu_data_in        ),  //input
+      .s_write_ready            (                          ),  //output
+      .m_write_req              ( stream_pu_fifo_push      ),  //output
+      .m_write_data             ( stream_pu_fifo_data_in   ),  //output
+      .m_write_ready            ( !stream_pu_full          )   //input
+      );
+    
+    fifo #(
+      .DATA_WIDTH               ( PU_DATA_W                ),
+      .ADDR_WIDTH               ( STREAM_PU_FIFO_ADDR_W    )
+    ) stream_pu (
+      .clk                      ( clk                      ),  //input
+      .reset                    ( reset                    ),  //input
+      .push                     ( stream_pu_fifo_push      ),  //input
+      .pop                      ( stream_pu_fifo_pop       ),  //input
+      .data_in                  ( stream_pu_fifo_data_in   ),  //input
+      .data_out                 ( stream_pu_fifo_data_out  ),  //output
+      .full                     ( stream_pu_fifo_full      ),  //output
+      .empty                    ( stream_pu_fifo_empty     ),  //output
+      .fifo_count               ( stream_pu_fifo_count     )   //output
+    );
+
+  assign stream_pu_count = stream_pu_fifo_count;
+end
+else begin
   for (i=0; i<NUM_PU; i=i+1)
   begin: STREAM_PU_GEN
 
@@ -329,10 +398,12 @@ generate
       .fifo_count               ( stream_pu_fifo_count     )   //output
     );
 
-  end
+  end // block: STREAM_PU_GEN
+  assign stream_pu_count = STREAM_PU_GEN[NUM_PU-1].stream_pu_fifo_count;
+end // else: !if(NUM_PU == 1)
 endgenerate
 
-assign stream_pu_count = STREAM_PU_GEN[NUM_PU-1].stream_pu_fifo_count;
+
 
 always @(posedge clk)
   if (reset)
@@ -347,6 +418,99 @@ always @(posedge clk)
 // ==================================================================
   
 generate
+if (NUM_PU == 1) begin
+    wire [ PU_DATA_W               -1 : 0 ]     ob_iw_data_in;
+    wire [ PU_DATA_W               -1 : 0 ]     ob_iw_data_out;
+    wire                                        ob_iw_push;
+    wire                                        ob_iw_pop;
+    wire                                        ob_iw_full;
+    wire                                        ob_iw_empty;
+    
+    assign outbuf_full = ob_iw_full;
+    assign ob_iw_push = outbuf_push;
+    assign ob_iw_data_in = outbuf_data_in[0*PU_DATA_W+:PU_DATA_W];
+    
+    fifo #(
+      .DATA_WIDTH               ( PU_DATA_W                ),
+      .ADDR_WIDTH               ( 7                        )
+    ) outbuf_iwidth (
+      .clk                      ( clk                      ),  //input
+      .reset                    ( reset                    ),  //input
+      .push                     ( ob_iw_push               ),  //input
+      .pop                      ( ob_iw_pop                ),  //input
+      .data_in                  ( ob_iw_data_in            ),  //input
+      .data_out                 ( ob_iw_data_out           ),  //output
+      .full                     ( ob_iw_full               ),  //output
+      .empty                    ( ob_iw_empty              ),  //output
+      .fifo_count               (    )   //output
+      );
+
+    wire m_packed_read_req;
+    wire m_packed_read_ready;
+    wire [PU_DATA_W-1:0] m_packed_read_data;
+    wire m_unpacked_write_req;
+    wire m_unpacked_write_ready;
+    wire [AXI_DATA_W-1:0] m_unpacked_write_data;
+    
+    assign m_packed_read_ready = !ob_iw_empty;
+    assign ob_iw_pop = m_packed_read_req;
+    assign m_packed_read_data = ob_iw_data_out;
+    
+    data_unpacker #(
+      .IN_WIDTH                 ( PU_DATA_W                ),
+      .OUT_WIDTH                ( AXI_DATA_W               )
+    ) d_unpacker (
+      .clk                      ( clk                      ),  //input
+      .reset                    ( reset                    ),  //input
+      .m_packed_read_req        ( m_packed_read_req        ),  //output
+      .m_packed_read_ready      ( m_packed_read_ready      ),  //input
+      .m_packed_read_data       ( m_packed_read_data       ),  //output
+      .m_unpacked_write_req     ( m_unpacked_write_req     ),  //output
+      .m_unpacked_write_ready   ( m_unpacked_write_ready   ),  //input
+      .m_unpacked_write_data    ( m_unpacked_write_data    )   //output
+      );
+    
+    wire [ AXI_DATA_W               -1 : 0 ]    ob_ow_data_in;
+    wire [ AXI_DATA_W               -1 : 0 ]    ob_ow_data_out;
+    wire                                        ob_ow_push;
+    wire                                        ob_ow_pop;
+    wire                                        ob_ow_full;
+    wire                                        ob_ow_empty;
+    
+    assign outbuf_empty = ob_ow_empty;
+    assign ob_ow_pop = outbuf_pop;
+    assign outbuf_data_out[0*AXI_DATA_W+:AXI_DATA_W] = ob_ow_data_out;
+    
+    assign ob_ow_push = m_unpacked_write_req;
+    assign m_unpacked_write_ready = !ob_ow_full;
+    assign ob_ow_data_in = m_unpacked_write_data;
+    
+    assign write_valid = ob_ow_push;
+    
+    reg  [ 32                   -1 : 0 ]        obuf_ow_push_count;
+    always @(posedge clk)
+      if (reset)
+        obuf_ow_push_count <= 0;
+      else if (ob_ow_push)
+        obuf_ow_push_count <= obuf_ow_push_count + 1;
+    
+    
+    fifo_fwft #(
+      .DATA_WIDTH               ( AXI_DATA_W               ),
+      .ADDR_WIDTH               ( 5                        )
+    ) outbuf_owidth (
+      .clk                      ( clk                      ),  //input
+      .reset                    ( reset                    ),  //input
+      .push                     ( ob_ow_push               ),  //input
+      .pop                      ( ob_ow_pop                ),  //input
+      .data_in                  ( ob_ow_data_in            ),  //input
+      .data_out                 ( ob_ow_data_out           ),  //output
+      .full                     ( ob_ow_full               ),  //output
+      .empty                    ( ob_ow_empty              ),  //output
+      .fifo_count               (                          )   //output
+      );
+end
+else begin
   for (i=0; i<NUM_PU; i=i+1)
   begin: OUTPUT_BUFFER_GEN
 
@@ -440,7 +604,8 @@ generate
       .empty                    ( ob_ow_empty              ),  //output
       .fifo_count               (                          )   //output
       );
-  end
+  end // block: OUTPUT_BUFFER_GEN
+end // else: !if(NUM_PU == 1)
 endgenerate
 
 // ==================================================================

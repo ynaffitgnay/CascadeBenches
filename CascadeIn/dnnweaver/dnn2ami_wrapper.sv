@@ -2,6 +2,8 @@
 `include "common.vh"
 `include "AMITypes.sv"
 `include "DNN2AMI.sv"
+`include "DNN2AMI_1_PU.v"
+
 
 //import ShellTypes::*;
 //import AMITypes::*;
@@ -72,40 +74,76 @@ localparam integer AXI_ID_W = `C_LOG_2(NUM_AXI+0);
 localparam integer AXI_PU_ID_W = `C_LOG_2(PU_PER_AXI);
 */
 
-DNN2AMI
-#(
-    .NUM_PU                   ( NUM_PU                   ),
-    .AXI_ID                   ( 0                        ),
-    .TID_WIDTH                ( TID_WIDTH                ),
-    .AXI_DATA_WIDTH           ( AXI_DATA_W               ),
-    .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            )
-) u_axim (
-    .clk                      ( clk                      ),
-    .rst                      ( reset                    ),
-    .mem_req                  ( mem_req                  ),
-    .mem_req_grant            ( mem_req_grant            ),
-    .mem_resp                 ( mem_resp                 ),
-    .mem_resp_grant           ( mem_resp_grant           ),
-    .outbuf_empty             ( outbuf_empty             ), // TODO: ????
-    .outbuf_pop               ( outbuf_pop               ),
-    .data_from_outbuf         ( data_from_outbuf         ),
-    .data_to_inbuf            ( data_to_inbuf            ),
-    .inbuf_push               ( inbuf_push               ),
-    .inbuf_full               ( inbuf_full               ),
-    .wr_req                   ( wr_req                   ),
-    .wr_addr                  ( wr_addr                  ),
-    .wr_pu_id                 ( wr_pu_id                 ),
-    .wr_ready                 ( wr_ready                 ),
-    .wr_done                  ( wr_done                  ), // double check
-    .wr_req_size              ( wr_req_size              ),
-    .write_valid              ( write_valid              ),
-    .rd_req                   ( rd_req                   ),
-    .rd_ready                 ( rd_ready                 ),
-    .rd_req_size              ( rd_req_size              ),
-    .rd_addr                  ( rd_addr                  )
-);
+generate
+if (NUM_PU == 1) begin
+  DNN2AMI_1_PU
+  #(
+      .AXI_ID                   ( 0                        ),
+      .TID_WIDTH                ( TID_WIDTH                ),
+      .AXI_DATA_WIDTH           ( AXI_DATA_W               ),
+      .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            )
+  ) u_axim (
+      .clk                      ( clk                      ),
+      .rst                      ( reset                    ),
+      .mem_req                  ( mem_req                  ),
+      .mem_req_grant            ( mem_req_grant            ),
+      .mem_resp                 ( mem_resp                 ),
+      .mem_resp_grant           ( mem_resp_grant           ),
+      .outbuf_empty             ( outbuf_empty             ), // TODO: ????
+      .outbuf_pop               ( outbuf_pop               ),
+      .data_from_outbuf         ( data_from_outbuf         ),
+      .data_to_inbuf            ( data_to_inbuf            ),
+      .inbuf_push               ( inbuf_push               ),
+      .inbuf_full               ( inbuf_full               ),
+      .wr_req                   ( wr_req                   ),
+      .wr_addr                  ( wr_addr                  ),
+      .wr_pu_id                 ( wr_pu_id                 ),
+      .wr_ready                 ( wr_ready                 ),
+      .wr_done                  ( wr_done                  ), // double check
+      .wr_req_size              ( wr_req_size              ),
+      .write_valid              ( write_valid              ),
+      .rd_req                   ( rd_req                   ),
+      .rd_ready                 ( rd_ready                 ),
+      .rd_req_size              ( rd_req_size              ),
+      .rd_addr                  ( rd_addr                  )
+  );
+end
+else begin
+  DNN2AMI
+  #(
+      .NUM_PU                   ( NUM_PU                   ),
+      .AXI_ID                   ( 0                        ),
+      .TID_WIDTH                ( TID_WIDTH                ),
+      .AXI_DATA_WIDTH           ( AXI_DATA_W               ),
+      .TX_SIZE_WIDTH            ( TX_SIZE_WIDTH            )
+  ) u_axim (
+      .clk                      ( clk                      ),
+      .rst                      ( reset                    ),
+      .mem_req                  ( mem_req                  ),
+      .mem_req_grant            ( mem_req_grant            ),
+      .mem_resp                 ( mem_resp                 ),
+      .mem_resp_grant           ( mem_resp_grant           ),
+      .outbuf_empty             ( outbuf_empty             ), // TODO: ????
+      .outbuf_pop               ( outbuf_pop               ),
+      .data_from_outbuf         ( data_from_outbuf         ),
+      .data_to_inbuf            ( data_to_inbuf            ),
+      .inbuf_push               ( inbuf_push               ),
+      .inbuf_full               ( inbuf_full               ),
+      .wr_req                   ( wr_req                   ),
+      .wr_addr                  ( wr_addr                  ),
+      .wr_pu_id                 ( wr_pu_id                 ),
+      .wr_ready                 ( wr_ready                 ),
+      .wr_done                  ( wr_done                  ), // double check
+      .wr_req_size              ( wr_req_size              ),
+      .write_valid              ( write_valid              ),
+      .rd_req                   ( rd_req                   ),
+      .rd_ready                 ( rd_ready                 ),
+      .rd_req_size              ( rd_req_size              ),
+      .rd_addr                  ( rd_addr                  )
+  );
 // ******************************************************************
-
+end // else: !if(NUM_PU == 1)
+endgenerate
 endmodule
 
 

@@ -1,6 +1,11 @@
 `include "common.vh"
-import ShellTypes::*;
-import AMITypes::*;
+`include "AMITypes.sv"
+`include "PU.v"
+`include "PU_controller.v"
+`include "mem_controller_top_ami.sv"
+`include "vectorgen.v"
+//import ShellTypes::*;
+//import AMITypes::*;
 
 module dnn_accelerator_ami #(
 // ******************************************************************
@@ -53,11 +58,11 @@ module dnn_accelerator_ami #(
   output reg  [ 16                   -1 : 0 ]        vecgen_read_count,
 
   // AMI signals
-  output AMIRequest                   mem_req        ,
-  input                               mem_req_grant  ,
-  input  AMIResponse                  mem_resp       ,
-  output                              mem_resp_grant ,
-  output                              l_inc
+  output [`AMI_REQUEST_BUS_WIDTH - 1 : 0 ]           mem_req,
+  input                                              mem_req_grant,
+  input  [`AMI_RESPONSE_BUS_WIDTH - 1 : 0 ]          mem_resp,
+  output                                             mem_resp_grant,
+  output                                             l_inc
   
 );
   //localparam integer NUM_PE             = `num_pe;
@@ -166,6 +171,16 @@ module dnn_accelerator_ami #(
 // ==================================================================
 // Memory Controller module
 // ==================================================================
+
+  wire stream_fifo_empty;
+  wire stream_fifo_pop;
+  wire buffer_read_empty;
+  wire buffer_read_req;
+  wire buffer_read_last;
+  wire buffer_pu_id;
+  wire next_read;
+
+
   mem_controller_top_ami #(
   // INPUT PARAMETERS
     .NUM_PE                   ( NUM_PE                   ),
@@ -227,12 +242,122 @@ module dnn_accelerator_ami #(
 // PU
 // ==================================================================
 
-
-  wire                                        pu_vecgen_ready;
-  assign pu_vecgen_ready = PU_GEN[NUM_PU-1].pu_vecgen_ready;
+  wire                                          pu_vecgen_ready;
 
   genvar i;
   generate
+  if (NUM_PU == 1) begin
+    wire                                        pu_write_ready;
+    reg                                         buffer_read_data_valid;
+    wire                                        pu_write_data;
+    wire [ AXI_DATA_W           -1 : 0 ]        pu_read_data;
+    wire [ D_TYPE_W             -1 : 0 ]        pu_read_d_type;
+    wire [ 10                   -1 : 0 ]        pu_read_id;
+
+    wire                                        pu_read_ready;
+    wire                                        pu_read_req;
+    wire                                        pu_write_req;
+
+    //-----------vectorgen-----------
+    wire [ DATA_IN_WIDTH        -1 : 0 ]        pu_vecgen_rd_data;
+    wire                                        pu_vecgen_rd_req;
+    wire                                        pu_vecgen_rd_ready;
+    wire [ VECGEN_CTRL_W        -1 : 0 ]        pu_vecgen_ctrl;
+    wire [ VECGEN_CFG_W         -1 : 0 ]        pu_vecgen_cfg;
+    wire                                        pu_vecgen_ready_num_pu_1;
+    wire [ DATA_IN_WIDTH        -1 : 0 ]        pu_vecgen_wr_data;
+    wire                                        pu_vecgen_wr_valid;
+    wire [ NUM_PE               -1 : 0 ]        pu_vecgen_mask;
+
+    assign pu_vecgen_cfg = vecgen_cfg;
+    assign pu_vecgen_rd_data = stream_pu_data_out;
+    assign pu_vecgen_rd_ready = !stream_pu_empty;
+    //assign pu_vecgen_ctrl = (l_type == 2) ? vecgen_ctrl : 'b0;
+    //assign stream_pu_pop[i] = pu_vecgen_rd_req && l_type == 2;
+    assign pu_vecgen_ctrl = 'b0;
+    assign stream_pu_pop = 'b0;
+
+    wire[1:0] pu_vecgen_state;
+    
+    vectorgen # (
+      .OP_WIDTH                 ( OP_WIDTH                 ),
+      .TID_WIDTH                ( PU_TID_WIDTH             ),
+      .MAX_STRIDE               ( 1                        ),
+      .NUM_PE                   ( NUM_PE                   )
+    ) pu_vecgen (
+      .clk                      ( clk                      ),
+      .reset                    ( reset                    ),
+      .ready                    ( pu_vecgen_ready_num_pu_1          ),
+      .state                    ( pu_vecgen_state          ),
+      .ctrl                     ( pu_vecgen_ctrl           ),
+      .cfg                      ( pu_vecgen_cfg            ),
+      .read_data                ( pu_vecgen_rd_data        ),
+      .read_ready               ( pu_vecgen_rd_ready       ),
+      .read_req                 ( pu_vecgen_rd_req         ),
+      .write_data               ( pu_vecgen_wr_data        ),
+      .write_valid              ( pu_vecgen_wr_valid       )
+      );
+
+    assign pu_read_data = buffer_read_data_out;
+    assign pu_read_ready = !buffer_read_empty; //  && !(next_read);
+
+    assign pu_read_id = pu_id_buf;
+    assign pu_read_d_type = d_type_buf;
+
+    assign pu_write_ready = !outbuf_full;
+    assign outbuf_push = pu_write_req;
+    assign outbuf_data_in[0+:PU_DATA_W] = pu_write_data;
+
+    always @(posedge clk)
+      if (reset)
+        buffer_read_data_valid <= 1'b0;
+      else
+        buffer_read_data_valid <= (buffer_read_req && !buffer_read_empty);
+
+    wire [ PU_DATA_W            -1 : 0 ]        pu_read_data0;
+    //assign pu_read_data0 = l_type == 2 ? pu_vecgen_wr_data: vecgen_wr_data;
+    assign pu_read_data0 = vecgen_wr_data;
+    PU #(
+      // Parameters
+      .PU_ID                    ( 0                        ),
+      .OP_WIDTH                 ( OP_WIDTH                 ),
+      .NUM_PE                   ( NUM_PE                   )
+    ) u_PU (
+      // IO
+      .clk                      ( clk                      ), //input
+      .reset                    ( reset                    ), //input
+      .pe_ctrl                  ( pe_ctrl                  ), //input
+      .lrn_enable               ( lrn_enable               ), //input
+      .pu_serdes_count          ( pu_serdes_count          ), //input
+      .pe_neuron_sel            ( pe_neuron_sel            ), //input
+      .pe_neuron_bias           ( pe_neuron_bias           ), //input
+      .pe_neuron_read_req       ( pe_neuron_read_req       ), //input
+      .vecgen_mask              ( vecgen_mask              ), //input
+      .vecgen_wr_data           ( pu_read_data0            ), //input
+      .wb_read_addr             ( wb_read_addr             ), //input
+      .wb_read_req              ( wb_read_req              ), //input
+      .bias_read_req            ( bias_read_req            ), //input
+      .src_0_sel                ( src_0_sel                ), //input
+      .src_1_sel                ( src_1_sel                ), //input
+      .src_2_sel                ( src_2_sel                ), //input
+      .out_sel                  ( out_sel                  ), //input
+      .dst_sel                  ( dst_sel                  ), //input
+      .pool_cfg                 ( pool_cfg                 ), //input
+      .pool_ctrl                ( pool_ctrl                ), //input
+      .read_id                  ( pu_read_id               ), //input
+      .read_d_type              ( pu_read_d_type           ), //input
+      .buffer_read_data_valid   ( buffer_read_data_valid   ), //input
+      .read_req                 ( pu_read_req              ), //output
+      .read_data                ( pu_read_data             ), //input,
+      .write_data               ( pu_write_data            ), //output
+      .write_req                ( pu_write_req             ), //output
+      .write_ready              ( pu_write_ready           )  //input
+      );
+
+    assign pu_vecgen_ready = pu_vecgen_ready_num_pu_1;
+
+  end // if (NUM_PU == 1)
+  else begin
     for (i = 0; i < NUM_PU; i = i + 1)
     begin: PU_GEN
 
@@ -343,8 +468,14 @@ module dnn_accelerator_ami #(
         .write_ready              ( pu_write_ready           )  //input
         );
 
-    end
+    end // block: PU_GEN
+    
+    assign pu_vecgen_ready = PU_GEN[NUM_PU-1].pu_vecgen_ready;
+  end // else: !if(NUM_PU == 1)
   endgenerate
+
+  
+  
 
   // ==================================================================
 
@@ -399,6 +530,9 @@ module dnn_accelerator_ami #(
   wire                                        pe_write_req;
   wire [ DATA_IN_WIDTH        -1 : 0 ]        pe_write_data;
 
+  wire                                        pe_piso_read_req;
+  
+  
   wire                                        pu_done;
   PU_controller
   #(  // PARAMETERS
@@ -452,3 +586,34 @@ module dnn_accelerator_ami #(
   // ==================================================================
 
 endmodule
+
+
+//dnn_accelerator_ami tda
+//(
+//  .clk(clock.val),
+//  .reset(),
+//  .start(),
+//  .done(),
+//  .dbg_kw(),
+//  .dbg_kh(),
+//  .dbg_iw(),
+//  .dbg_ih(),
+//  .dbg_ic(),
+//  .dbg_oc(),
+//  .buffer_read_count(),
+//  .stream_read_count(),
+//  .inbuf_count(),
+//  .pu_write_valid(),
+//  .wr_cfg_idx(),
+//  .rd_cfg_idx(),
+//  .outbuf_push(),
+//  .pu_controller_state(),
+//  .vecgen_state(),
+//  .vecgen_read_count(),
+//  .mem_req(),
+//  .mem_req_grant(),
+//  .mem_resp(),
+//  .mem_resp_grant(),
+//  .l_inc()  
+// );
+
