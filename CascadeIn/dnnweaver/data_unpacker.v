@@ -21,7 +21,7 @@ module data_unpacker #(
 );
 
 localparam MAX_READS = (IN_WIDTH < OUT_WIDTH ? 1 : IN_WIDTH % OUT_WIDTH == 0 ? IN_WIDTH/OUT_WIDTH : IN_WIDTH/OUT_WIDTH+1);
-localparam READ_COUNT_W = `C_LOG_2(MAX_READS);
+localparam READ_COUNT_W = `C_LOG_2(MAX_READS) + 1;
 reg rd_valid;
 reg [READ_COUNT_W-1:0] rd_count;
 wire rd_count_inc;
@@ -73,4 +73,18 @@ endmodule
 //wire b3, b4, b5;
 //wire [63:0] b6;
 //
-//data_unpacker dtest(clock.val, rst, b1, b2, b3, b4, b5, b6);
+////data_unpacker dtest(clock.val, rst, b1, b2, b3, b4, b5, b6);
+//
+//data_unpacker #(
+//      .IN_WIDTH                 ( 4 * 16                ),
+//      .OUT_WIDTH                ( 64               )
+//    ) d_unpacker (
+//      .clk                      ( /*clk                     */ ),  //input
+//      .reset                    ( /*reset */                    ),  //input
+//      .m_packed_read_req        ( /*m_packed_read_req      */  ),  //output
+//      .m_packed_read_ready      ( /*m_packed_read_ready    */  ),  //input
+//      .m_packed_read_data       ( /*m_packed_read_data     */  ),  //output
+//      .m_unpacked_write_req     ( /*m_unpacked_write_req   */  ),  //output
+//      .m_unpacked_write_ready   ( /*m_unpacked_write_ready */  ),  //input
+//      .m_unpacked_write_data    ( /*m_unpacked_write_data  */  )   //output
+//      );
