@@ -334,20 +334,20 @@ module DNN2AMI_WRPath
                 new_wr_done_reg = 1'b1;
             end
         end // if (macro_req_active)
-        else begin
-            // See if there is a new operation available
-            /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
-            if (!macroWrQ_empty) begin
-                // A new operation can become active
-                accept_new_active_req = 1'b1;
-                new_macro_req_active  = 1'b1;
-                // Select the output of the arbiter
-                new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
-                new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
-                new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
-                new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
-            end
-        end
+        //else begin
+        //    // See if there is a new operation available
+        //    /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
+        //    if (!macroWrQ_empty) begin
+        //        // A new operation can become active
+        //        accept_new_active_req = 1'b1;
+        //        new_macro_req_active  = 1'b1;
+        //        // Select the output of the arbiter
+        //        new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
+        //        new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
+        //        new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
+        //        new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
+        //    end
+        //end
     end // always @ (*)
 
 /*
