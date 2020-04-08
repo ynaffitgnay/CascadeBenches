@@ -238,17 +238,18 @@ module DNN2AMI_WRPath
     reg accept_new_active_req;
     reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
 
-    always @(*) begin
-        macroWrQ_deq = 1'b0;
-        macro_arbiter_output = macroWrQ_out;
-        if (accept_new_active_req) begin
-            if (!macroWrQ_empty) begin
-                // select Read
-                macroWrQ_deq = 1'b1;
-                macro_arbiter_output = macroWrQ_out;
-            end
-        end
-    end
+    /* COMMENTED THIS OUT TO MERGE WITH OTHER COMBINATIONAL BLOCK */
+    //always @(*) begin
+    //    macroWrQ_deq = 1'b0;
+    //    macro_arbiter_output = macroWrQ_out;
+    //    if (accept_new_active_req) begin
+    //        if (!macroWrQ_empty) begin
+    //            // select Read
+    //            macroWrQ_deq = 1'b1;
+    //            macro_arbiter_output = macroWrQ_out;
+    //        end
+    //    end
+    //end
 
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
@@ -287,6 +288,17 @@ module DNN2AMI_WRPath
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
     always @(*) begin
+        // This block is merged from the previous block
+        macroWrQ_deq = 1'b0;
+        macro_arbiter_output = macroWrQ_out;
+        if (accept_new_active_req) begin
+            if (!macroWrQ_empty) begin
+                // select Read
+                macroWrQ_deq = 1'b1;
+                macro_arbiter_output = macroWrQ_out;
+            end
+        end
+      
         accept_new_active_req = 1'b0;
         new_macro_req_active  = macro_req_active;
         new_current_address   = current_address;
@@ -334,20 +346,20 @@ module DNN2AMI_WRPath
                 new_wr_done_reg = 1'b1;
             end
         end // if (macro_req_active)
-        //else begin
-        //    // See if there is a new operation available
-        //    /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
-        //    if (!macroWrQ_empty) begin
-        //        // A new operation can become active
-        //        accept_new_active_req = 1'b1;
-        //        new_macro_req_active  = 1'b1;
-        //        // Select the output of the arbiter
-        //        new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
-        //        new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
-        //        new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
-        //        new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
-        //    end
-        //end
+        else begin
+            // See if there is a new operation available
+            /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
+            if (!macroWrQ_empty) begin
+                // A new operation can become active
+                accept_new_active_req = 1'b1;
+                new_macro_req_active  = 1'b1;
+                // Select the output of the arbiter
+                new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
+                new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
+                new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
+                new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
+            end
+        end
     end // always @ (*)
 
 /*
