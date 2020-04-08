@@ -386,6 +386,12 @@ module DNN2AMI_WRPath
     
 endmodule
 
+// toggle wr_req every cycle
+reg wr_req = 0;
+always@(posedge clock.val) begin
+  wr_req <= ~wr_req;
+end
+
 DNN2AMI_WRPath tdw
 (
     .clk(clock.val),
@@ -399,7 +405,7 @@ DNN2AMI_WRPath tdw
     .write_valid(),       // value is ready to be written back
     .outbuf_pop(),   // dequeue a data item(), why is this registered?
     
-    .wr_req(),   // assert when submitting a wr request
+    .wr_req(wr_req),   // assert when submitting a wr request
     .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
     .wr_req_size(), // size of request in bytes (I assume)
     .wr_addr(), // address to write to(), look like 32 bit addresses
