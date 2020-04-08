@@ -1,7 +1,10 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
-import ShellTypes::*;
-import AMITypes::*;
+`include "AMITypes.sv"
+`include "DNN2AMI.sv"
+
+//import ShellTypes::*;
+//import AMITypes::*;
 module dnn2ami_wrapper
 #( // INPUT PARAMETERS
   parameter integer NUM_PE                            = 4,
@@ -28,10 +31,10 @@ module dnn2ami_wrapper
   input  wire                                         reset,
 
     // AMI signals
-  output AMIRequest                   mem_req        ,
-  input                               mem_req_grant  ,
-  input  AMIResponse                  mem_resp       ,
-  output                              mem_resp_grant ,
+  output wire [ `AMI_REQUEST_BUS_WIDTH - 1 : 0]       mem_req,
+  input                                               mem_req_grant,
+  input  wire [ `AMI_RESPONSE_BUS_WIDTH - 1 : 0]      mem_resp,
+  output                                              mem_resp_grant,
 
   input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty,
   output wire  [ NUM_PU               -1 : 0 ]        outbuf_pop,
@@ -104,3 +107,31 @@ DNN2AMI
 // ******************************************************************
 
 endmodule
+
+
+//dnn2ami_wrapper tdw
+//( 
+//  .clk(clock.val),
+//  .reset(),
+//  .mem_req(),
+//  .mem_req_grant(),
+//  .mem_resp(),
+//  .mem_resp_grant(),
+//  .outbuf_empty(),
+//  .outbuf_pop(),
+//  .data_from_outbuf(),
+//  .write_valid(),
+//  .inbuf_full(),
+//  .inbuf_push(),
+//  .data_to_inbuf(),
+//  .rd_req(),
+//  .rd_ready(),
+//  .rd_req_size(),
+//  .rd_addr(),
+//  .wr_req(),
+//  .wr_pu_id(),
+//  .wr_ready(),
+//  .wr_req_size(),
+//  .wr_addr(),
+//  .wr_done()
+//);
