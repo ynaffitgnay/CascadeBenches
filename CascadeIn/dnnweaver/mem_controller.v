@@ -1,6 +1,7 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
 `include "dw_params.vh"
+`include "counter.v"
 module mem_controller
 #( // INPUT PARAMETERS
   parameter integer NUM_PE            = 4,
@@ -11,9 +12,9 @@ module mem_controller
   parameter integer RD_LOOP_W         = 32,
   parameter integer TX_SIZE_WIDTH     = 10,
   parameter integer D_TYPE_W          = 2,
-  parameter integer RD_ROM_ADDR_W     = $clog2(`max_rd_mem_idx+2),
-  parameter integer WR_ROM_ADDR_W     = $clog2(`max_wr_mem_idx+2),
-  parameter PU_ID_W = $clog2(NUM_PU)+1
+  parameter integer RD_ROM_ADDR_W     = `C_LOG_2(`max_rd_mem_idx+2),
+  parameter integer WR_ROM_ADDR_W     = `C_LOG_2(`max_wr_mem_idx+2),
+  parameter PU_ID_W = `C_LOG_2(NUM_PU)+1
 )( // PORTS
   input   wire                          clk,
   input   wire                          reset,
@@ -74,8 +75,8 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
   reg  [ STATE_W              -1 : 0 ]        wr_state_d;
   reg  [ STATE_W              -1 : 0 ]        next_wr_state;
 
-  reg  [ RD_ROM_WIDTH         -1 : 0 ]        rd_cfg_rom [0 : RD_ROM_DEPTH - 1];
-  reg  [ WR_ROM_WIDTH         -1 : 0 ]        wr_cfg_rom [0 : WR_ROM_DEPTH - 1];
+  reg  [ RD_ROM_WIDTH         -1 : 0 ]        rd_cfg_rom [RD_ROM_DEPTH - 1 : 0];
+  reg  [ WR_ROM_WIDTH         -1 : 0 ]        wr_cfg_rom [WR_ROM_DEPTH - 1 : 0];
   reg  [ RD_ROM_ADDR_W        -1 : 0 ]        rd_cfg_idx_max;
   reg  [ WR_ROM_ADDR_W        -1 : 0 ]        wr_cfg_idx_max;
 
@@ -160,19 +161,35 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
   reg [ADDR_W-1:0] stream_rd_loop1_addr;
   reg [ADDR_W-1:0] stream_rd_loop2_addr;
 
+  integer idx = 0;
+  integer rmstream = $fopen("input_files/dnnweaver/rd_mem_controller.mif", "r");
+  reg[RD_ROM_WIDTH - 1:0] rval;
+  integer wmstream = $fopen("input_files/dnnweaver/wr_mem_controller.mif", "r");
+  reg[WR_ROM_WIDTH - 1:0] wval;
 // ******************************************************************
 // Initialization
 // ******************************************************************
   initial begin
     rd_cfg_idx_max = `max_rd_mem_idx;
     wr_cfg_idx_max = `max_wr_mem_idx;
-    `ifdef simulation
-      $readmemb("./hardware/include/rd_mem_controller.vh", rd_cfg_rom);
-      $readmemb("./hardware/include/wr_mem_controller.vh", wr_cfg_rom);
-    `else
-      $readmemb("rd_mem_controller.mif", rd_cfg_rom);
-      $readmemb("wr_mem_controller.mif", wr_cfg_rom);
-    `endif
+    for (idx = 0; idx < RD_ROM_DEPTH; idx = idx + 1) begin
+      if (!($feof(rmstream))) begin
+        $fscanf(rmstream, "%b", rval);
+        rd_cfg_rom[idx] <= rval;  
+      end 
+      else begin
+        rd_cfg_rom[idx] <= 0;
+      end 
+    end
+    for (idx = 0; idx < WR_ROM_DEPTH; idx = idx + 1) begin
+      if (!($feof(wmstream))) begin
+        $fscanf(wmstream, "%b", wval);
+        wr_cfg_rom[idx] <= wval;  
+      end 
+      else begin
+        wr_cfg_rom[idx] <= 0;
+      end 
+    end
   end
 
 // ******************************************************************
@@ -614,6 +631,7 @@ end
   wire [PU_ID_W-1:0] wr_pu_id_count;
   wire               wr_pu_id_inc;
   wire               wr_pu_id_clear;
+  wire               wr_pu_id_overflow;
   assign wr_pu_id_default = GND[PU_ID_W-1:0];
   assign wr_pu_id_min = GND[PU_ID_W-1:0];
   assign wr_pu_id_max = NUM_PU-1;
@@ -638,3 +656,27 @@ end
   );
 
 endmodule
+
+
+//mem_controller tmc
+//( // PORTS
+//  .clk(clock.val),
+//  .reset(),
+//  .start(),
+//  .done(),
+//  .rd_req(),
+//  .rd_ready(),
+//  .rd_req_size(),
+//  .rd_rvalid_size(),
+//  .rd_addr(),
+//  .pu_id(), // TODO BIG CHANGE
+//  .d_type(),
+//  .wr_req(),
+//  .wr_pu_id(),
+//  .wr_ready(),
+//  .wr_addr(),
+//  .wr_req_size(),
+//  .wr_done(),
+//  .wr_cfg_idx(),
+//  .rd_cfg_idx()
+//);
