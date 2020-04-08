@@ -1,7 +1,18 @@
-`timescale 1ns/1ps
+//`timescale 1ns/1ps
 `include "common.vh"
-import ShellTypes::*;
-import AMITypes::*;
+`include "counter.v"
+`include "fifo.v"
+`include "buffer_read_counter.v"
+`include "read_info.v"
+`include "fifo_fwft.v"
+`include "mem_controller.v"
+`include "data_unpacker.v"
+`include "data_packer.v"
+`include "dnn2ami_wrapper.sv"
+`include "AMITypes.sv"
+
+//import ShellTypes::*;
+//import AMITypes::*;
 
 module mem_controller_top_ami
 #( // INPUT PARAMETERS
@@ -29,7 +40,7 @@ module mem_controller_top_ami
   parameter integer STREAM_PU_DATA_W = OP_WIDTH * NUM_PE * NUM_PU,
   parameter integer OUTBUF_DATA_W = PU_DATA_W * NUM_PU,
   parameter integer AXI_OUT_DATA_W = AXI_DATA_W * NUM_PU,
-  parameter integer PU_ID_W = $clog2(NUM_PU)+1
+  parameter integer PU_ID_W = `C_LOG_2(NUM_PU)+1
 )( // PORTS
   input  wire                                         clk,
   input  wire                                         reset,
@@ -37,10 +48,10 @@ module mem_controller_top_ami
   output wire                                         done,
 
   // AMI signals
-  output AMIRequest                   mem_req        ,
-  input                               mem_req_grant  ,
-  input  AMIResponse                  mem_resp       ,
-  output                              mem_resp_grant ,
+  output [ `AMI_REQUEST_BUS_WIDTH - 1 : 0 ]           mem_req,
+  input                                               mem_req_grant,
+  input  [ `AMI_RESPONSE_BUS_WIDTH - 1 : 0 ]          mem_resp,
+  output                                              mem_resp_grant,
  
   output wire  [ RD_LOOP_W            -1 : 0 ]        pu_id_buf,
   output wire  [ D_TYPE_W             -1 : 0 ]        d_type_buf,
@@ -108,6 +119,10 @@ module mem_controller_top_ami
   wire [ NUM_PU               -1 : 0 ]        outbuf_empty;
   wire [ NUM_PU               -1 : 0 ]        write_valid;
   wire [ NUM_PU               -1 : 0 ]        outbuf_pop;
+
+  wire M_AXI_AWUSER;
+  wire M_AXI_WUSER;
+  wire M_AXI_ARUSER;
 
   assign M_AXI_AWUSER = 0;
   assign M_AXI_WUSER = 0;
@@ -244,14 +259,6 @@ assign rd_ready = !buffer_counter_full && axi_rd_ready;
   wire stream_pu_push;
   wire [PU_ID_W-1:0] stream_pu_id;
 
-assign stream_pu_count = STREAM_PU_GEN[NUM_PU-1].stream_pu_fifo_count;
-
-always @(posedge clk)
-  if (reset)
-    stream_pu_full <= 1'b0;
-  else
-    stream_pu_full <= stream_pu_count > (1<<STREAM_PU_FIFO_ADDR_W) - 4;
-
 genvar i;
 generate
   for (i=0; i<NUM_PU; i=i+1)
@@ -272,25 +279,27 @@ generate
       end
     `endif
 
+    
     wire stream_pu_push_local;
     assign stream_pu_push_local = stream_pu_push && stream_pu_id == i;
-
+    
     wire [AXI_DATA_W-1:0] stream_pu_data_in;
-
+    
     wire [ PU_DATA_W               -1 : 0 ]     stream_pu_fifo_data_in;
     wire [ PU_DATA_W               -1 : 0 ]     stream_pu_fifo_data_out;
     wire                                        stream_pu_fifo_push;
     wire                                        stream_pu_fifo_pop;
     wire                                        stream_pu_fifo_full;
     wire                                        stream_pu_fifo_empty;
-    wire [STREAM_PU_FIFO_ADDR_W:0] stream_pu_fifo_count; // TODO big change
-
+    
+    wire [STREAM_PU_FIFO_ADDR_W - 1:0] stream_pu_fifo_count; // TODO big change
+    
     assign stream_pu_data_in = axi_rd_buffer_data_out_d;
-
+    
     assign stream_pu_fifo_pop = stream_pu_pop[i];
     assign stream_pu_empty[i] = stream_pu_fifo_empty;
     assign stream_pu_data_out[i*PU_DATA_W+:PU_DATA_W] = stream_pu_fifo_data_out;
-
+    
     data_packer #(
       .IN_WIDTH                 ( AXI_DATA_W               ),
       .OUT_WIDTH                ( PU_DATA_W                )
@@ -304,7 +313,7 @@ generate
       .m_write_data             ( stream_pu_fifo_data_in   ),  //output
       .m_write_ready            ( !stream_pu_full          )   //input
       );
-
+    
     fifo #(
       .DATA_WIDTH               ( PU_DATA_W                ),
       .ADDR_WIDTH               ( STREAM_PU_FIFO_ADDR_W    )
@@ -323,6 +332,13 @@ generate
   end
 endgenerate
 
+assign stream_pu_count = STREAM_PU_GEN[NUM_PU-1].stream_pu_fifo_count;
+
+always @(posedge clk)
+  if (reset)
+    stream_pu_full <= 1'b0;
+  else
+    stream_pu_full <= stream_pu_count > (1<<STREAM_PU_FIFO_ADDR_W) - 4;
 // ==================================================================
 
 
@@ -340,11 +356,11 @@ generate
     wire                                        ob_iw_pop;
     wire                                        ob_iw_full;
     wire                                        ob_iw_empty;
-
+    
     assign outbuf_full[i] = ob_iw_full;
     assign ob_iw_push = outbuf_push[i];
     assign ob_iw_data_in = outbuf_data_in[i*PU_DATA_W+:PU_DATA_W];
-
+    
     fifo #(
       .DATA_WIDTH               ( PU_DATA_W                ),
       .ADDR_WIDTH               ( 7                        )
@@ -366,11 +382,11 @@ generate
     wire m_unpacked_write_req;
     wire m_unpacked_write_ready;
     wire [AXI_DATA_W-1:0] m_unpacked_write_data;
-
+    
     assign m_packed_read_ready = !ob_iw_empty;
     assign ob_iw_pop = m_packed_read_req;
     assign m_packed_read_data = ob_iw_data_out;
-
+    
     data_unpacker #(
       .IN_WIDTH                 ( PU_DATA_W                ),
       .OUT_WIDTH                ( AXI_DATA_W               )
@@ -384,32 +400,32 @@ generate
       .m_unpacked_write_ready   ( m_unpacked_write_ready   ),  //input
       .m_unpacked_write_data    ( m_unpacked_write_data    )   //output
       );
-
+    
     wire [ AXI_DATA_W               -1 : 0 ]    ob_ow_data_in;
     wire [ AXI_DATA_W               -1 : 0 ]    ob_ow_data_out;
     wire                                        ob_ow_push;
     wire                                        ob_ow_pop;
     wire                                        ob_ow_full;
     wire                                        ob_ow_empty;
-
+    
     assign outbuf_empty[i] = ob_ow_empty;
     assign ob_ow_pop = outbuf_pop[i];
     assign outbuf_data_out[i*AXI_DATA_W+:AXI_DATA_W] = ob_ow_data_out;
-
+    
     assign ob_ow_push = m_unpacked_write_req;
     assign m_unpacked_write_ready = !ob_ow_full;
     assign ob_ow_data_in = m_unpacked_write_data;
-
+    
     assign write_valid[i] = ob_ow_push;
-
+    
     reg  [ 32                   -1 : 0 ]        obuf_ow_push_count;
     always @(posedge clk)
       if (reset)
         obuf_ow_push_count <= 0;
       else if (ob_ow_push)
         obuf_ow_push_count <= obuf_ow_push_count + 1;
-
-
+    
+    
     fifo_fwft #(
       .DATA_WIDTH               ( AXI_DATA_W               ),
       .ADDR_WIDTH               ( 5                        )
@@ -655,3 +671,39 @@ end
   assign pu_write_valid = write_valid;
 // ==================================================================
 endmodule
+
+
+//mem_controller_top_ami tmcta
+//( 
+//  .clk(clock.val),
+//  .reset(),
+//  .start(),
+//  .done(),
+//  .mem_req(),
+//  .mem_req_grant(),
+//  .mem_resp(),
+//  .mem_resp_grant(),
+//  .pu_id_buf(),
+//  .d_type_buf(),
+//  .next_read(),
+//  .outbuf_full(),
+//  .outbuf_push(),
+//  .outbuf_data_in(),
+//  .stream_fifo_empty(),
+//  .stream_fifo_pop(),
+//  .stream_fifo_data_out(),
+//  .stream_pu_empty(),
+//  .stream_pu_pop(),
+//  .stream_pu_data_out(),
+//  .buffer_read_last(),
+//  .buffer_read_empty(),
+//  .buffer_read_req(),
+//  .buffer_pu_id(),
+//  .buffer_read_data_out(),
+//  .buffer_read_count(),
+//  .stream_read_count(),
+//  .inbuf_count(),
+//  .pu_write_valid(),
+//  .wr_cfg_idx(),
+//  .rd_cfg_idx()
+//);
