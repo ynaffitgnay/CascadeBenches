@@ -1,3 +1,6 @@
+`ifndef __DNN2AMI_WRPath_sv__
+`define __DNN2AMI_WRPath_sv__
+
 //`timescale 1ns/1ps
 `include "AMITypes.sv"
 
@@ -281,7 +284,7 @@ module DNN2AMI_WRPath
 
     integer i = 0;
 
-
+    /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
     always @(*) begin
         accept_new_active_req = 1'b0;
@@ -290,8 +293,8 @@ module DNN2AMI_WRPath
         new_requests_left     = requests_left;
         new_current_isWrite   = current_isWrite;
         new_current_pu_id     = current_pu_id;
-
-
+    
+    
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
         //new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); 
         new_wr_done_reg  = 1'b0;
@@ -385,12 +388,12 @@ module DNN2AMI_WRPath
     end
     
 endmodule
+`endif //  `ifndef __DNN2AMI_WRPath_sv__
 
-// toggle wr_req every cycle
-reg wr_req = 0;
-always@(posedge clock.val) begin
-  wr_req <= ~wr_req;
-end
+reg wrReq;
+
+initial $display("Start");
+
 
 DNN2AMI_WRPath tdw
 (
@@ -405,7 +408,7 @@ DNN2AMI_WRPath tdw
     .write_valid(),       // value is ready to be written back
     .outbuf_pop(),   // dequeue a data item(), why is this registered?
     
-    .wr_req(wr_req),   // assert when submitting a wr request
+    .wr_req(wrReq),   // assert when submitting a wr request
     .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
     .wr_req_size(), // size of request in bytes (I assume)
     .wr_addr(), // address to write to(), look like 32 bit addresses
@@ -413,3 +416,5 @@ DNN2AMI_WRPath tdw
     .wr_done(),  // no writes left to submit
     .reqOut()
 );
+
+initial $display("Instantiated?");
