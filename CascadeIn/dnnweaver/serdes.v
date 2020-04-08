@@ -15,7 +15,7 @@ module serdes #(
   parameter integer OP_WIDTH        = 16,
   parameter integer IN_WIDTH        = IN_COUNT * OP_WIDTH,
   parameter integer OUT_WIDTH       = OUT_COUNT * OP_WIDTH,
-  parameter integer COUNT_W         = `C_LOG_2(IN_COUNT+1)
+  parameter integer COUNT_W         = `C_LOG_2(IN_COUNT) + 1
 )
 (
 // ******************************************************************

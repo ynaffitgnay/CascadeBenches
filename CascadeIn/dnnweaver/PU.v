@@ -33,7 +33,7 @@ module PU
   parameter integer RD_LOOP_W         = 10,
   parameter integer SERDES_COUNT_W    = 6,
 
-  parameter integer PE_SEL_W          = `C_LOG_2(NUM_PE),
+  parameter integer PE_SEL_W          = `C_LOG_2(NUM_PE) + 1,
   parameter integer DATA_IN_WIDTH            = OP_WIDTH * NUM_PE,
   parameter integer DATA_OUT_WIDTH           = OP_WIDTH * NUM_PE,
   parameter integer PE_CTRL_WIDTH            = 10 + 2*PE_BUF_ADDR_WIDTH

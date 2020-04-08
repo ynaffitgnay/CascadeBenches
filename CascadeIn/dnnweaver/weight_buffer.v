@@ -25,7 +25,7 @@ module weight_buffer
 // ******************************************************************
   localparam integer MEM_WIDTH      = WR_WIDTH;
   localparam integer MEM_ADDR_WIDTH = WR_ADDR_WIDTH;
-  localparam integer MUX_SEL_WIDTH  = `C_LOG_2(WR_WIDTH/RD_WIDTH);
+  localparam integer MUX_SEL_WIDTH  = `C_LOG_2(WR_WIDTH/RD_WIDTH) + 1;
 // ******************************************************************
 
 // ******************************************************************

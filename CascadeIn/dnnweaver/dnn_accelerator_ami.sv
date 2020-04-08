@@ -20,7 +20,7 @@ module dnn_accelerator_ami #(
   parameter integer D_TYPE_W          = 2,
   parameter integer ROM_ADDR_W        = 3,
   parameter integer SERDES_COUNT_W    = 6,
-  parameter integer PE_SEL_W          = `C_LOG_2(NUM_PE),
+  parameter integer PE_SEL_W          = `C_LOG_2(NUM_PE) + 1,
   parameter integer PE_BUF_ADDR_WIDTH  = 10,
   parameter integer LAYER_PARAM_WIDTH  = 10
 

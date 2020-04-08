@@ -26,7 +26,7 @@ module PU_controller
   parameter integer POOL_CFG_W              = 3,
   parameter integer KERNEL_SIZE_W           = 3,
   parameter integer SERDES_COUNT_W          = 6,
-  parameter integer PE_SEL_W                = `C_LOG_2(NUM_PE),
+  parameter integer PE_SEL_W                = `C_LOG_2(NUM_PE) + 1,
   parameter CFG_DEPTH = MAX_LAYERS,
   parameter L_TYPE_WIDTH = 2,
   parameter CFG_WIDTH =

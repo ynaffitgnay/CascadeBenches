@@ -22,7 +22,7 @@ module data_packer #(
 );
 
 localparam integer OUT_NUM_DATA = (OUT_WIDTH < IN_WIDTH ? 1 : OUT_WIDTH % IN_WIDTH == 0 ? OUT_WIDTH/IN_WIDTH : OUT_WIDTH/IN_WIDTH+1);
-localparam integer DATA_COUNT_W = `C_LOG_2(OUT_NUM_DATA);
+localparam integer DATA_COUNT_W = `C_LOG_2(OUT_NUM_DATA) + 1;
 
 assign s_write_ready = m_write_ready;
 
