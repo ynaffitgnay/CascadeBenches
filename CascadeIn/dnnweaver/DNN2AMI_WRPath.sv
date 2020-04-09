@@ -162,6 +162,7 @@ module DNN2AMI_WRPath
             $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
         end
         if (wr_req) begin
+            //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
             $display("DNN2AMI: WR_req is being asserted");
         end    
     end    
@@ -235,8 +236,8 @@ module DNN2AMI_WRPath
     
     // Sequencer logic
     // Arbiter
-    reg accept_new_active_req;
-    reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
+    //reg accept_new_active_req;
+    //reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
 
     /* COMMENTED THIS OUT TO MERGE WITH OTHER COMBINATIONAL BLOCK */
     //always @(*) begin
@@ -287,19 +288,9 @@ module DNN2AMI_WRPath
 
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
-    always @(*) begin
-        // This block is merged from the previous block
-        macroWrQ_deq = 1'b0;
-        macro_arbiter_output = macroWrQ_out;
-        if (accept_new_active_req) begin
-            if (!macroWrQ_empty) begin
-                // select Read
-                macroWrQ_deq = 1'b1;
-                macro_arbiter_output = macroWrQ_out;
-            end
-        end
-      
-        accept_new_active_req = 1'b0;
+    always @(*) begin      
+        //accept_new_active_req = 1'b0;
+        macroWrQ_deq          = 1'b0;
         new_macro_req_active  = macro_req_active;
         new_current_address   = current_address;
         new_requests_left     = requests_left;
@@ -331,10 +322,11 @@ module DNN2AMI_WRPath
                     outbuf_pop[current_pu_id] = 1'b1;
                     //reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
                     reqQ_in[`AMIRequest_valid] = 1'b1;
-                    reqQ_in[`AMIRequest_isWrite] = 1'b1;
-                    reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-                    reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
-                    reqQ_in[`AMIRequest_size] = 8; // double check this size
+                    /* These values get set above */
+                    //reqQ_in[`AMIRequest_isWrite] = 1'b1;
+                    //reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
+                    //reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
+                    //reqQ_in[`AMIRequest_size] = 8; // double check this size
                     reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
@@ -351,15 +343,18 @@ module DNN2AMI_WRPath
             /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
             if (!macroWrQ_empty) begin
                 // A new operation can become active
-                accept_new_active_req = 1'b1;
+                //accept_new_active_req = 1'b1;
+                macroWrQ_deq = 1'b1;
                 new_macro_req_active  = 1'b1;
+                //macro_arbiter_output = macroWrQ_out;
+                
                 // Select the output of the arbiter
-                new_current_address = macro_arbiter_output[`DNNWeaverMemReq_addr];
-                new_requests_left   = macro_arbiter_output[`DNNWeaverMemReq_size];
-                new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
-                new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
+                new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
+                new_requests_left   = macroWrQ_out[`DNNWeaverMemReq_size];
+                new_current_isWrite = macroWrQ_out[`DNNWeaverMemReq_isWrite];
+                new_current_pu_id   = macroWrQ_out[`DNNWeaverMemReq_pu_id];        
             end
-        end
+        end // else: !if(macro_req_active)
     end // always @ (*)
 
 /*
@@ -374,15 +369,15 @@ module DNN2AMI_WRPath
             $display("WRPATH: Should be popping but we're not ");
         end
         if (outbuf_pop[0]) begin
-            $display("WRPATH:                                                                             Popping outbuf data, current addr: %x , %d requests left", new_current_address, new_requests_left);
+            $display("WRPATH: Popping outbuf data, current addr: %x , %d requests left", new_current_address, new_requests_left);
         end
     end
 */
-    always@(posedge clk) begin
-        //if (!outbuf_empty[0]) begin
-        //    $display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %x",outbuf_empty[0],write_valid[0],reqQ_full, requests_left,current_address);
-        //end
-    end
+    //always@(posedge clk) begin
+    //    //if (!outbuf_empty[0]) begin
+    //    //    $display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %x",outbuf_empty[0],write_valid[0],reqQ_full, requests_left,current_address);
+    //    //end
+    //end
 
     // How the memory controller determines if a wr_request should be sent
     // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
@@ -430,3 +425,21 @@ DNN2AMI_WRPath tdw
 );
 
 initial $display("Instantiated?");
+
+initial wrReq = 1;
+
+initial $display("Hello");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
