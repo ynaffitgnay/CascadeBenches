@@ -147,7 +147,6 @@ module DNN2AMI_WRPath
     endgenerate    
 
     // Inputs to the MacroWriteQ
-    //assign macroWrQ_in  = '{valid: wr_req, isWrite: 1'b1, addr: wr_addr, size: wr_req_size, pu_id: wr_pu_id, time_stamp: current_timestamp};
     assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
     assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
     assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
@@ -217,41 +216,12 @@ module DNN2AMI_WRPath
     assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
     assign reqOut   = reqQ_out;
     assign reqQ_deq = reqOut_grant && reqValid;
-    /*
-    always@(posedge clk) begin
-        if  (reqValid) begin
-            $display("                                                       WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
-        end
-    end
-    */
-    //assign wr_ready = 1'b1;//macroWrQ_empty && (macro_req_active ? !current_isWrite : 1'b1);// no pending writes?
-    //assign wr_done  = 1'b0; // probably not correct
     
     // Two important output signals
-    //reg wr_ready_reg;
     reg wr_done_reg;
 
-    //reg new_wr_ready_reg;
     reg new_wr_done_reg;
     
-    // Sequencer logic
-    // Arbiter
-    //reg accept_new_active_req;
-    //reg[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0] macro_arbiter_output;
-
-    /* COMMENTED THIS OUT TO MERGE WITH OTHER COMBINATIONAL BLOCK */
-    //always @(*) begin
-    //    macroWrQ_deq = 1'b0;
-    //    macro_arbiter_output = macroWrQ_out;
-    //    if (accept_new_active_req) begin
-    //        if (!macroWrQ_empty) begin
-    //            // select Read
-    //            macroWrQ_deq = 1'b1;
-    //            macro_arbiter_output = macroWrQ_out;
-    //        end
-    //    end
-    //end
-
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
     reg[AXI_ADDR_WIDTH-1:0] current_address;
@@ -289,7 +259,6 @@ module DNN2AMI_WRPath
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
     always @(*) begin      
-        //accept_new_active_req = 1'b0;
         macroWrQ_deq          = 1'b0;
         new_macro_req_active  = macro_req_active;
         new_current_address   = current_address;
@@ -299,11 +268,9 @@ module DNN2AMI_WRPath
     
     
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        //new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty); 
         new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
-        //reqQ_in  = '{valid: 1'b0, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
         reqQ_in[`AMIRequest_valid] = 1'b0;
         reqQ_in[`AMIRequest_isWrite] = 1'b1;
         reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
@@ -320,13 +287,8 @@ module DNN2AMI_WRPath
             if (current_isWrite == 1'b1) begin
                 if (!outbuf_empty[current_pu_id] && !reqQ_full) begin // TODO: Not sure about this write_valid signal
                     outbuf_pop[current_pu_id] = 1'b1;
-                    //reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
+
                     reqQ_in[`AMIRequest_valid] = 1'b1;
-                    /* These values get set above */
-                    //reqQ_in[`AMIRequest_isWrite] = 1'b1;
-                    //reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-                    //reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
-                    //reqQ_in[`AMIRequest_size] = 8; // double check this size
                     reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
@@ -340,13 +302,10 @@ module DNN2AMI_WRPath
         end // if (macro_req_active)
         else begin
             // See if there is a new operation available
-            /* SOMETHING ABOUT THIS BLOCK ALSO CAUSES CASCADE TO HANG! */
             if (!macroWrQ_empty) begin
                 // A new operation can become active
-                //accept_new_active_req = 1'b1;
                 macroWrQ_deq = 1'b1;
                 new_macro_req_active  = 1'b1;
-                //macro_arbiter_output = macroWrQ_out;
                 
                 // Select the output of the arbiter
                 new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
@@ -357,28 +316,6 @@ module DNN2AMI_WRPath
         end // else: !if(macro_req_active)
     end // always @ (*)
 
-/*
-    always@(posedge clk) begin
-        if (wr_ready && !wr_done) begin
-            $display("DNN2: XXXXXXXXXXXX Should be able to accept a new write XXXXXXXXXXXXXXX");
-        end
-    end
-    
-    always@(posedge clk) begin
-        if (!outbuf_empty[0] && !outbuf_pop[0]) begin
-            $display("WRPATH: Should be popping but we're not ");
-        end
-        if (outbuf_pop[0]) begin
-            $display("WRPATH: Popping outbuf data, current addr: %x , %d requests left", new_current_address, new_requests_left);
-        end
-    end
-*/
-    //always@(posedge clk) begin
-    //    //if (!outbuf_empty[0]) begin
-    //    //    $display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %x",outbuf_empty[0],write_valid[0],reqQ_full, requests_left,current_address);
-    //    //end
-    //end
-
     // How the memory controller determines if a wr_request should be sent
     // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
     //  wr_ready <= pu_wr_ready[wr_pu_id] && !(wr_req && wr_ready);
@@ -386,10 +323,8 @@ module DNN2AMI_WRPath
     // WR_DONE is asserted when all the PUs no writes remaining.
     always@(posedge clk) begin
         if (rst) begin
-            //wr_ready_reg <= 1'b1;
             wr_done_reg  <= 1'b0;
         end else begin
-            //wr_ready_reg <= new_wr_ready_reg;
             wr_done_reg  <= new_wr_done_reg;
         end
     end
