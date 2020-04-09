@@ -1,8 +1,9 @@
 `include "common.vh"
-//import ShellTypes::*;
-`include "ShellTypes.sv"
-//import AMITypes::*;
+//`include "ShellTypes.sv"
 `include "AMITypes.sv"
+`include "BlockBuffer.sv"
+`include "dnn_accelerator_ami.sv"
+
 
 module dnnweaver_ami_top #(
 // ******************************************************************
@@ -55,18 +56,22 @@ module dnnweaver_ami_top #(
   output reg  [ 16                   -1 : 0 ]        vecgen_read_count,
 
   // AMI signals
-  output AMIRequest                   mem_req[AMI_NUM_PORTS-1:0]        ,
-  input                               mem_req_grant[AMI_NUM_PORTS-1:0]  ,
-  input  AMIResponse                  mem_resp[AMI_NUM_PORTS-1:0]       ,
-  output                              mem_resp_grant[AMI_NUM_PORTS-1:0] ,
+  output [ `AMI_REQUEST_BUS_WIDTH - 1 : 0 ]          mem_req0,
+  input                                              mem_req0_grant,
+  output [ `AMI_REQUEST_BUS_WIDTH - 1 : 0 ]          mem_req1,
+  input                                              mem_req1_grant,
+  input  [ `AMI_RESPONSE_BUS_WIDTH - 1 : 0 ]         mem_resp0,
+  output                                             mem_resp0_grant,
+  input  [ `AMI_RESPONSE_BUS_WIDTH - 1 : 0 ]         mem_resp1,
+  output                                             mem_resp1_grant,
   output l_inc
   
 );
 
     // Signals between DNNWeaver and the BlockBuffer
-    AMIRequest reqIn;
+    wire[`AMI_REQUEST_BUS_WIDTH - 1:0] reqIn;
     wire reqIn_grant;
-    AMIResponse respOut;
+    wire[`AMI_RESPONSE_BUS_WIDTH - 1:0] respOut;
     wire respOut_grant;
 
     // Block buffer
@@ -83,10 +88,14 @@ module dnnweaver_ami_top #(
         .respOut (respOut),
         .respOut_grant (respOut_grant),
         // Interface to Memory system, 2 ports enables simulatentous eviction and request of a new block
-        .reqOut(mem_req), // port 0 is the rd port, port 1 is the wr port
-        .reqOut_grant(mem_req_grant),
-        .respIn(mem_resp),
-        .respIn_grant(mem_resp_grant)
+        .reqOut0(mem_req0), // port 0 is the rd port, port 1 is the wr port
+        .reqOut0_grant(mem_req0_grant),
+        .reqOut1(mem_req1), // port 0 is the rd port, port 1 is the wr port
+        .reqOut1_grant(mem_req1_grant),
+        .respIn0(mem_resp0),
+        .respIn0_grant(mem_resp0_grant),
+        .respIn1(mem_resp1),
+        .respIn1_grant(mem_resp1_grant)
     );
 
     
@@ -137,3 +146,42 @@ module dnnweaver_ami_top #(
     );
 
 endmodule
+
+//initial $display("start");
+//
+//
+//dnnweaver_ami_top tdat
+//(
+//  .clk(clock.val),
+//  .reset(),
+//  .start(),
+//  .flush_buffer(), // TODO: Actually connect it
+//  .done(),
+//  .dbg_kw(),
+//  .dbg_kh(),
+//  .dbg_iw(),
+//  .dbg_ih(),
+//  .dbg_ic(),
+//  .dbg_oc(),
+//  .buffer_read_count(),
+//  .stream_read_count(),
+//  .inbuf_count(),
+//  .pu_write_valid(),
+//  .wr_cfg_idx(),
+//  .rd_cfg_idx(),
+//  .outbuf_push(),
+//  .pu_controller_state(),
+//  .vecgen_state(),
+//  .vecgen_read_count(),
+//  .mem_req0(),
+//  .mem_req0_grant(),
+//  .mem_req1(),
+//  .mem_req1_grant(),
+//  .mem_resp0(),
+//  .mem_resp0_grant(),
+//  .mem_resp1(),
+//  .mem_resp1_grant(),
+//  .l_inc()  
+//);
+//
+//initial $display("instantiated");
