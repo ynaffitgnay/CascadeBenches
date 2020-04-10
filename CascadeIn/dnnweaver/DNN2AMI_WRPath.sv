@@ -255,6 +255,8 @@ module DNN2AMI_WRPath
     assign wr_done  = wr_done_reg;
 
     integer i = 0;
+    
+    wire not_macroWrQ_empty = !macroWrQ_empty;
 
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
@@ -302,7 +304,7 @@ module DNN2AMI_WRPath
         end // if (macro_req_active)
         else begin
             // See if there is a new operation available
-            if (!macroWrQ_empty) begin
+            if (not_macroWrQ_empty) begin
                 // A new operation can become active
                 macroWrQ_deq = 1'b1;
                 new_macro_req_active  = 1'b1;
