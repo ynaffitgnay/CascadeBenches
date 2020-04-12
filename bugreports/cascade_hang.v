@@ -339,12 +339,7 @@ module DNN2AMI_WRPath
     /* Something seems weird about this always block, I guess */
     always @(*) begin      
         macroWrQ_deq          = 1'b0;
-        new_macro_req_active  = macro_req_active;
-        new_current_address   = current_address;
-        new_requests_left     = requests_left;
-        new_current_isWrite   = current_isWrite;
-        new_current_pu_id     = current_pu_id;
-    
+        new_macro_req_active  = macro_req_active;    
     
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
         new_wr_done_reg  = 1'b0;
@@ -358,12 +353,6 @@ module DNN2AMI_WRPath
             // A new operation can become active
             macroWrQ_deq = 1'b1;
             new_macro_req_active  = 1'b1;
-            
-            // Select the output of the arbiter
-            new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
-            new_requests_left   = macroWrQ_out[`DNNWeaverMemReq_size];
-            new_current_isWrite = macroWrQ_out[`DNNWeaverMemReq_isWrite];
-            new_current_pu_id   = macroWrQ_out[`DNNWeaverMemReq_pu_id];        
         end
     end // always @ (*)
 
