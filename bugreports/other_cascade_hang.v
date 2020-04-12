@@ -214,35 +214,24 @@ module DNN2AMI_WRPath
     input                               rst,
 
     // Connection to rest of memory system
-    output wire                         reqValid,
-    input                               reqOut_grant,
-
-    // Writes
-    // WRITE from BRAM to DDR
-    input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty, // no data in the output buffer
-    input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,  // data to write from, portion per PU
-    input  wire  [ NUM_PU               -1 : 0 ]        write_valid,       // value is ready to be written back
-    output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
-    
-    // Memory Controller Interface - Write
-    input  wire                                         wr_req,   // assert when submitting a wr request
-    input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
-    input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
-    input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
-    output wire                                         wr_ready, // ready for more writes
-    output wire                                         wr_done,  // no writes left to submit
-    output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
+    //output wire                         reqValid,
+    //input                               reqOut_grant,
+    //
+    //// Memory Controller Interface - Write
+    input  wire                                         wr_req   // assert when submitting a wr request
+    //input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
+    //input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
+    //input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
+    //output wire                                         wr_ready, // ready for more writes
+    //output wire                                         wr_done,  // no writes left to submit
+    //output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
+    reg   [ NUM_PU               -1 : 0 ]        outbuf_pop;
 
     genvar pu_num;
 
     // rename the inputs from the write buffer
     wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data[NUM_PU-1:0];
-    generate
-        for (pu_num = 0; pu_num < NUM_PU; pu_num = pu_num + 1) begin : per_pu_buf_rename
-            assign pu_outbuf_data[pu_num] = data_from_outbuf[((pu_num+1)*AXI_DATA_WIDTH)-1:(pu_num*AXI_DATA_WIDTH)];
-        end
-    endgenerate    
     
     // Counter for time  stamps
     wire[63:0] current_timestamp;
@@ -282,18 +271,18 @@ module DNN2AMI_WRPath
     );    
    
     // Inputs to the MacroWriteQ
-    assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
-    assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
-    assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
-    assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
-    assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
-    assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
+    //assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
+    //assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
+    //assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
+    //assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
+    //assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
+    //assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
     always@(posedge clk) begin
         if (macroWrQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
+            $display("DNN2AMI:============================================================ Accepting macro WRITE request");// ADDR: %h Size: %d ",wr_addr,wr_req_size);
         end
         if (wr_req) begin
             //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
@@ -327,9 +316,9 @@ module DNN2AMI_WRPath
     );    
 
     // Interface to the memory system
-    assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
-    assign reqOut   = reqQ_out;
-    assign reqQ_deq = reqOut_grant && reqValid;
+    //assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
+    //assign reqOut   = reqQ_out;
+    //assign reqQ_deq = reqOut_grant && reqValid;
     
     // Two important output signals
     reg wr_done_reg;
@@ -365,8 +354,8 @@ module DNN2AMI_WRPath
         end
     end
 
-    assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
-    assign wr_done  = wr_done_reg;
+    //assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
+    //assign wr_done  = wr_done_reg;
 
     integer i = 0;
     
@@ -387,15 +376,15 @@ module DNN2AMI_WRPath
         new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
-        reqQ_in[`AMIRequest_valid] = 1'b0;
-        reqQ_in[`AMIRequest_isWrite] = 1'b1;
-        reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-        reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
-        reqQ_in[`AMIRequest_size] = 8; // double check this size
+        //reqQ_in[`AMIRequest_valid] = 1'b0;
+        //reqQ_in[`AMIRequest_isWrite] = 1'b1;
+        //reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
+        //reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
+        //reqQ_in[`AMIRequest_size] = 8; // double check this size
         
-        //for (i = 0; i < NUM_PU; i = i + 1) begin
-        //    outbuf_pop[i] = 1'b0;
-        //end
+        for (i = 0; i < NUM_PU; i = i + 1) begin
+            outbuf_pop[i] = 1'b0;
+        end
         
         // An operation is being sequenced
         if (macro_req_active) begin
@@ -407,20 +396,9 @@ module DNN2AMI_WRPath
                 new_wr_done_reg = 1'b1;
             end
         end // if (macro_req_active)
-        else begin
-            // See if there is a new operation available
-            if (not_macroWrQ_empty) begin
-                // A new operation can become active
-                macroWrQ_deq = 1'b1;
-                new_macro_req_active  = 1'b1;
-                
-                // Select the output of the arbiter
-                new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
-                new_requests_left   = macroWrQ_out[`DNNWeaverMemReq_size];
-                new_current_isWrite = macroWrQ_out[`DNNWeaverMemReq_isWrite];
-                new_current_pu_id   = macroWrQ_out[`DNNWeaverMemReq_pu_id];        
-            end
-        end // else: !if(macro_req_active)
+        if (not_macroWrQ_empty) begin
+            new_macro_req_active  = 1'b1;
+        end
     end // always @ (*)
 
     // How the memory controller determines if a wr_request should be sent
@@ -449,21 +427,15 @@ DNN2AMI_WRPath tdw
     .clk(clock.val),
     .rst(),
 
-    .reqValid(),
-    .reqOut_grant(),
-
-    .outbuf_empty(), // no data in the output buffer
-    .data_from_outbuf(),  // data to write from(), portion per PU
-    .write_valid(),       // value is ready to be written back
-    .outbuf_pop(),   // dequeue a data item(), why is this registered?
-    
-    .wr_req(wrReq),   // assert when submitting a wr request
-    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
-    .wr_req_size(), // size of request in bytes (I assume)
-    .wr_addr(), // address to write to(), look like 32 bit addresses
-    .wr_ready(), // ready for more writes
-    .wr_done(),  // no writes left to submit
-    .reqOut()
+    //.reqValid(),
+    //.reqOut_grant(),
+    .wr_req(wrReq)   // assert when submitting a wr request
+    //.wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
+    //.wr_req_size(), // size of request in bytes (I assume)
+    //.wr_addr(), // address to write to(), look like 32 bit addresses
+    //.wr_ready(), // ready for more writes
+    //.wr_done(),  // no writes left to submit
+    //.reqOut()
 );
 
 initial $display("Instantiated?");
