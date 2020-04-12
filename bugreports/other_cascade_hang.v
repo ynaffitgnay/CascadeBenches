@@ -123,44 +123,7 @@ endmodule // SoftFIFO
 
 module DNN2AMI_WRPath
 #(
-  parameter integer NUM_PU               = 2,
-
-  parameter integer AXI_ID               = 0,
-
-  parameter integer TID_WIDTH            = 6,
-  parameter integer AXI_ADDR_WIDTH       = 32,
-  parameter integer AXI_DATA_WIDTH       = 64,
-  parameter integer AWUSER_W             = 1,
-  parameter integer ARUSER_W             = 1,
-  parameter integer WUSER_W              = 1,
-  parameter integer RUSER_W              = 1,
-  parameter integer BUSER_W              = 1,
-
-  /* Disabling these parameters will remove any throttling.
-   The resulting ERROR flag will not be useful */
-  parameter integer C_M_AXI_SUPPORTS_WRITE             = 1,
-  parameter integer C_M_AXI_SUPPORTS_READ              = 1,
-
-  /* Max count of written but not yet read bursts.
-   If the interconnect/slave is able to accept enough
-   addresses and the read channels are stalled, the
-   master will issue this many commands ahead of
-   write responses */
-
-  // Base address of targeted slave
-  //Changing read and write addresses
-  parameter         C_M_AXI_READ_TARGET                = 32'hFFFF0000,
-  parameter         C_M_AXI_WRITE_TARGET               = 32'hFFFF8000,
-
-  // CUSTOM PARAMS
-  parameter         TX_SIZE_WIDTH                      = 10,
-
-  // Number of address bits to test before wrapping
-  parameter integer C_OFFSET_WIDTH                     = TX_SIZE_WIDTH,
- 
-  parameter integer WSTRB_W  = AXI_DATA_WIDTH/8,
-  parameter integer NUM_PU_W = `C_LOG_2(NUM_PU)+1,
-  parameter integer OUTBUF_DATA_W = NUM_PU * AXI_DATA_WIDTH
+  parameter integer NUM_PU               = 2
  
 )
 (
@@ -171,23 +134,18 @@ module DNN2AMI_WRPath
 );
     reg   [ NUM_PU               -1 : 0 ]        outbuf_pop;
 
-    genvar pu_num;
-
-    // rename the inputs from the write buffer
-    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data[NUM_PU-1:0];
-        
     // Queue to buffer Write requests
     wire             macroWrQ_empty;
     wire             macroWrQ_full;
     wire            macroWrQ_enq;
     reg             macroWrQ_deq;
-    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_in;
-    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_out;
+    wire[127:0]  macroWrQ_in;
+    wire[127:0]  macroWrQ_out;
 
     
     SoftFIFO
     #(
-        .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
+        .WIDTH                    (128),
         .LOG_DEPTH                (3)
     )
     macroWriteQ
@@ -215,10 +173,10 @@ module DNN2AMI_WRPath
         
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
-    reg[TX_SIZE_WIDTH-1:0]  requests_left;
+    reg[9:0]  requests_left;
 
     reg new_macro_req_active;
-    reg[TX_SIZE_WIDTH-1:0]  new_requests_left;
+    reg[9:0]  new_requests_left;
     
     always@(posedge clk) begin
         if (rst) begin
