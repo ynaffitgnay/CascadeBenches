@@ -295,41 +295,24 @@ module DNN2AMI_WRPath
     end    
         
     // Two important output signals
-    reg wr_done_reg;
-
-    reg new_wr_done_reg;
+    //reg wr_done_reg;
+    //
+    //reg new_wr_done_reg;
     
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
-    reg[AXI_ADDR_WIDTH-1:0] current_address;
-    reg[TX_SIZE_WIDTH-1:0]  requests_left;
-    reg                     current_isWrite;
-    reg[NUM_PU_W-1:0]       current_pu_id;
-
     reg new_macro_req_active;
-    reg[AXI_ADDR_WIDTH-1:0] new_current_address;
-    reg[TX_SIZE_WIDTH-1:0]  new_requests_left;
-    reg                     new_current_isWrite;
-    reg[NUM_PU_W-1:0]       new_current_pu_id;
     
     always@(posedge clk) begin
         if (rst) begin
             macro_req_active <= 1'b0;
-            current_address  <= 0;
-            requests_left    <= 0;
-            current_isWrite  <= 1'b0;
-            current_pu_id    <= 0;
         end else begin
             macro_req_active <= new_macro_req_active;
-            current_address  <= new_current_address;
-            requests_left    <= new_requests_left;
-            current_isWrite  <= new_current_isWrite;
-            current_pu_id    <= new_current_pu_id;
         end
     end
 
     assign wr_ready = (macroWrQ_empty && !macro_req_active);
-    assign wr_done  = wr_done_reg;
+    //assign wr_done  = wr_done_reg;
 
     integer i = 0;
     
@@ -342,7 +325,7 @@ module DNN2AMI_WRPath
         new_macro_req_active  = macro_req_active;    
     
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        new_wr_done_reg  = 1'b0;
+        //new_wr_done_reg  = 1'b0;
                 
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
@@ -361,13 +344,13 @@ module DNN2AMI_WRPath
     //  wr_ready <= pu_wr_ready[wr_pu_id] && !(wr_req && wr_ready);
     // We issue a write for a PU when the PU has no writes remaining.
     // WR_DONE is asserted when all the PUs no writes remaining.
-    always@(posedge clk) begin
-        if (rst) begin
-            wr_done_reg  <= 1'b0;
-        end else begin
-            wr_done_reg  <= new_wr_done_reg;
-        end
-    end
+    //always@(posedge clk) begin
+    //    if (rst) begin
+    //        wr_done_reg  <= 1'b0;
+    //    end else begin
+    //        wr_done_reg  <= new_wr_done_reg;
+    //    end
+    //end
     
 endmodule
 `endif //  `ifndef __DNN2AMI_WRPath_sv__
