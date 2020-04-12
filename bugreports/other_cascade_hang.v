@@ -215,31 +215,6 @@ module DNN2AMI_WRPath
         end    
     end    
     
-    // reqOut queue to simplify the sequencing logic
-    wire             reqQ_empty;
-    wire             reqQ_full;
-    reg              reqQ_enq;
-    wire             reqQ_deq;
-    reg[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqQ_in;
-    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]      reqQ_out;
-
-    SoftFIFO
-    #(
-        .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
-        .LOG_DEPTH                (3)
-    )
-    reqQ
-    (
-        .clock                    (clk),
-        .reset_n                (~rst),
-        .wrreq                    (reqQ_enq),
-        .data                   (reqQ_in),
-        .full                   (reqQ_full),
-        .q                      (reqQ_out),
-        .empty                  (reqQ_empty),
-        .rdreq                  (reqQ_deq)
-    );    
-    
     // Two important output signals
     reg wr_done_reg;
 
@@ -271,9 +246,7 @@ module DNN2AMI_WRPath
         new_requests_left     = requests_left;
 
         new_wr_done_reg  = 1'b0;
-        
-        reqQ_enq = 1'b0;
-        
+                
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
         end
