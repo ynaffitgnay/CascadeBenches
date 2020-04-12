@@ -353,37 +353,18 @@ module DNN2AMI_WRPath
             outbuf_pop[i] = 1'b0;
         end
         
-        // An operation is being sequenced
-        if (macro_req_active) begin
-            // issue write requests
-            if (current_isWrite == 1'b1) begin
-                if (!outbuf_empty[current_pu_id]) begin
-                    outbuf_pop[current_pu_id] = 1'b1;
-
-                    new_current_address = current_address + 8; // 8 bytes
-                    new_requests_left   = requests_left - 1;
-                end
-            end
-            // check if anything is left to issue
-            if (new_requests_left == 0) begin
-                new_macro_req_active = 1'b0;
-                new_wr_done_reg = 1'b1;
-            end
-        end // if (macro_req_active)
-        else begin
             // See if there is a new operation available
-            if (not_macroWrQ_empty) begin
-                // A new operation can become active
-                macroWrQ_deq = 1'b1;
-                new_macro_req_active  = 1'b1;
-                
-                // Select the output of the arbiter
-                new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
-                new_requests_left   = macroWrQ_out[`DNNWeaverMemReq_size];
-                new_current_isWrite = macroWrQ_out[`DNNWeaverMemReq_isWrite];
-                new_current_pu_id   = macroWrQ_out[`DNNWeaverMemReq_pu_id];        
-            end
-        end // else: !if(macro_req_active)
+        if (!macroWrQ_empty) begin
+            // A new operation can become active
+            macroWrQ_deq = 1'b1;
+            new_macro_req_active  = 1'b1;
+            
+            // Select the output of the arbiter
+            new_current_address = macroWrQ_out[`DNNWeaverMemReq_addr];
+            new_requests_left   = macroWrQ_out[`DNNWeaverMemReq_size];
+            new_current_isWrite = macroWrQ_out[`DNNWeaverMemReq_isWrite];
+            new_current_pu_id   = macroWrQ_out[`DNNWeaverMemReq_pu_id];        
+        end
     end // always @ (*)
 
     // How the memory controller determines if a wr_request should be sent
