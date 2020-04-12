@@ -20,80 +20,6 @@
 (n) <= (1<<30) ? 30 : (n) <= (1<<31) ? 31 : 32)
 
 
-`define AMI_ADDR_WIDTH 64
-`define AMI_DATA_WIDTH (512 + 64)
-`define AMI_REQ_SIZE_WIDTH 6
-
-`define AMI_REQUEST_BUS_WIDTH  (1 + 1 + `AMI_ADDR_WIDTH + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
-`define AMIRequest_valid       0:0
-`define AMIRequest_isWrite     1:1
-`define AMIRequest_addr        (`AMI_ADDR_WIDTH + 2 - 1):2
-`define AMIRequest_data        (`AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2 - 1):(`AMI_ADDR_WIDTH + 2)
-`define AMIRequest_size        (`AMI_REQ_SIZE_WIDTH + `AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2 - 1):(`AMI_DATA_WIDTH + `AMI_ADDR_WIDTH + 2)
-
-`define AMI_RESPONSE_BUS_WIDTH  (1 + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
-`define AMIResponse_valid       0:0
-`define AMIResponse_data        (`AMI_DATA_WIDTH + 1 - 1):1
-`define AMIResponse_size        (`AMI_REQ_SIZE_WIDTH + `AMI_DATA_WIDTH + 1 - 1):(`AMI_DATA_WIDTH + 1)
-
-`define DNNMICRORD_TAG_BUS_WIDTH  (1 + 32 + 20)
-`define DNNMicroRdTag_valid       0:0
-`define DNNMicroRdTag_addr        (32 + 1 - 1):1
-`define DNNMicroRdTag_size        (20 + 32 + 1 - 1):(32 + 1)
-
-`define DNNWEAVER_MEMREQ_BUS_WIDTH  (1 + 1 + 32 + 20 + 10 + 64)
-`define DNNWeaverMemReq_valid       0:0
-`define DNNWeaverMemReq_isWrite     1:1
-`define DNNWeaverMemReq_addr        (32 + 2 - 1):2
-`define DNNWeaverMemReq_size        (20 + 32 + 2 - 1):(32 + 2)
-`define DNNWeaverMemReq_pu_id       (10 + 20 + 32 + 2 - 1):(20 + 32 + 2)
-`define DNNWeaverMemReq_time_stamp  (64 + 10 + 20 + 32 + 2 - 1):(10 + 20 + 32 + 2)
-
-module Counter64
-(
-  input               clk,
-  input               rst, 
-	input								increment,
-	output[63:0]				count
-
-);
-
-	reg[31:0]  lower;
-	reg[31:0]  upper;
-	reg[31:0] new_lower;
-	reg[31:0] new_upper;
-
-	assign count = {upper,lower};
-	
-	always@(posedge clk) begin : counter64_update
-		if (rst) begin
-			lower <= 32'h0000_0000;
-			upper <= 32'h0000_0000;
-		end else begin
-			lower <= new_lower;
-			upper <= new_upper;
-		end
-	end
-
-	always @(*) begin : counter64_update_logic
-
-		new_lower = lower;
-		new_upper = upper;
-
-		if (increment) begin
-			// check if overflow will occur
-			if (lower == 32'hFFFF_FFFF) begin
-				new_upper = upper + 32'h1;
-				new_lower = 32'h0;
-			end else begin
-				new_lower = lower + 32'h1;
-			end
-		end
-
-	end
-
-endmodule // Counter64
-
 module SoftFIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
 (
     // General signals
@@ -210,41 +136,22 @@ module DNN2AMI_WRPath
     // General signals
     input                               clk,
     input                               rst,
-
-    // Connection to rest of memory system
-    output wire                         reqValid,
-    input                               reqOut_grant,
-
-    // Writes
-    output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
-    
-    // Memory Controller Interface - Write
-    input  wire                                         wr_req,   // assert when submitting a wr request
-    output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
+    input  wire                                         wr_req   // assert when submitting a wr request
 );
-    
-    // Counter for time  stamps
-    wire[63:0] current_timestamp;
-    Counter64
-    time_stamp_counter
-    (
-        .clk (clk),
-        .rst (rst), 
-        .increment (1'b1),
-        .count (current_timestamp)
-    );    
-    
+
+    reg   [ NUM_PU               -1 : 0 ]        outbuf_pop;
+        
     // Queue to buffer Write requests
     wire             macroWrQ_empty;
     wire             macroWrQ_full;
     wire            macroWrQ_enq;
     reg             macroWrQ_deq;
-    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_in;
-    wire[`DNNWEAVER_MEMREQ_BUS_WIDTH - 1:0]  macroWrQ_out;
+    wire[127:0]  macroWrQ_in;
+    wire[127:0]  macroWrQ_out;
 
     SoftFIFO
     #(
-        .WIDTH                    (`DNNWEAVER_MEMREQ_BUS_WIDTH),
+        .WIDTH                    (127),
         .LOG_DEPTH                (3)
     )
     macroWriteQ
@@ -259,10 +166,6 @@ module DNN2AMI_WRPath
         .rdreq                  (macroWrQ_deq)
     );    
 
-    // Inputs to the MacroWriteQ
-    assign macroWrQ_enq = wr_req && !macroWrQ_full;        
-
-    // Debug  // TODO: comment this out
     always@(posedge clk) begin
         if (macroWrQ_enq) begin
             $display("DNN2AMI:============================================================ Accepting macro WRITE request "); // ADDR: %h Size: %d ",wr_addr,wr_req_size);
@@ -271,20 +174,6 @@ module DNN2AMI_WRPath
             $display("DNN2AMI: WR_req is being asserted");
         end    
     end    
-            
-    // Current macro request being sequenced (fractured into smaller operations)
-    reg macro_req_active;
-    reg new_macro_req_active;
-    
-    always@(posedge clk) begin
-        if (rst) begin
-            macro_req_active <= 1'b0;
-        end else begin
-            macro_req_active <= new_macro_req_active;
-        end
-    end
-
-    //assign wr_ready = (macroWrQ_empty && !macro_req_active);
 
     integer i = 0;
     
@@ -312,14 +201,7 @@ DNN2AMI_WRPath tdw
 (
     .clk(clock.val),
     .rst(),
-
-    .reqValid(),
-    .reqOut_grant(),
-
-    .outbuf_pop(),   // dequeue a data item(), why is this registered?
-    
-    .wr_req(wrReq),   // assert when submitting a wr request
-    .reqOut()
+    .wr_req(wrReq)   // assert when submitting a wr request
 );
 
 initial $display("Instantiated?");
