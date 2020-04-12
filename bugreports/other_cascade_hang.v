@@ -399,17 +399,8 @@ module DNN2AMI_WRPath
         
         // An operation is being sequenced
         if (macro_req_active) begin
-            // issue write requests
-            if (current_isWrite == 1'b1) begin
-                if (!outbuf_empty[current_pu_id] && !reqQ_full) begin // TODO: Not sure about this write_valid signal
-                    outbuf_pop[current_pu_id] = 1'b1;
-                    
-                    reqQ_in[`AMIRequest_valid] = 1'b1;
-                    reqQ_enq = 1'b1;
-                    new_current_address = current_address + 8; // 8 bytes
-                    //new_requests_left   = requests_left - 1;
-                end
-            end
+            
+            new_requests_left   = requests_left - 1;
             // check if anything is left to issue
             if (new_requests_left == 0) begin
                 new_macro_req_active = 1'b0;
