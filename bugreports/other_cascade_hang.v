@@ -50,51 +50,6 @@
 `define DNNWeaverMemReq_pu_id       (10 + 20 + 32 + 2 - 1):(20 + 32 + 2)
 `define DNNWeaverMemReq_time_stamp  (64 + 10 + 20 + 32 + 2 - 1):(10 + 20 + 32 + 2)
 
-module Counter64
-(
-  input               clk,
-  input               rst, 
-	input								increment,
-	output[63:0]				count
-
-);
-
-	reg[31:0]  lower;
-	reg[31:0]  upper;
-	reg[31:0] new_lower;
-	reg[31:0] new_upper;
-
-	assign count = {upper,lower};
-	
-	always@(posedge clk) begin : counter64_update
-		if (rst) begin
-			lower <= 32'h0000_0000;
-			upper <= 32'h0000_0000;
-		end else begin
-			lower <= new_lower;
-			upper <= new_upper;
-		end
-	end
-
-	always @(*) begin : counter64_update_logic
-
-		new_lower = lower;
-		new_upper = upper;
-
-		if (increment) begin
-			// check if overflow will occur
-			if (lower == 32'hFFFF_FFFF) begin
-				new_upper = upper + 32'h1;
-				new_lower = 32'h0;
-			end else begin
-				new_lower = lower + 32'h1;
-			end
-		end
-
-	end
-
-endmodule // Counter64
-
 module SoftFIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
 (
     // General signals
@@ -212,19 +167,7 @@ module DNN2AMI_WRPath
     // General signals
     input                               clk,
     input                               rst,
-
-    // Connection to rest of memory system
-    //output wire                         reqValid,
-    //input                               reqOut_grant,
-    //
-    //// Memory Controller Interface - Write
     input  wire                                         wr_req   // assert when submitting a wr request
-    //input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
-    //input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
-    //input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
-    //output wire                                         wr_ready, // ready for more writes
-    //output wire                                         wr_done,  // no writes left to submit
-    //output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
     reg   [ NUM_PU               -1 : 0 ]        outbuf_pop;
 
@@ -232,18 +175,7 @@ module DNN2AMI_WRPath
 
     // rename the inputs from the write buffer
     wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data[NUM_PU-1:0];
-    
-    // Counter for time  stamps
-    wire[63:0] current_timestamp;
-    Counter64
-    time_stamp_counter
-    (
-        .clk (clk),
-        .rst (rst), 
-        .increment (1'b1),
-        .count (current_timestamp)
-    );    
-    
+        
     // Queue to buffer Write requests
     wire             macroWrQ_empty;
     wire             macroWrQ_full;
@@ -270,13 +202,6 @@ module DNN2AMI_WRPath
         .rdreq                  (macroWrQ_deq)
     );    
    
-    // Inputs to the MacroWriteQ
-    //assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
-    //assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
-    //assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
-    //assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
-    //assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
-    //assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
@@ -314,11 +239,6 @@ module DNN2AMI_WRPath
         .empty                  (reqQ_empty),
         .rdreq                  (reqQ_deq)
     );    
-
-    // Interface to the memory system
-    //assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
-    //assign reqOut   = reqQ_out;
-    //assign reqQ_deq = reqOut_grant && reqValid;
     
     // Two important output signals
     reg wr_done_reg;
@@ -327,60 +247,32 @@ module DNN2AMI_WRPath
     
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
-    reg[AXI_ADDR_WIDTH-1:0] current_address;
     reg[TX_SIZE_WIDTH-1:0]  requests_left;
-    reg                     current_isWrite;
-    reg[NUM_PU_W-1:0]       current_pu_id;
 
     reg new_macro_req_active;
-    reg[AXI_ADDR_WIDTH-1:0] new_current_address;
     reg[TX_SIZE_WIDTH-1:0]  new_requests_left;
-    reg                     new_current_isWrite;
-    reg[NUM_PU_W-1:0]       new_current_pu_id;
     
     always@(posedge clk) begin
         if (rst) begin
             macro_req_active <= 1'b0;
-            current_address  <= 0;
             requests_left    <= 0;
-            current_isWrite  <= 1'b0;
-            current_pu_id    <= 0;
         end else begin
             macro_req_active <= new_macro_req_active;
-            current_address  <= new_current_address;
             requests_left    <= new_requests_left;
-            current_isWrite  <= new_current_isWrite;
-            current_pu_id    <= new_current_pu_id;
         end
     end
-
-    //assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
-    //assign wr_done  = wr_done_reg;
 
     integer i = 0;
     
     wire not_macroWrQ_empty = !macroWrQ_empty;
 
-    /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
-    /* Something seems weird about this always block, I guess */
     always @(*) begin      
         macroWrQ_deq          = 1'b0;
-        new_macro_req_active  = macro_req_active;
-        new_current_address   = current_address;
         new_requests_left     = requests_left;
-        new_current_isWrite   = current_isWrite;
-        new_current_pu_id     = current_pu_id;
-    
-    
-        /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
+
         new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
-        //reqQ_in[`AMIRequest_valid] = 1'b0;
-        //reqQ_in[`AMIRequest_isWrite] = 1'b1;
-        //reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-        //reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
-        //reqQ_in[`AMIRequest_size] = 8; // double check this size
         
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
@@ -426,16 +318,7 @@ DNN2AMI_WRPath tdw
 (
     .clk(clock.val),
     .rst(),
-
-    //.reqValid(),
-    //.reqOut_grant(),
     .wr_req(wrReq)   // assert when submitting a wr request
-    //.wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
-    //.wr_req_size(), // size of request in bytes (I assume)
-    //.wr_addr(), // address to write to(), look like 32 bit addresses
-    //.wr_ready(), // ready for more writes
-    //.wr_done(),  // no writes left to submit
-    //.reqOut()
 );
 
 initial $display("Instantiated?");
