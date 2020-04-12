@@ -108,8 +108,6 @@ module SoftFIFO  #(parameter WIDTH = 512, LOG_DEPTH = 9)
     input  rdreq // deq    
 );
 
-//parameter WIDTH     = 64; // bits wide
-//parameter LOG_DEPTH = 9;  // 2^LOG_DEPTH slots
 
 reg [WIDTH-1:0] buffer[(1 << LOG_DEPTH)-1:0];
 
@@ -237,12 +235,8 @@ module DNN2AMI_WRPath
     genvar pu_num;
 
     // rename the inputs from the write buffer
-    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data[NUM_PU-1:0];
-    generate
-        for (pu_num = 0; pu_num < NUM_PU; pu_num = pu_num + 1) begin : per_pu_buf_rename
-            assign pu_outbuf_data[pu_num] = data_from_outbuf[((pu_num+1)*AXI_DATA_WIDTH)-1:(pu_num*AXI_DATA_WIDTH)];
-        end
-    endgenerate    
+    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data;
+    assign pu_outbuf_data = data_from_outbuf[AXI_DATA_WIDTH - 1:0];
     
     // Counter for time  stamps
     wire[63:0] current_timestamp;
@@ -299,37 +293,7 @@ module DNN2AMI_WRPath
             $display("DNN2AMI: WR_req is being asserted");
         end    
     end    
-    
-    // reqOut queue to simplify the sequencing logic
-    wire             reqQ_empty;
-    wire             reqQ_full;
-    reg              reqQ_enq;
-    wire             reqQ_deq;
-    reg[`AMI_REQUEST_BUS_WIDTH - 1:0]       reqQ_in;
-    wire[`AMI_REQUEST_BUS_WIDTH - 1:0]      reqQ_out;
-
-    SoftFIFO
-    #(
-        .WIDTH                    (`AMI_REQUEST_BUS_WIDTH),
-        .LOG_DEPTH                (3)
-    )
-    reqQ
-    (
-        .clock                    (clk),
-        .reset_n                (~rst),
-        .wrreq                    (reqQ_enq),
-        .data                   (reqQ_in),
-        .full                   (reqQ_full),
-        .q                      (reqQ_out),
-        .empty                  (reqQ_empty),
-        .rdreq                  (reqQ_deq)
-    );    
-
-    // Interface to the memory system
-    assign reqValid = reqQ_out[`AMIRequest_valid] && !reqQ_empty;
-    assign reqOut   = reqQ_out;
-    assign reqQ_deq = reqOut_grant && reqValid;
-    
+        
     // Two important output signals
     reg wr_done_reg;
 
@@ -364,7 +328,7 @@ module DNN2AMI_WRPath
         end
     end
 
-    assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
+    assign wr_ready = (macroWrQ_empty && !macro_req_active);
     assign wr_done  = wr_done_reg;
 
     integer i = 0;
@@ -384,14 +348,7 @@ module DNN2AMI_WRPath
     
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
         new_wr_done_reg  = 1'b0;
-        
-        reqQ_enq = 1'b0;
-        reqQ_in[`AMIRequest_valid] = 1'b0;
-        reqQ_in[`AMIRequest_isWrite] = 1'b1;
-        reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-        reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
-        reqQ_in[`AMIRequest_size] = 8; // double check this size
-        
+                
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
         end
@@ -400,11 +357,9 @@ module DNN2AMI_WRPath
         if (macro_req_active) begin
             // issue write requests
             if (current_isWrite == 1'b1) begin
-                if (!outbuf_empty[current_pu_id] && !reqQ_full) begin // TODO: Not sure about this write_valid signal
+                if (!outbuf_empty[current_pu_id]) begin
                     outbuf_pop[current_pu_id] = 1'b1;
 
-                    reqQ_in[`AMIRequest_valid] = 1'b1;
-                    reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
                 end
@@ -417,7 +372,7 @@ module DNN2AMI_WRPath
         end // if (macro_req_active)
         else begin
             // See if there is a new operation available
-            if (!macroWrQ_empty) begin
+            if (not_macroWrQ_empty) begin
                 // A new operation can become active
                 macroWrQ_deq = 1'b1;
                 new_macro_req_active  = 1'b1;
