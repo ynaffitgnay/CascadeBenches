@@ -204,22 +204,15 @@ module DNN2AMI_WRPath
    
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
-    // Debug  // TODO: comment this out
     always@(posedge clk) begin
         if (macroWrQ_enq) begin
             $display("DNN2AMI:============================================================ Accepting macro WRITE request");// ADDR: %h Size: %d ",wr_addr,wr_req_size);
         end
         if (wr_req) begin
-            //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
             $display("DNN2AMI: WR_req is being asserted");
         end    
     end    
-    
-    // Two important output signals
-    reg wr_done_reg;
-
-    reg new_wr_done_reg;
-    
+        
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
     reg[TX_SIZE_WIDTH-1:0]  requests_left;
@@ -244,8 +237,6 @@ module DNN2AMI_WRPath
     always @(*) begin      
         macroWrQ_deq          = 1'b0;
         new_requests_left     = requests_left;
-
-        new_wr_done_reg  = 1'b0;
                 
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
@@ -258,27 +249,13 @@ module DNN2AMI_WRPath
             // check if anything is left to issue
             if (new_requests_left == 0) begin
                 new_macro_req_active = 1'b0;
-                new_wr_done_reg = 1'b1;
             end
         end // if (macro_req_active)
         if (not_macroWrQ_empty) begin
             new_macro_req_active  = 1'b1;
         end
     end // always @ (*)
-
-    // How the memory controller determines if a wr_request should be sent
-    // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
-    //  wr_ready <= pu_wr_ready[wr_pu_id] && !(wr_req && wr_ready);
-    // We issue a write for a PU when the PU has no writes remaining.
-    // WR_DONE is asserted when all the PUs no writes remaining.
-    always@(posedge clk) begin
-        if (rst) begin
-            wr_done_reg  <= 1'b0;
-        end else begin
-            wr_done_reg  <= new_wr_done_reg;
-        end
-    end
-    
+   
 endmodule
 `endif //  `ifndef __DNN2AMI_WRPath_sv__
 
