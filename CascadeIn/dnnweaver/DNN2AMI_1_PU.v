@@ -4,7 +4,7 @@
 `include "Counter64.sv"
 `include "SoftFIFO.sv"
 `include "FIFO.sv"
-`include "DNN2AMI_WRPath.sv"
+`include "DNN2AMI_WRPath_1_PU.v"
 
 //import ShellTypes::*;
 //import AMITypes::*;
@@ -93,9 +93,8 @@ module DNN2AMI_1_PU
     wire wrReqValid;
 
     // Instantiate Write path
-    DNN2AMI_WRPath
+    DNN2AMI_WRPath_1_PU
     #(
-        .NUM_PU( 1 ),
         .AXI_ID(AXI_ID),
         .TID_WIDTH(TID_WIDTH),
         .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),

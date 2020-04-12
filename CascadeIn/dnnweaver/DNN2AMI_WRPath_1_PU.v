@@ -1,20 +1,15 @@
-`ifndef __DNN2AMI_WRPath_sv__
-`define __DNN2AMI_WRPath_sv__
+`ifndef __DNN2AMI_WRPath_1_PU_v__
+`define __DNN2AMI_WRPath_1_PU_v__
 
-//`timescale 1ns/1ps
 `include "AMITypes.sv"
 
 `include "common.vh" // TODO: Uncomment when not testing
 `include "Counter64.sv"
 `include "SoftFIFO.sv"
 `include "FIFO.sv"
-//import ShellTypes::*;
-//import AMITypes::*;
 
-module DNN2AMI_WRPath
+module DNN2AMI_WRPath_1_PU
 #(
-  parameter integer NUM_PU               = 2,
-
   parameter integer AXI_ID               = 0,
 
   parameter integer TID_WIDTH            = 6,
@@ -49,8 +44,8 @@ module DNN2AMI_WRPath
   parameter integer C_OFFSET_WIDTH                     = TX_SIZE_WIDTH,
  
   parameter integer WSTRB_W  = AXI_DATA_WIDTH/8,
-  parameter integer NUM_PU_W = `C_LOG_2(NUM_PU)+1,
-  parameter integer OUTBUF_DATA_W = NUM_PU * AXI_DATA_WIDTH
+  parameter integer NUM_PU_W = 1,
+  parameter integer OUTBUF_DATA_W = AXI_DATA_WIDTH
  
 )
 (
@@ -64,14 +59,14 @@ module DNN2AMI_WRPath
 
     // Writes
     // WRITE from BRAM to DDR
-    input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty, // no data in the output buffer
+    input  wire                                         outbuf_empty, // no data in the output buffer
     input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,  // data to write from, portion per PU
-    input  wire  [ NUM_PU               -1 : 0 ]        write_valid,       // value is ready to be written back
-    output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
+    input  wire                                         write_valid,       // value is ready to be written back
+    output reg                                          outbuf_pop,   // dequeue a data item, why is this registered?
     
     // Memory Controller Interface - Write
     input  wire                                         wr_req,   // assert when submitting a wr request
-    input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
+    input  wire                                         wr_pu_id, // determine where to write, I assume ach PU has a different region to write
     input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
     input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
     output wire                                         wr_ready, // ready for more writes
@@ -79,15 +74,9 @@ module DNN2AMI_WRPath
     output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
 
-    genvar pu_num;
-
     // rename the inputs from the write buffer
-    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data[NUM_PU-1:0];
-    generate
-        for (pu_num = 0; pu_num < NUM_PU; pu_num = pu_num + 1) begin : per_pu_buf_rename
-            assign pu_outbuf_data[pu_num] = data_from_outbuf[((pu_num+1)*AXI_DATA_WIDTH)-1:(pu_num*AXI_DATA_WIDTH)];
-        end
-    endgenerate    
+    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data;
+    assign pu_outbuf_data = data_from_outbuf[AXI_DATA_WIDTH - 1:0];
     
     // Counter for time  stamps
     wire[63:0] current_timestamp;
@@ -254,8 +243,6 @@ module DNN2AMI_WRPath
     assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
     assign wr_done  = wr_done_reg;
 
-    integer i = 0;
-    
     wire not_macroWrQ_empty = !macroWrQ_empty;
 
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
@@ -276,19 +263,17 @@ module DNN2AMI_WRPath
         reqQ_in[`AMIRequest_valid] = 1'b0;
         reqQ_in[`AMIRequest_isWrite] = 1'b1;
         reqQ_in[`AMIRequest_addr] = {{32{1'b0}},current_address};
-        reqQ_in[`AMIRequest_data] = pu_outbuf_data[current_pu_id];
+        reqQ_in[`AMIRequest_data] = pu_outbuf_data;
         reqQ_in[`AMIRequest_size] = 8; // double check this size
         
-        for (i = 0; i < NUM_PU; i = i + 1) begin
-            outbuf_pop[i] = 1'b0;
-        end
+        outbuf_pop = 1'b0;
         
         // An operation is being sequenced
         if (macro_req_active) begin
             // issue write requests
             if (current_isWrite == 1'b1) begin
-                if (!outbuf_empty[current_pu_id] && !reqQ_full) begin // TODO: Not sure about this write_valid signal
-                    outbuf_pop[current_pu_id] = 1'b1;
+                if (!outbuf_empty && !reqQ_full) begin // TODO: Not sure about this write_valid signal
+                    outbuf_pop = 1'b1;
 
                     reqQ_in[`AMIRequest_valid] = 1'b1;
                     reqQ_enq = 1'b1;
@@ -331,15 +316,16 @@ module DNN2AMI_WRPath
         end
     end
     
-endmodule
-`endif //  `ifndef __DNN2AMI_WRPath_sv__
+endmodule // DNN2AMI_WRPath_1_PU
+`endif //  `ifndef __DNN2AMI_WRPath_1_PU_v__
+
 
 //reg wrReq;
 //
 //initial $display("Start");
 //
 //
-//DNN2AMI_WRPath tdw
+//DNN2AMI_WRPath_1_PU tdw
 //(
 //    .clk(clock.val),
 //    .rst(),
