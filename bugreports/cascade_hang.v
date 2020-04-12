@@ -216,27 +216,23 @@ module DNN2AMI_WRPath
     input                               reqOut_grant,
 
     // Writes
-    // WRITE from BRAM to DDR
-    input  wire  [ NUM_PU               -1 : 0 ]        outbuf_empty, // no data in the output buffer
-    input  wire  [ OUTBUF_DATA_W        -1 : 0 ]        data_from_outbuf,  // data to write from, portion per PU
-    input  wire  [ NUM_PU               -1 : 0 ]        write_valid,       // value is ready to be written back
     output reg   [ NUM_PU               -1 : 0 ]        outbuf_pop,   // dequeue a data item, why is this registered?
     
     // Memory Controller Interface - Write
     input  wire                                         wr_req,   // assert when submitting a wr request
-    input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
-    input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
-    input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
-    output wire                                         wr_ready, // ready for more writes
-    output wire                                         wr_done,  // no writes left to submit
+    //input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
+    //input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
+    //input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
+    //output wire                                         wr_ready, // ready for more writes
+    //output wire                                         wr_done,  // no writes left to submit
     output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
 
     genvar pu_num;
 
     // rename the inputs from the write buffer
-    wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data;
-    assign pu_outbuf_data = data_from_outbuf[AXI_DATA_WIDTH - 1:0];
+    //wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data;
+    //assign pu_outbuf_data = data_from_outbuf[AXI_DATA_WIDTH - 1:0];
     
     // Counter for time  stamps
     wire[63:0] current_timestamp;
@@ -275,30 +271,24 @@ module DNN2AMI_WRPath
     );    
 
     // Inputs to the MacroWriteQ
-    assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
-    assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
-    assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
-    assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
-    assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
-    assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
+    //assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
+    //assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
+    //assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
+    //assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
+    //assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
+    //assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
     always@(posedge clk) begin
         if (macroWrQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
+            $display("DNN2AMI:============================================================ Accepting macro WRITE request "); // ADDR: %h Size: %d ",wr_addr,wr_req_size);
         end
         if (wr_req) begin
-            //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
             $display("DNN2AMI: WR_req is being asserted");
         end    
     end    
-        
-    // Two important output signals
-    //reg wr_done_reg;
-    //
-    //reg new_wr_done_reg;
-    
+            
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
     reg new_macro_req_active;
@@ -311,8 +301,7 @@ module DNN2AMI_WRPath
         end
     end
 
-    assign wr_ready = (macroWrQ_empty && !macro_req_active);
-    //assign wr_done  = wr_done_reg;
+    //assign wr_ready = (macroWrQ_empty && !macro_req_active);
 
     integer i = 0;
     
@@ -321,36 +310,14 @@ module DNN2AMI_WRPath
     /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
     /* Something seems weird about this always block, I guess */
     always @(*) begin      
-        macroWrQ_deq          = 1'b0;
-        new_macro_req_active  = macro_req_active;    
-    
-        /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        //new_wr_done_reg  = 1'b0;
-                
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
         end
         
-            // See if there is a new operation available
+        // See if there is a new operation available
         if (!macroWrQ_empty) begin
-            // A new operation can become active
-            macroWrQ_deq = 1'b1;
-            new_macro_req_active  = 1'b1;
         end
     end // always @ (*)
-
-    // How the memory controller determines if a wr_request should be sent
-    // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
-    //  wr_ready <= pu_wr_ready[wr_pu_id] && !(wr_req && wr_ready);
-    // We issue a write for a PU when the PU has no writes remaining.
-    // WR_DONE is asserted when all the PUs no writes remaining.
-    //always@(posedge clk) begin
-    //    if (rst) begin
-    //        wr_done_reg  <= 1'b0;
-    //    end else begin
-    //        wr_done_reg  <= new_wr_done_reg;
-    //    end
-    //end
     
 endmodule
 `endif //  `ifndef __DNN2AMI_WRPath_sv__
@@ -368,17 +335,14 @@ DNN2AMI_WRPath tdw
     .reqValid(),
     .reqOut_grant(),
 
-    .outbuf_empty(), // no data in the output buffer
-    .data_from_outbuf(),  // data to write from(), portion per PU
-    .write_valid(),       // value is ready to be written back
     .outbuf_pop(),   // dequeue a data item(), why is this registered?
     
     .wr_req(wrReq),   // assert when submitting a wr request
-    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
-    .wr_req_size(), // size of request in bytes (I assume)
-    .wr_addr(), // address to write to(), look like 32 bit addresses
-    .wr_ready(), // ready for more writes
-    .wr_done(),  // no writes left to submit
+    //.wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
+    //.wr_req_size(), // size of request in bytes (I assume)
+    //.wr_addr(), // address to write to(), look like 32 bit addresses
+    //.wr_ready(), // ready for more writes
+    //.wr_done(),  // no writes left to submit
     .reqOut()
 );
 
