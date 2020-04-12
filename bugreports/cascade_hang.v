@@ -220,19 +220,8 @@ module DNN2AMI_WRPath
     
     // Memory Controller Interface - Write
     input  wire                                         wr_req,   // assert when submitting a wr request
-    //input  wire  [ NUM_PU_W             -1 : 0 ]        wr_pu_id, // determine where to write, I assume ach PU has a different region to write
-    //input  wire  [ TX_SIZE_WIDTH        -1 : 0 ]        wr_req_size, // size of request in bytes (I assume)
-    //input  wire  [ AXI_ADDR_WIDTH       -1 : 0 ]        wr_addr, // address to write to, look like 32 bit addresses
-    //output wire                                         wr_ready, // ready for more writes
-    //output wire                                         wr_done,  // no writes left to submit
     output [`AMI_REQUEST_BUS_WIDTH - 1:0]               reqOut
 );
-
-    genvar pu_num;
-
-    // rename the inputs from the write buffer
-    //wire[AXI_DATA_WIDTH-1:0] pu_outbuf_data;
-    //assign pu_outbuf_data = data_from_outbuf[AXI_DATA_WIDTH - 1:0];
     
     // Counter for time  stamps
     wire[63:0] current_timestamp;
@@ -271,12 +260,6 @@ module DNN2AMI_WRPath
     );    
 
     // Inputs to the MacroWriteQ
-    //assign macroWrQ_in[`DNNWeaverMemReq_valid] = wr_req;
-    //assign macroWrQ_in[`DNNWeaverMemReq_isWrite] = 1'b1;
-    //assign macroWrQ_in[`DNNWeaverMemReq_addr] = wr_addr;
-    //assign macroWrQ_in[`DNNWeaverMemReq_size] = wr_req_size;
-    //assign macroWrQ_in[`DNNWeaverMemReq_pu_id] = wr_pu_id;
-    //assign macroWrQ_in[`DNNWeaverMemReq_time_stamp] = current_timestamp;
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
@@ -307,8 +290,6 @@ module DNN2AMI_WRPath
     
     wire not_macroWrQ_empty = !macroWrQ_empty;
 
-    /* COMMENTED OUT THIS BLOCK TO KEEP WORKING ON OTHER CODE!! */
-    /* Something seems weird about this always block, I guess */
     always @(*) begin      
         for (i = 0; i < NUM_PU; i = i + 1) begin
             outbuf_pop[i] = 1'b0;
@@ -338,11 +319,6 @@ DNN2AMI_WRPath tdw
     .outbuf_pop(),   // dequeue a data item(), why is this registered?
     
     .wr_req(wrReq),   // assert when submitting a wr request
-    //.wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
-    //.wr_req_size(), // size of request in bytes (I assume)
-    //.wr_addr(), // address to write to(), look like 32 bit addresses
-    //.wr_ready(), // ready for more writes
-    //.wr_done(),  // no writes left to submit
     .reqOut()
 );
 
