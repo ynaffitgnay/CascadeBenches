@@ -154,8 +154,6 @@ initial $display("Instantiated?");
 
 initial wrReq = 1;
 
-initial $display("Hello");
-
 
 
 
