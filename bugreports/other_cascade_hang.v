@@ -146,10 +146,6 @@ module DNN2AMI_WRPath
     always @(*) begin      
         macroWrQ_deq          = 1'b0;
         new_requests_left     = requests_left;
-                
-        for (i = 0; i < NUM_PU; i = i + 1) begin
-            outbuf_pop[i] = 1'b0;
-        end
         
         // An operation is being sequenced
         if (macro_req_active) begin
@@ -183,8 +179,6 @@ DNN2AMI_WRPath tdw
 initial $display("Instantiated?");
 
 initial wrReq = 1;
-
-initial $display("Hello");
 
 
 
