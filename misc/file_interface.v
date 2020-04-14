@@ -89,7 +89,7 @@ reg[3:0] val = 0;
             $fwrite(outstream, "%h ", ctr);
             $fflush(outstream);
         end else begin
-            $fseek(outstream, 100, 0);  // 0 seems to be the correct direction...
+            $fseek(outstream, 200, 0);  // 0 seems to be the correct direction...
             $fwrite(outstream, "%h ", ctr);
             $fflush(outstream);
         end            
@@ -102,7 +102,7 @@ reg[3:0] val = 0;
             $fread(instream, inval);
             $display("ctr: %d, inval: %d", ctr, inval);
         end else begin
-            $fseek(instream, 100, 0);  // 0 seems to be the correct direction...
+            $fseek(instream, 200, 0);  // 0 seems to be the correct direction...
             $fread(instream, inval);
             $display("ctr: %d, inval: %d", ctr, inval);
         end            
