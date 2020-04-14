@@ -30,10 +30,11 @@ module DNNDrive_Cascade #(
 )
 (
     // User clock and reset
-    input                               clk
+    input                               clk,
+    input                               rst
 );
 
-    reg rst;
+//    reg rst;
 
     // DNNWeaver signals
     wire  dnn_start;
@@ -103,98 +104,10 @@ module DNNDrive_Cascade #(
     // clk and debug counter
     wire[63:0] clk_counter;
 
-    // Don't need the PCI-e interface
-    //assign pcie_full_out = 1'b0;
-    //assign pcie_packet_out = '{valid: 1'b0, data: 0, slot: 0, pad: 0, last: 1'b0};
-
-    // Response credits
-    //reg[31:0]   read_resp_credit_cnt;
-    //logic[31:0] new_read_resp_credit_cnt;
-    //logic       decr_read_resp_credit_cnt;
-    //
-    //always @(posedge clk) begin 
-    //    if (rst) begin
-    //        read_resp_credit_cnt <= 1'b0;
-    //    end else begin
-    //        read_resp_credit_cnt <= new_read_resp_credit_cnt;
-    //    end
-    //end   
-    //
-    //// Input queue for PCI-e
-    //wire             sr_inQ_empty;
-    //wire             sr_inQ_full;
-    //logic            sr_inQ_enq;
-    //logic            sr_inQ_deq;
-    //SoftRegReq       sr_inQ_in;
-    //SoftRegReq       sr_inQ_out;
-    //
-    //HullFIFO
-    //#(
-    //    .TYPE                   (DNNDRIVE_SOFTREG_Type),
-    //    .WIDTH                  ($bits(SoftRegReq)),
-    //    .LOG_DEPTH              (DNNDRIVE_SOFTREG_Depth)
-    //)
-    //sr_InQ
-    //(
-    //    .clock                  (clk),
-    //    .reset_n                (~rst),
-    //    .wrreq                  (sr_inQ_enq),
-    //    .data                   (sr_inQ_in),
-    //    .full                   (sr_inQ_full),
-    //    .q                      (sr_inQ_out),
-    //    .empty                  (sr_inQ_empty),
-    //    .rdreq                  (sr_inQ_deq)
-    //);    
-    //
-    //// Connections to softreg input interface
-    //assign sr_inQ_in   = softreg_req;
-    //assign sr_inQ_enq  = softreg_req.valid && (softreg_req.isWrite == 1'b1) && !sr_inQ_full;
-    //
-    //logic  incoming_req_is_read;
-    //assign incoming_req_is_read = softreg_req.valid && (softreg_req.isWrite == 1'b0);
-    //
-    //always_comb begin
-    //    new_read_resp_credit_cnt = read_resp_credit_cnt;
-    //    if (incoming_req_is_read && !decr_read_resp_credit_cnt) begin
-    //  $display("Cycle %d DNNDrive %d: Gained response credit", clk_counter, srcApp);
-    //        new_read_resp_credit_cnt = read_resp_credit_cnt + 1;
-    //    end else if (!incoming_req_is_read && decr_read_resp_credit_cnt) begin
-    //  $display("Cycle %d DDNDRive %d: Lost response credit", clk_counter, srcApp);
-    //        new_read_resp_credit_cnt = read_resp_credit_cnt - 1;
-    //    end
-    //    // otherwise either gained/lost none (+0) or both (+0)
-    //end
-    
-    // Logic used to program the FSM over PCI-e
-    parameter PACKET_COUNT = 8; // 8 64 bit packet contents
-    //  Information to read/write
-    //reg[63:0] program_struct[PACKET_COUNT-1:0];
-    //logic[63:0] start_addr;
-    //logic[63:0] total_subs;
-    //logic[63:0] mask;
-    //logic[63:0] mode;    
-    //logic[63:0] start_addr2;
-    //logic[63:0] addr_delta;
-    //logic[63:0] canary0;
-    //logic[63:0] canary1;
-    //
-
 
     // Actually, want to use these to count the number of reads/writes to mem there are...
     reg[3:0] wr_count;
     reg[3:0] new_wr_count;
-
-    //logic[2:0] struct_wr_index;
-    //logic   struct_wr_en;
-    //
-    //assign start_addr  = program_struct[0][63:0];
-    //assign total_subs  = program_struct[1][63:0];
-    //assign mask        = program_struct[2][63:0];
-    //assign mode        = program_struct[3][63:0];
-    //assign start_addr2 = program_struct[4][63:0];
-    //assign addr_delta  = program_struct[5][63:0];
-    //assign canary0     = program_struct[6][63:0];
-    //assign canary1     = program_struct[7][63:0];
     
     // Counter
     reg[63:0]  start_cycle;
@@ -252,21 +165,13 @@ module DNNDrive_Cascade #(
             current_state <= next_state;
         end
     end
-
-    // Used when programming the internal struct
-    //always @(posedge clk) begin : struct_update
-    //    if (struct_wr_en) begin
-    //        program_struct[struct_wr_index] <= sr_inQ_out.data;
-    //    end else begin
-    //        program_struct[struct_wr_index] <= program_struct[struct_wr_index];
-    //    end
-    //end
     
     // Start logic
     reg   initiate_start; 
     reg   start_d;
     assign dnn_start = start_d;
-    
+
+    // This used to be @negedge clk
     always @(posedge clk) begin : start_update_logic
         if (rst) begin
             start_d <= 1'b0;
@@ -280,21 +185,14 @@ module DNNDrive_Cascade #(
         end
     end
 
-    //logic  enough_sr_resp_credits;
-    //assign enough_sr_resp_credits = (read_resp_credit_cnt != 32'h0000_0000);
     
     // FSM update logic
     always @(*) begin
         next_state = current_state;
-        //struct_wr_en    = 1'b0;
-        //struct_wr_index = 0;
-        //sr_inQ_deq    = 1'b0;
         new_wr_count = wr_count;
-        //softreg_resp = '{valid: 1'b0, data: 0};
         start_cycle_we = 1'b0;
         initiate_start = 1'b0;
      
-        //decr_read_resp_credit_cnt = 1'b0;
         end_cycle_we = 1'b0;
         
         case (current_state)
@@ -308,7 +206,11 @@ module DNNDrive_Cascade #(
                 //end
 
                 // TODO: change this to actually make better sense
-                next_state = REQUESTING;
+                if (rst) begin
+                    next_state = REQUESTING;
+                end else begin
+                    next_state = IDLE;
+                end
             end
 
             //PROGRAMMING : begin
@@ -341,7 +243,7 @@ module DNNDrive_Cascade #(
                 initiate_start = 1'b1;
                 // Go to await state
                 next_state = AWAIT_RESP;
-                //$display("Cycle %d DNNDrive %d: Starting and transitioning to AWAIT_RESP", clk_counter, srcApp);
+                $display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
             end
 
             AWAIT_RESP : begin
@@ -397,6 +299,9 @@ endmodule
 
 initial $display("start");
 
-DNNDrive_Cascade dnnc(clock.val);
+reg rst;
+
+
+DNNDrive_Cascade dnnc(clock.val, rst);
 
 initial $display("instantiated");
