@@ -1,7 +1,8 @@
 //`timescale 1ns/1ps
 module file_mem (
   input  wire                         clk,
-  input  wire                         reset
+  input  wire                         reset,
+  input  wire                         offset
   //input  wire  [ADDR_WIDTH-1:0]       address,
   //input  wire                         enable,
   //output reg   [DATA_WIDTH-1:0]       data_out
@@ -10,7 +11,9 @@ module file_mem (
 // ******************************************************************
 // Variables for cascade file interface
 // ******************************************************************
-integer lutstream = $fopen("nonexistent_file.txt"); 
+integer lutstream = $fopen("nonexistent_file.txt");
+integer outstream = $fopen("other_file.txt");
+integer instream = $fopen("other_file.txt", "r");
 integer i = 0;
 reg[3:0] val = 0;
 
@@ -48,23 +51,63 @@ reg[3:0] val = 0;
 
     // Counter
     integer ctr;
+    integer inval;
+    integer inval2;
+
+
     always @(posedge clk) begin
         ctr <= ctr + 1;
+        if (ctr > 20) begin
+            $finish(1);
+        end
     end
 
 
     always @ (posedge clk) begin
-        if (ctr > 10) begin
-            $finish(1);
-        end else if (ctr <= 5) begin
+        if (ctr <= 5) begin
             $fwrite(lutstream, "ctr: %d ", ctr);
             $fflush(lutstream);
+            /* Doing this in the same clock cycle doesn't seem to work */
+            //$fread(lutstream, inval2);
+            //$display("ctr: %d, inval2: %d", ctr, inval2);
         end else begin
             $fseek(lutstream, 100, 0);  // 0 seems to be the correct direction...
             $fwrite(lutstream, "ctr: %d ", ctr);
             $fflush(lutstream);
+            /* Doing this in the same clock cycle doesn't seem to work */
+            //$fseek(lutstream, 100, 0);  // 0 seems to be the correct direction...
+            //$fread(lutstream, inval2);
+            //$display("ctr: %d, inval2: %d", ctr, inval2);
         end            
     end
+
+
+    always @ (posedge clk) begin
+        //if (ctr < 5) begin
+        //end else 
+        if (ctr <= 10) begin
+            $fwrite(outstream, "%h ", ctr);
+            $fflush(outstream);
+        end else begin
+            $fseek(outstream, 100, 0);  // 0 seems to be the correct direction...
+            $fwrite(outstream, "%h ", ctr);
+            $fflush(outstream);
+        end            
+    end // always @ (posedge clk)
+
+    always @ (posedge clk) begin
+        //if (ctr < 5) begin
+        //end else 
+        if (ctr <= 10) begin
+            $fread(instream, inval);
+            $display("ctr: %d, inval: %d", ctr, inval);
+        end else begin
+            $fseek(instream, 100, 0);  // 0 seems to be the correct direction...
+            $fread(instream, inval);
+            $display("ctr: %d, inval: %d", ctr, inval);
+        end            
+    end
+
 
 
   //always @ (posedge clk)
@@ -83,4 +126,9 @@ reg[3:0] val = 0;
 endmodule
 
 reg r;
-file_mem tr(clock.val, r);
+reg [31:0] offset;
+
+initial offset <= 32'hffff;
+
+
+file_mem tr(clock.val, offset, r);
