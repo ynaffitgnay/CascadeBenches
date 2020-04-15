@@ -7,21 +7,6 @@
 
 `include "common.vh"
 
-//package AMITypes;
-
-// For Heterogenous config
-// 0 - DNNWeaver
-// 1 - Bitcoin
-// 2 - MemDrive
-// 3 - Unused
-//parameter AMI_HETERO_TOTAL  = 4;
-//parameter bit[1:0] AMI_HETERO_CONFIG[AMI_HETERO_TOTAL-1:0] = '{2 , 0 , 0 , 0};
-
-/*AMI_HETERO_CONFIG[0] = 2; // app 0 MemDrive
-AMI_HETERO_CONFIG[1] = 0; // app 1 DNNWeaver
-AMI_HETERO_CONFIG[2] = 0; // app 2
-AMI_HETERO_CONFIG[3] = 0; // app 3*/
-
 parameter AMI_NUM_REAL_DNN = 4;
 parameter AMI_NUM_APPS     = 8;
 parameter AMI_NUM_PORTS    = 2;
@@ -98,58 +83,6 @@ parameter BLOCK_BUFFER_RESP_OUT_Q_DEPTH = (USE_SOFT_FIFO ? 3 : 9);
 //    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
 //} AMIResponse;
 
-/*
-typedef struct packed
-{
-    logic                          valid;
-    logic                          isWrite;
-    logic [AMI_PORT_BITS-1:0]      srcPort;
-    logic [AMI_APP_BITS-1:0]       srcApp;
-    logic [AMI_CHANNEL_BITS-1:0]   channel;
-    logic [AMI_ADDR_WIDTH-1:0]     addr;
-    logic [AMI_DATA_WIDTH-1:0]     data;
-    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
-} AMIReq;
-
-typedef struct packed {
-    logic                        valid;
-    logic [AMI_PORT_BITS-1:0]    srcPort;
-    logic [AMI_APP_BITS-1:0]     srcApp;
-    logic [AMI_CHANNEL_BITS-1:0] channel;
-    logic [AMI_DATA_WIDTH-1:0]   data;
-    logic [AMI_REQ_SIZE_WIDTH-1:0] size;    
-} AMIResp;
-
-typedef struct packed {
-    logic                        valid;
-    logic [AMI_PORT_BITS-1:0]    srcPort;
-    logic [AMI_APP_BITS-1:0]     srcApp;
-    logic [AMI_CHANNEL_BITS-1:0] channel;
-    logic [AMI_REQ_SIZE_WIDTH-1:0] size;
-} AMITag;
-
-// TLB
-parameter AMI_NUM_APP_TLB_ENTRIES = 4;
-
-typedef struct packed {
-    logic valid;
-    logic in_memory;
-    logic readable;
-    logic writable;
-    logic [AMI_ADDR_WIDTH-1:0] va_start;
-    logic [AMI_ADDR_WIDTH-1:0] va_end;
-    logic [AMI_ADDR_WIDTH-1:0] size;
-    logic [AMI_ADDR_WIDTH-1:0] pa;
-} AMIAPP_TLB_Entry;
-
-typedef enum {
-    DISABLED,
-    PROGRAMMING,
-    ENABLED
-} APP_TLB_STATE;
-
-*/
-
 `define DNNMICRORD_TAG_BUS_WIDTH  (1 + 32 + 20)
 `define DNNMicroRdTag_valid       0:0
 `define DNNMicroRdTag_addr        (32 + 1 - 1):1
@@ -179,34 +112,4 @@ typedef enum {
 //    logic [63:0] time_stamp;
 //} DNNWeaverMemReq;
 
-/*
-// Bulk Data
-// AmorphOS Big Bulk Data packet format
-typedef struct packed {
-    logic valid;
-    logic[63:0]  addr;
-    logic[511:0] data;
-} ABDPacket;
-
-typedef struct packed {
-    logic valid;
-    logic[15:0] app_id;
-    ABDPacket data_packet;
-} ABDInternalPacket;
-*/
-
-// Soft Reg virtualiztion
-
-parameter VIRT_SOFTREG_RESP_Q_SIZE = (USE_SOFT_FIFO ? 4 : 9);
-parameter VIRT_SOFTREG_RESV_BITS   = (AMI_NUM_APPS  > 1 ? `C_LOG_2(AMI_NUM_APPS)  : 1);
-
-// PCI-E virtualization
-
-parameter VIRT_PCIE_IN_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
-parameter VIRT_PCIE_UNIFIED_IN_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
-parameter VIRT_PCIE_RESP_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
-parameter VIRT_PCIE_UNIFIED_RESP_Q_SIZE = (USE_SOFT_FIFO ? 3 : 9);
-parameter VIRT_PCIE_RESV_BITS = (AMI_NUM_APPS  > 1 ? `C_LOG_2(AMI_NUM_APPS)  : 1);
-
-//endpackage
 `endif
