@@ -229,6 +229,31 @@ module DNNDrive_Cascade #(
 
 
     // Deal with reads and writes
+    integer instream = $fopen("dnnweaver_mem.txt", "r");
+    // Address to be read at (offset into mem file)
+    wire[`AMI_ADDR_WIDTH - 1:0] read_addr;   // TODO: actually use this in reads
+    // Data at address
+    reg[`AMI_DATA_WIDTH - 1:0] read_data;
+    // size should be the same as the request size
+    wire[`AMI_REQ_SIZE_WIDTH - 1:0] read_size;
+    // TODO: check if read_size is ever not 64. 
+    // in which case you'll have to do some finagling to ensure that 
+    // the SIZE most significant bits are what get read in
+
+    integer outstream = $fopen("dnnweaver_mem.txt");
+    wire[`AMI_ADDR_WIDTH - 1:0] write_addr;  // TODO: actually use this in writes
+    // Need to make a register of each possible (8-byte aligned) size for writes...
+    // And you're going to have to use them in a case statement or v. long if-else
+    // based on what AMIRequest_size is
+    // (you need to do this so that you don't overwrite anything beyond the write_size)
+    wire[63:0] write_data_8_bytes;
+    wire[127:0] write_data_16_bytes;
+    wire[192:0] write_data_24_bytes;
+    wire[255:0] write_data_32_bytes;
+    wire[319:0] write_data_40_bytes;
+    wire[383:0] write_data_48_bytes;
+    wire[447:0] write_data_56_bytes;
+    wire[511:0] write_data_64_bytes;
     
 
 
