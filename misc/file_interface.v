@@ -109,20 +109,6 @@ reg[3:0] val = 0;
     end
 
 
-
-  //always @ (posedge clk)
-  //begin : READ_BLK
-  //  if(!reset) begin
-  //    if (enable)
-  //      data_out <= mem[address];
-  //    else
-  //      data_out <= data_out;
-  //  end else begin
-  //    data_out <= 0;
-  //  end
-  //end
-
-
 endmodule
 
 reg r;
