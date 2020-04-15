@@ -110,9 +110,7 @@ module DNNDrive_Cascade #(
     
     // Counter
     reg[63:0]  start_cycle;
-    reg        start_cycle_we;
     reg[63:0]  end_cycle;
-    reg        end_cycle_we;
     
     Counter64 
     clk_counter64
@@ -122,23 +120,7 @@ module DNNDrive_Cascade #(
         .increment       (1'b1), // clock is always incrementing
         .count           (clk_counter)
     );
-    
-    //always@(posedge clk) begin : start_cycle_update
-    //    if (rst) begin
-    //        start_cycle  <= 64'h0;
-    //        end_cycle    <= 64'h0;
-    //    end else begin
-    //        if (start_cycle_we) begin
-    //            $display("Start cycle: %d", clk_counter);
-    //            start_cycle <= clk_counter;
-    //        end
-    //        if (end_cycle_we) begin
-    //            $display("Start cycle: %d, End cycle: %d, Total Cycles: %d", start_cycle, clk_counter, (clk_counter - start_cycle));
-    //            end_cycle <= clk_counter;
-    //        end
-    //    end
-    //end
- 
+     
     // FSM states
     parameter IDLE        = 4'b0000;
     parameter PROGRAMMING = 4'b0001;
@@ -152,27 +134,12 @@ module DNNDrive_Cascade #(
     
     // FSM registers
     reg[3:0]   current_state;
-    //reg[3:0]   next_state;
 
     
     // Start logic
     reg   initiate_start; 
     //reg   start_d;
     assign dnn_start = initiate_start;
-
-
-    //always @(negedge clk) begin : start_update_logic
-    //    if (rst) begin
-    //        start_d <= 1'b0;
-    //    end else begin
-    //        if (initiate_start) begin
-    //            start_d <= 1'b1;
-    //        end else begin
-    //            // always set it to low
-    //            start_d <= 1'b0;
-    //        end
-    //    end
-    //end
 
     
     // FSM update logic
@@ -184,19 +151,12 @@ module DNNDrive_Cascade #(
         end else begin        
             case (current_state)
                 IDLE : begin
-                    //if (!sr_inQ_empty) begin
-                    //    $display("Cycle %d DNNDrive %d: Starting programming", clk_counter, srcApp);
-                    //    next_state = PROGRAMMING;
-                    //    //next_state   = CLEAN_UP1;
-                    //end else begin
-                    //    next_state = IDLE;
-                    //end
+                    // TODO: make this state more useful
                     current_state <= REQUESTING;
             
                 end
             
                 REQUESTING : begin
-                    //start_cycle_we = 1'b1;
                     start_cycle <= clk_counter;
             
                     // Signify start
@@ -211,11 +171,9 @@ module DNNDrive_Cascade #(
                     // wait for the done signal to be asserted
                     //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
                     if (dnn_done == 1'b1) begin
-                        //end_cycle_we = 1'b1;
                         end_cycle <= clk_counter;
                         $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
             
-                        //next_state = IDLE;
                         current_state <= IDLE;
                     end 
                 end // case: AWAIT_RESP
