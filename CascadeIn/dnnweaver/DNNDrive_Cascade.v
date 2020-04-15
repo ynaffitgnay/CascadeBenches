@@ -151,37 +151,27 @@ module DNNDrive_Cascade #(
     
     // FSM registers
     reg[3:0]   current_state;
-    reg[3:0]   next_state;
+    //reg[3:0]   next_state;
 
-    // FSM reset/update
-    //always@(posedge clk) begin : fsm_update
-    //    if (rst) begin
-    //        wr_count <=  0;
-    //        current_state  <= IDLE;
-    //    end else begin
-    //        wr_count <= new_wr_count;
-    //        current_state <= next_state;
-    //    end
-    //end
     
     // Start logic
     reg   initiate_start; 
-    reg   start_d;
-    assign dnn_start = start_d;
+    //reg   start_d;
+    assign dnn_start = initiate_start;
 
-    // This used to be @negedge clk
-    always @(posedge clk) begin : start_update_logic
-        if (rst) begin
-            start_d <= 1'b0;
-        end else begin
-            if (initiate_start) begin
-                start_d <= 1'b1;
-            end else begin
-                // always set it to low
-                start_d <= 1'b0;
-            end
-        end
-    end
+
+    //always @(negedge clk) begin : start_update_logic
+    //    if (rst) begin
+    //        start_d <= 1'b0;
+    //    end else begin
+    //        if (initiate_start) begin
+    //            start_d <= 1'b1;
+    //        end else begin
+    //            // always set it to low
+    //            start_d <= 1'b0;
+    //        end
+    //    end
+    //end
 
     
     // FSM update logic
@@ -193,12 +183,6 @@ module DNNDrive_Cascade #(
             
         end
 
-        //next_state = current_state;
-        //new_wr_count = wr_count;
-        //start_cycle_we = 1'b0;
-        //initiate_start = 1'b0;
-     
-        //end_cycle_we = 1'b0;
         
         case (current_state)
             IDLE : begin
@@ -212,29 +196,6 @@ module DNNDrive_Cascade #(
                 current_state <= REQUESTING;
 
             end
-
-            //PROGRAMMING : begin
-            //    if (!sr_inQ_empty) begin
-            //        sr_inQ_deq = 1'b1;
-            //        struct_wr_en = 1'b1;
-            //        struct_wr_index = wr_count;
-            //        new_wr_count = wr_count + 1;
-            //        if (new_wr_count == 4'b1000) begin
-            //            // Consumed last packet, move on to requesting
-            //            next_state = REQUESTING;
-            //            // reset the wr count
-            //            new_wr_count = 0;
-            //            // Save the current cycle as the start time stamp
-            //            start_cycle_we = 1'b1;
-            //            $display("Cycle %d DNNDrive %d: DONE programming", clk_counter, srcApp);
-            //        end else begin
-            //            next_state = PROGRAMMING; // need more packets
-            //        end
-            //    end else begin
-            //        // Still need more packet(s) to finish programming
-            //        next_state = PROGRAMMING;
-            //    end
-            //end // case: PROGRAMMING
 
             REQUESTING : begin
                 //start_cycle_we = 1'b1;
@@ -259,47 +220,17 @@ module DNNDrive_Cascade #(
                     //next_state = IDLE;
                     current_state <= IDLE;
                 end 
-                //else begin
-                //    next_state = AWAIT_RESP;
-                //end
             end // case: AWAIT_RESP
 
-            //CLEAN_UP1: begin
-            //    if (enough_sr_resp_credits) begin
-            //        $display("Cycle %d DNNDrive %d: Clean up 1", clk_counter, srcApp);
-            //        softreg_resp = '{valid: 1'b1, data: start_cycle};
-            //        decr_read_resp_credit_cnt = 1'b1;
-            //        next_state = CLEAN_UP2;
-            //    end else begin
-            //        if (clk_counter % 100 == 0) begin
-            //            $display("Cycle %d DNNDrive %d: Staying in Clean up 1, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
-            //        end
-            //        next_state = CLEAN_UP1;
-            //    end
-            //end // case: CLEAN_UP1
-            //
-            //CLEAN_UP2: begin
-            //    if (enough_sr_resp_credits) begin
-            //        $display("Cycle %d DNNDrive %d: Clean up 2", clk_counter, srcApp);
-            //        softreg_resp = '{valid: 1'b1, data: end_cycle};
-            //        decr_read_resp_credit_cnt = 1'b1;
-            //        next_state = IDLE;
-            //        $display("Cycle %d DNNDrive %d: DONE", clk_counter, srcApp);
-            //    end else begin
-            //        if (clk_counter % 100 == 0) begin
-            //            $display("Cycle %d DNNDrive %d: Staying in Clean up 2, no resp credits (%d)", clk_counter, srcApp, read_resp_credit_cnt);
-            //        end
-            //        next_state = CLEAN_UP2;
-            //    end
-            //end // case: CLEAN_UP2
-
             default : begin
-                //next_state = current_state;
             end
         endcase
-    end // always @ (*)
+    end // always @ (posedge clk)
 
+
+    // Deal with reads and writes
     
+
 
 endmodule
 
