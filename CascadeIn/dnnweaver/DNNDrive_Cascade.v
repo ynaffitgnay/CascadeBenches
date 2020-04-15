@@ -43,9 +43,10 @@ module DNNDrive_Cascade #(
     wire                                    dnn_read_req_grant;
     wire [ `AMI_REQUEST_BUS_WIDTH - 1 : 0 ] dnn_write_req;
     wire                                    dnn_write_req_grant;
-    reg  [`AMI_RESPONSE_BUS_WIDTH - 1:0]    dnn_read_resp;
+    //reg  [`AMI_RESPONSE_BUS_WIDTH - 1:0]    dnn_read_resp;
+    wire [`AMI_RESPONSE_BUS_WIDTH - 1:0]    dnn_read_resp;
     wire                                    dnn_read_resp_grant;
-    reg  [`AMI_RESPONSE_BUS_WIDTH - 1:0]    dnn_write_resp;
+    wire  [`AMI_RESPONSE_BUS_WIDTH - 1:0]   dnn_write_resp;
     wire                                    dnn_write_resp_grant;
     
     dnnweaver_ami_top #(
@@ -104,8 +105,8 @@ module DNNDrive_Cascade #(
 
 
     // Actually, want to use these to count the number of reads/writes to mem there are...
-    reg[3:0] wr_count;
-    reg[3:0] new_wr_count;
+    integer r_count;
+    integer w_count;
     
     // Counter
     reg[63:0]  start_cycle;
@@ -180,56 +181,55 @@ module DNNDrive_Cascade #(
             start_cycle  <= 64'h0;
             end_cycle    <= 64'h0;
             current_state <= IDLE;
+        end else begin        
+            case (current_state)
+                IDLE : begin
+                    //if (!sr_inQ_empty) begin
+                    //    $display("Cycle %d DNNDrive %d: Starting programming", clk_counter, srcApp);
+                    //    next_state = PROGRAMMING;
+                    //    //next_state   = CLEAN_UP1;
+                    //end else begin
+                    //    next_state = IDLE;
+                    //end
+                    current_state <= REQUESTING;
             
-        end
-
-        
-        case (current_state)
-            IDLE : begin
-                //if (!sr_inQ_empty) begin
-                //    $display("Cycle %d DNNDrive %d: Starting programming", clk_counter, srcApp);
-                //    next_state = PROGRAMMING;
-                //    //next_state   = CLEAN_UP1;
-                //end else begin
-                //    next_state = IDLE;
-                //end
-                current_state <= REQUESTING;
-
-            end
-
-            REQUESTING : begin
-                //start_cycle_we = 1'b1;
-                start_cycle <= clk_counter;
-
-                // Signify start
-                initiate_start <= 1'b1;
-                $display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
-
-                // Go to await state
-                current_state <= AWAIT_RESP;
-            end
-
-            AWAIT_RESP : begin
-                // wait for the done signal to be asserted
-                //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
-                if (dnn_done == 1'b1) begin
-                    //end_cycle_we = 1'b1;
-                    end_cycle <= clk_counter;
-                    $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
-
-                    //next_state = IDLE;
-                    current_state <= IDLE;
-                end 
-            end // case: AWAIT_RESP
-
-            default : begin
-            end
-        endcase
+                end
+            
+                REQUESTING : begin
+                    //start_cycle_we = 1'b1;
+                    start_cycle <= clk_counter;
+            
+                    // Signify start
+                    initiate_start <= 1'b1;
+                    $display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
+            
+                    // Go to await state
+                    current_state <= AWAIT_RESP;
+                end
+            
+                AWAIT_RESP : begin
+                    // wait for the done signal to be asserted
+                    //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
+                    if (dnn_done == 1'b1) begin
+                        //end_cycle_we = 1'b1;
+                        end_cycle <= clk_counter;
+                        $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
+            
+                        //next_state = IDLE;
+                        current_state <= IDLE;
+                    end 
+                end // case: AWAIT_RESP
+            
+                default : begin
+                end
+            endcase // case (current_state)
+        end // else: !if(rst)
     end // always @ (posedge clk)
 
 
     // Deal with reads and writes
     integer instream = $fopen("dnnweaver_mem.txt", "r");
+    reg read_resp_valid;
     // Address to be read at (offset into mem file)
     wire[`AMI_ADDR_WIDTH - 1:0] read_addr;   // TODO: actually use this in reads
     // Data at address
@@ -254,8 +254,130 @@ module DNNDrive_Cascade #(
     wire[383:0] write_data_48_bytes;
     wire[447:0] write_data_56_bytes;
     wire[511:0] write_data_64_bytes;
-    
 
+
+    // Deal with reads
+    assign dnn_read_req_grant = dnn_read_req[`AMIRequest_valid];
+    assign read_addr = dnn_read_req[`AMIRequest_addr];
+    assign read_size = dnn_read_req[`AMIRequest_size];
+    assign dnn_read_resp = {read_size, read_data, read_resp_valid};
+
+    always @ (posedge clk) begin
+        if (rst) begin
+            r_count <= 0;
+            //dnn_read_resp[`AMIResponse_valid] <= 1'b0;
+            read_resp_valid <= 1'b0;
+        end else begin
+
+            if (dnn_read_req[`AMIRequest_valid]) begin
+                //// Mark the request as accepted
+                //dnn_read_req_grant <= 1'b1;
+                $display("Read request. Addr: %h, Size: %d", dnn_read_req[`AMIRequest_addr], dnn_read_req[`AMIRequest_size]);
+                
+                r_count <= r_count + 1;  // Should this only happen if !isWrite?
+                
+                if (dnn_read_req[`AMIRequest_isWrite]) begin
+                    $display("Write request sent to read port. Ignored.");
+                end else begin
+                    // TODO: use variable offset
+                    //$fseek(instream, read_addr, 0);
+                    $fseek(instream, 100000, 0);
+                    $fread(instream, read_data);
+                    
+                    if (dnn_read_req[`AMIRequest_size] != 64) begin
+                        $display("Getting a read req of size %d", dnn_read_req[`AMIRequest_size]);
+                    end
+
+                    // Mark this response as valid
+                    read_resp_valid <= 1'b1;
+                end
+            end else begin // if (dnn_read_req[`AMIRequest_valid])
+                //dnn_read_resp[`AMIResponse_valid] <= 1'b0;
+                read_resp_valid <= 1'b1;
+            end // else: !if(dnn_read_req[`AMIRequest_valid])
+        end // else: !if(rst)
+    end
+
+
+    // Deal with writes
+    assign dnn_write_req_grant = dnn_write_req[`AMIRequest_valid];
+    assign dnn_write_resp[`AMIResponse_valid] = 1'b0;
+    assign write_addr = dnn_write_req[`AMIRequest_addr];
+
+    // Assign each var to the corresponding least significant bytes of the request
+    assign write_data_8_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_16_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_24_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_32_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_40_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_48_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_56_bytes = dnn_write_req[`AMIRequest_data];
+    assign write_data_64_bytes = dnn_write_req[`AMIRequest_data];
+    always @ (posedge clk) begin
+        if (rst) begin
+            w_count <= 0;
+        end else begin
+            if (dnn_write_req[`AMIRequest_valid]) begin
+                $display("Write request. Addr: %h, Size: %d", dnn_write_req[`AMIRequest_addr], dnn_write_req[`AMIRequest_size]);
+
+                w_count <= w_count + 1;
+
+                if (!dnn_write_req[`AMIRequest_isWrite]) begin
+                    $display("Read request sent to write port. Ignored.");
+                end else begin
+                    // TODO: use variable offset
+                    //$fseek(outstream, write_addr, 0);
+                    $fseek(outstream, 1000000, 0);
+
+                    if (dnn_write_req[`AMIRequest_size] % 8 != 0) begin
+                        $display("Write request size not a multiple of 8 bytes...");
+                    end
+
+                    case (dnn_write_req[`AMIRequest_size])
+                      8 : begin
+                          $fwrite(outstream, "%h", write_data_8_bytes);
+                      end
+
+                      16 : begin
+                          $fwrite(outstream, "%h", write_data_16_bytes);
+                      end
+
+                      24 : begin
+                          $fwrite(outstream, "%h", write_data_24_bytes);
+                      end
+
+                      32 : begin
+                          $fwrite(outstream, "%h", write_data_32_bytes);
+                      end
+
+                      40 : begin
+                          $fwrite(outstream, "%h", write_data_40_bytes);
+                      end
+
+                      48 : begin
+                          $fwrite(outstream, "%h", write_data_48_bytes);
+                      end
+
+                      56 : begin
+                          $fwrite(outstream, "%h", write_data_56_bytes);
+                      end
+
+                      64 : begin
+                          $fwrite(outstream, "%h", write_data_64_bytes);
+                      end
+
+                      default : begin
+                          $display("Write request for unexpected number of bytes");
+                      end                      
+                    endcase // case (dnn_write_req[`AMIRequest_size])
+
+                    // Flush the outstream
+                    $fflush(outstream);
+
+                end
+            end
+        end
+    end // always @ (posedge clk)
 
 endmodule
 
