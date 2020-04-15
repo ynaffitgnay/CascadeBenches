@@ -34,8 +34,6 @@ module DNNDrive_Cascade #(
     input                               rst
 );
 
-//    reg rst;
-
     // DNNWeaver signals
     wire  dnn_start;
     wire  dnn_done;
@@ -124,21 +122,21 @@ module DNNDrive_Cascade #(
         .count           (clk_counter)
     );
     
-    always@(posedge clk) begin : start_cycle_update
-        if (rst) begin
-            start_cycle  <= 64'h0;
-            end_cycle    <= 64'h0;
-        end else begin
-            if (start_cycle_we) begin
-                $display("Start cycle: %d", clk_counter);
-                start_cycle <= clk_counter;
-            end
-            if (end_cycle_we) begin
-                $display("Start cycle: %d, End cycle: %d, Total Cycles: %d", start_cycle, clk_counter, (clk_counter - start_cycle));
-                end_cycle <= clk_counter;
-            end
-        end
-    end
+    //always@(posedge clk) begin : start_cycle_update
+    //    if (rst) begin
+    //        start_cycle  <= 64'h0;
+    //        end_cycle    <= 64'h0;
+    //    end else begin
+    //        if (start_cycle_we) begin
+    //            $display("Start cycle: %d", clk_counter);
+    //            start_cycle <= clk_counter;
+    //        end
+    //        if (end_cycle_we) begin
+    //            $display("Start cycle: %d, End cycle: %d, Total Cycles: %d", start_cycle, clk_counter, (clk_counter - start_cycle));
+    //            end_cycle <= clk_counter;
+    //        end
+    //    end
+    //end
  
     // FSM states
     parameter IDLE        = 4'b0000;
@@ -156,15 +154,15 @@ module DNNDrive_Cascade #(
     reg[3:0]   next_state;
 
     // FSM reset/update
-    always@(posedge clk) begin : fsm_update
-        if (rst) begin
-            wr_count <=  0;
-            current_state  <= IDLE;
-        end else begin
-            wr_count <= new_wr_count;
-            current_state <= next_state;
-        end
-    end
+    //always@(posedge clk) begin : fsm_update
+    //    if (rst) begin
+    //        wr_count <=  0;
+    //        current_state  <= IDLE;
+    //    end else begin
+    //        wr_count <= new_wr_count;
+    //        current_state <= next_state;
+    //    end
+    //end
     
     // Start logic
     reg   initiate_start; 
@@ -187,13 +185,20 @@ module DNNDrive_Cascade #(
 
     
     // FSM update logic
-    always @(*) begin
-        next_state = current_state;
-        new_wr_count = wr_count;
-        start_cycle_we = 1'b0;
-        initiate_start = 1'b0;
+    always @(posedge clk) begin
+        if (rst) begin
+            start_cycle  <= 64'h0;
+            end_cycle    <= 64'h0;
+            current_state <= IDLE;
+            
+        end
+
+        //next_state = current_state;
+        //new_wr_count = wr_count;
+        //start_cycle_we = 1'b0;
+        //initiate_start = 1'b0;
      
-        end_cycle_we = 1'b0;
+        //end_cycle_we = 1'b0;
         
         case (current_state)
             IDLE : begin
@@ -204,13 +209,8 @@ module DNNDrive_Cascade #(
                 //end else begin
                 //    next_state = IDLE;
                 //end
+                current_state <= REQUESTING;
 
-                // TODO: change this to actually make better sense
-                if (rst) begin
-                    next_state = REQUESTING;
-                end else begin
-                    next_state = IDLE;
-                end
             end
 
             //PROGRAMMING : begin
@@ -237,25 +237,31 @@ module DNNDrive_Cascade #(
             //end // case: PROGRAMMING
 
             REQUESTING : begin
-                start_cycle_we = 1'b1;
+                //start_cycle_we = 1'b1;
+                start_cycle <= clk_counter;
 
                 // Signify start
-                initiate_start = 1'b1;
-                // Go to await state
-                next_state = AWAIT_RESP;
+                initiate_start <= 1'b1;
                 $display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
+
+                // Go to await state
+                current_state <= AWAIT_RESP;
             end
 
             AWAIT_RESP : begin
                 // wait for the done signal to be asserted
                 //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
                 if (dnn_done == 1'b1) begin
-                    $display("Cycle %d: DNNWeaver DONE", clk_counter);
-                    next_state = IDLE;
-                    end_cycle_we = 1'b1;
-                end else begin
-                    next_state = AWAIT_RESP;
-                end
+                    //end_cycle_we = 1'b1;
+                    end_cycle <= clk_counter;
+                    $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
+
+                    //next_state = IDLE;
+                    current_state <= IDLE;
+                end 
+                //else begin
+                //    next_state = AWAIT_RESP;
+                //end
             end // case: AWAIT_RESP
 
             //CLEAN_UP1: begin
@@ -288,7 +294,7 @@ module DNNDrive_Cascade #(
             //end // case: CLEAN_UP2
 
             default : begin
-                next_state = current_state;
+                //next_state = current_state;
             end
         endcase
     end // always @ (*)
