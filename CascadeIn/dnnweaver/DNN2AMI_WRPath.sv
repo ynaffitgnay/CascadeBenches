@@ -344,34 +344,34 @@ module DNN2AMI_WRPath
 endmodule
 `endif //  `ifndef __DNN2AMI_WRPath_sv__
 
-reg wrReq;
-
-initial $display("Start");
-
-
-DNN2AMI_WRPath tdw
-(
-    .clk(clock.val),
-    .rst(),
-
-    .reqValid(),
-    .reqOut_grant(),
-
-    .outbuf_empty(), // no data in the output buffer
-    .data_from_outbuf(),  // data to write from(), portion per PU
-    .write_valid(),       // value is ready to be written back
-    .outbuf_pop(),   // dequeue a data item(), why is this registered//    
-    .wr_req(wrReq),   // assert when submitting a wr request
-    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
-    .wr_req_size(), // size of request in bytes (I assume)
-    .wr_addr(), // address to write to(), look like 32 bit addresses
-    .wr_ready(), // ready for more writes
-    .wr_done(),  // no writes left to submit
-    .reqOut()
-);
-
-initial $display("Instantiated?");
-
-initial wrReq = 1;
-
-initial $display("Hello");
+//reg wrReq;
+//
+//initial $display("Start");
+//
+//
+//DNN2AMI_WRPath tdw
+//(
+//    .clk(clock.val),
+//    .rst(),
+//
+//    .reqValid(),
+//    .reqOut_grant(),
+//
+//    .outbuf_empty(), // no data in the output buffer
+//    .data_from_outbuf(),  // data to write from(), portion per PU
+//    .write_valid(),       // value is ready to be written back
+//    .outbuf_pop(),   // dequeue a data item(), why is this registered//    
+//    .wr_req(wrReq),   // assert when submitting a wr request
+//    .wr_pu_id(), // determine where to write(), I assume ach PU has a different region to write
+//    .wr_req_size(), // size of request in bytes (I assume)
+//    .wr_addr(), // address to write to(), look like 32 bit addresses
+//    .wr_ready(), // ready for more writes
+//    .wr_done(),  // no writes left to submit
+//    .reqOut()
+//);
+//
+//initial $display("Instantiated?");
+//
+//initial wrReq = 1;
+//
+//initial $display("Hello");
