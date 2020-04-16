@@ -279,10 +279,15 @@ module DNN2AMI_WRPath_1_PU
                     reqQ_enq = 1'b1;
                     new_current_address = current_address + 8; // 8 bytes
                     new_requests_left   = requests_left - 1;
+
+                    if ((requests_left - 1) == 0) begin
+                        new_macro_req_active = 1'b0;
+                        new_wr_done_reg = 1'b1;
+                    end
                 end
             end
             // check if anything is left to issue
-            if (new_requests_left == 0) begin
+            if (requests_left == 0) begin
                 new_macro_req_active = 1'b0;
                 new_wr_done_reg = 1'b1;
             end
