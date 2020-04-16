@@ -238,8 +238,7 @@ module DNNDrive_Cascade #(
                     $display("Write request sent to read port. Ignored.");
                 end else begin
                     // TODO: use variable offset
-                    //$fseek(instream, read_addr, 0);
-                    $fseek(instream, 100000, 0);
+                    $fseek(instream, read_addr, 0);
                     $fread(instream, read_data);
                     
                     if (dnn_read_req[`AMIRequest_size] != 64) begin
@@ -284,9 +283,7 @@ module DNNDrive_Cascade #(
                     $display("Read request sent to write port. Ignored.");
                 end else begin
                     // TODO: use variable offset
-                    //$fseek(outstream, write_addr, 0);
-                    $fseek(outstream, 1000000, 0);
-
+                    $fseek(outstream, write_addr, 0);
                     if (dnn_write_req[`AMIRequest_size] % 8 != 0) begin
                         $display("Write request size not a multiple of 8 bytes...");
                     end
