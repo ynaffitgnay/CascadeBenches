@@ -18,7 +18,7 @@ parameter AMI_PORT_BITS    = (AMI_NUM_PORTS > 1 ? `C_LOG_2(AMI_NUM_PORTS) : 1);
 
 parameter AMI_ADDR_WIDTH = 64;
 parameter AMI_DATA_WIDTH = 512 + 64;
-parameter AMI_REQ_SIZE_WIDTH = 6; // enables 64 byte size
+parameter AMI_REQ_SIZE_WIDTH = 7; // enables 64 byte size
 
 parameter USE_SOFT_FIFO = 1;
 `define USE_SOFT_FIFO 1
@@ -52,9 +52,9 @@ parameter BLOCK_BUFFER_RESP_OUT_Q_DEPTH = (USE_SOFT_FIFO ? 3 : 9);
 
 `define AMI_ADDR_WIDTH 64
 // TODO: maybe change AMI_DATA_WIDTH to just 512? I don't know why the 64 is there
-//`define AMI_DATA_WIDTH (512 + 64)
-`define AMI_DATA_WIDTH 512
-`define AMI_REQ_SIZE_WIDTH 6
+`define AMI_DATA_WIDTH (512 + 64)
+//`define AMI_DATA_WIDTH 512
+`define AMI_REQ_SIZE_WIDTH 7
 
 `define AMI_REQUEST_BUS_WIDTH  (1 + 1 + `AMI_ADDR_WIDTH + `AMI_DATA_WIDTH + `AMI_REQ_SIZE_WIDTH)
 `define AMIRequest_valid       0:0
