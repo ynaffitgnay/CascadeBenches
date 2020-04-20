@@ -141,7 +141,14 @@ module DNNDrive_Cascade #(
     //reg   start_d;
     assign dnn_start = initiate_start;
 
-    
+
+    always @(posedge clk) begin
+        $display();
+        $display();
+        $display("Cycle: %d", clk_counter);
+    end
+
+
     // FSM update logic
     always @(posedge clk) begin
         if (rst) begin
@@ -173,7 +180,11 @@ module DNNDrive_Cascade #(
                     if (dnn_done == 1'b1) begin
                         end_cycle <= clk_counter;
                         $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
-            
+
+
+                        // TODO
+                        $finish(1);
+
                         current_state <= IDLE;
                     end 
                 end // case: AWAIT_RESP
@@ -241,9 +252,9 @@ module DNNDrive_Cascade #(
                     $fseek(instream, read_addr, 0);
                     $fread(instream, read_data);
                     
-                    if (dnn_read_req[`AMIRequest_size] != 64) begin
-                        $display("Getting a read req of size %d", dnn_read_req[`AMIRequest_size]);
-                    end
+                    //if (dnn_read_req[`AMIRequest_size] != 64) begin
+                    //    $display("Getting a read req of size %d", dnn_read_req[`AMIRequest_size]);
+                    //end
 
                     // Mark this response as valid
                     read_resp_valid <= 1'b1;
