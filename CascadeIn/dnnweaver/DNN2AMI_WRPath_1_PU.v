@@ -206,12 +206,12 @@ module DNN2AMI_WRPath_1_PU
     assign reqOut   = reqQ_out;
     assign reqQ_deq = reqOut_grant && reqValid;
 
-    // TODO: comment out
-    always@(posedge clk) begin
-        if  (reqValid) begin
-            $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
-        end
-    end
+    //// TODO: comment out
+    //always@(posedge clk) begin
+    //    if  (reqValid) begin
+    //        $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
+    //    end
+    //end
 
     // Two important output signals
     reg wr_done_reg;
@@ -317,27 +317,35 @@ module DNN2AMI_WRPath_1_PU
 
 
 
-    always@(posedge clk) begin
-        if (wr_ready && !wr_done) begin
-            $display("DNN2: XXXXXXXXXXXX Should be able to accept a new write XXXXXXXXXXXXXXX");
-        end
-    end
-    
-    always@(posedge clk) begin
-        if (!outbuf_empty && !outbuf_pop) begin
-            $display("WRPATH: Should be popping but we're not ");
-        end
-        if (outbuf_pop) begin
-            $display("WRPATH: Popping outbuf data, current addr: %x , %d requests left", new_current_address, new_requests_left);
-        end
-    end
+    //always@(posedge clk) begin
+    //    if (wr_ready && !wr_done) begin
+    //        $display("DNN2: XXXXXXXXXXXX Should be able to accept a new write XXXXXXXXXXXXXXX");
+    //    end
+    //end
+    //
+    //always@(posedge clk) begin
+    //    if (!outbuf_empty && !outbuf_pop) begin
+    //        $display("WRPATH: Should be popping but we're not ");
+    //    end
+    //    if (outbuf_pop) begin
+    //        $display("WRPATH: Popping outbuf data, current addr: %h , %d requests left", new_current_address, new_requests_left);
+    //    end
+    //end
+    //
+    //always@(posedge clk) begin
+    //    if (!outbuf_empty) begin
+    //        //$display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %x",outbuf_empty,write_valid,reqQ_full, requests_left,current_address);
+    //        $display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d, requests_left %d, current addr: %h",outbuf_empty,write_valid,reqQ_full, requests_left,current_address);
+    //    end/* else begin
+    //        $display("Outbuf empty");
+    //    end */
+    //
+    //end
 
-    always@(posedge clk) begin
-        if (!outbuf_empty) begin
-            //$display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %x",outbuf_empty,write_valid,reqQ_full, requests_left,current_address);
-            $display("WRPATH: outbuf_empty %d write_valid: %d, reqQ_full %d requests_left %d, current addr: %h",outbuf_empty,write_valid,reqQ_full, requests_left,current_address);
-        end
-    end
+
+    //always @(posedge clk) begin
+    //    $display("wr_done: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, new_wr_done_reg, requests_left);
+    //end
 
     // How the memory controller determines if a wr_request should be sent
     // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;

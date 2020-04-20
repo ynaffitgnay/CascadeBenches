@@ -217,7 +217,7 @@ module BlockBuffer
 
     // Read data out of the block
     wire [SECTOR_WIDTH-1:0] rd_output;
-    reg [`C_LOG_2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
+    wire [`C_LOG_2(NUM_SECTORS)-1:0] rd_mux_sel; // controlled by the FSM
 
     assign rd_output = dataout[rd_mux_sel];
 
@@ -341,35 +341,64 @@ module BlockBuffer
     parameter CLEAN       = 3'b010;
     parameter MODIFIED    = 3'b011;
 
+
     // FSM registers
     reg[2:0]   current_state;
-    reg[2:0]   next_state;
+    //reg[2:0]   next_state;
 
     // FSM reset/update
-    always@(posedge clk) begin : fsm_update
-        if (rst) begin
-            current_state <= INVALID;
-        end else begin
-            current_state <= next_state;
-        end
-    end
+    //always@(posedge clk) begin : fsm_update
+    //    if (rst) begin
+    //        current_state <= INVALID;
+    //    end else begin
+    //        current_state <= next_state;
+    //    end
+    //end
+
     
+    //always @(posedge clk) begin
+    //    case (current_state)
+    //        INVALID : begin
+    //            $display("BlockBuffer at state INVALID");
+    //        end
+    //
+    //        PENDING : begin
+    //            $display("BlockBuffer at state PENDING");
+    //        end
+    //
+    //        CLEAN : begin
+    //            $display("BlockBuffer at state CLEAN");
+    //        end
+    //
+    //        MODIFIED : begin
+    //            $display("BlockBuffer at state MODIFIED");
+    //        end
+    //
+    //        default : begin
+    //            $display("BlockBuffer at state default????");
+    //        end
+    //    endcase // case (current_state)
+    //end
+
+
     // Current request info
     reg[`AMI_ADDR_WIDTH-6:0]   current_block_index;
-    reg[`AMI_ADDR_WIDTH-6:0]   new_block_index;
+    //reg[`AMI_ADDR_WIDTH-6:0]   new_block_index;
     reg                       block_index_we;
 
-    always@(posedge clk) begin : current_block_update
-        if (rst) begin
-            current_block_index <= 0;
-        end else begin
-            if (block_index_we) begin
-                current_block_index <= new_block_index;
-            end else begin
-                current_block_index <= current_block_index;
-            end
-        end
-    end
+    //always@(posedge clk) begin : current_block_update
+    //    if (rst) begin
+    //        current_block_index <= 0;
+    //    end else begin
+    //        if (block_index_we) begin
+    //            current_block_index <= new_block_index;
+    //        end else begin
+    //            current_block_index <= current_block_index;
+    //        end
+    //    end
+    //end // block: current_block_update
+
+
     // FSM state transitions
     // FSM controlled signals
     // inMuxSel 0 for RdInput, 1 for WrInput
@@ -392,78 +421,99 @@ module BlockBuffer
     wire[`AMI_ADDR_WIDTH - 1:0] reqInQ_out_addr;
     assign reqInQ_out_addr = reqInQ_out[`AMIRequest_addr];
     assign wr_sector_index    = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
+    // mux out correct sector
+    assign rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment 
 
-    always @(*) begin
+
+    always @(posedge clk) begin
+        if (rst) begin
+            current_state <= INVALID;
+            current_block_index <= 0;
+        end
+
+
+        //$display("I'm inside the BB state machine. clk: %d, rst: %d, flush_buffer: %d, reqIn: %d, respOut_grant: %d, reqOut0_grant: %d, reqOut1_grant: %d", clk, rst, flush_buffer, reqIn, respOut_grant, reqOut0_grant, reqOut1_grant);
+        //$display("I'm inside the BB state machine.");
+
         // Signals controlling writing into the block
-        inMuxSel           = 1'b0;
-        wr_all_sectors     = 1'b0;
-        wr_specific_sector = 1'b0;
-        // mux out correct sector
-        rd_mux_sel         = reqInQ_out_addr[5:3]; // assume bits 2-0 are 0, 8 byte alignment
+        //inMuxSel           = 1'b0;
+        //wr_all_sectors     = 1'b0;
+        //wr_specific_sector = 1'b0;
+        
         // block index
-        new_block_index = current_block_index;
-        block_index_we  = 1'b0;
+        //new_block_index = current_block_index;
+        //block_index_we  = 1'b0;
+
+
         // requests to the memory system
         // Read port
-        //reqOut0 = '{1'b0, 1'b0, 64'b0, 512'b0, 6'd64}; // read port
-        //reqOut0 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
-        reqOut0[`AMIRequest_valid] = 1'b0;
-        reqOut0[`AMIRequest_isWrite] = 1'b0;
-        reqOut0[`AMIRequest_addr] = 64'b0;
-        reqOut0[`AMIRequest_data] = 512'b0;
-        reqOut0[`AMIRequest_size] = 6'd64;
+        //reqOut0 = '{1'b0, 1'b0, 64'b0, 512'b0, 7'd64}; // read port
+        //reqOut0 = {7'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        reqOut0[`AMIRequest_valid] <= 1'b0;
+        //reqOut0[`AMIRequest_isWrite] = 1'b0;
+        //reqOut0[`AMIRequest_addr] = 64'b0;
+        //reqOut0[`AMIRequest_data] = 512'b0;
+        //reqOut0[`AMIRequest_size] = 7'd64;
 
 
         // Write port
-        //reqOut1 = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 6'd64}; // write port
-        //reqOut1 = {6'd64, 512'b0, 64'b0, 1'b0, 1'b0};
-        reqOut1[`AMIRequest_valid] = 1'b0;
-        reqOut1[`AMIRequest_isWrite] = 1'b0;
-        reqOut1[`AMIRequest_addr] = 64'b0;
-        reqOut1[`AMIRequest_data] = 512'b0;
-        reqOut1[`AMIRequest_size] = 6'd64;
+        //reqOut1 = '{valid: 0, isWrite: 1'b0, addr: 64'b0, data: 512'b0, size: 7'd64}; // write port
+        //reqOut1 = {7'd64, 512'b0, 64'b0, 1'b0, 1'b0};
+        reqOut1[`AMIRequest_valid] <= 1'b0;
+        //reqOut1[`AMIRequest_isWrite] = 1'b0;
+        //reqOut1[`AMIRequest_addr] = 64'b0;
+        //reqOut1[`AMIRequest_data] = 512'b0;
+        //reqOut1[`AMIRequest_size] = 7'd64;
         
 
         // response from memory system
-        respIn0_grant = 1'b0;
-        respIn1_grant = 1'b0;
+        respIn0_grant <= 1'b0;
+        respIn1_grant <= 1'b0;
         // control the queues to 
-        reqInQ_deq   = 1'b0;
-        respOutQ_enq = 1'b0;
+        reqInQ_deq   <= 1'b0;
+        respOutQ_enq <= 1'b0;
         //respOutQ_in  = '{valid: 0, data: 512'b0, size: 64};
-        respOutQ_in[`AMIResponse_valid]  = 0;
-        respOutQ_in[`AMIResponse_data] = 512'b0;
-        respOutQ_in[`AMIResponse_size] = 64; 
+        respOutQ_in[`AMIResponse_valid]  <= 0;
+        //respOutQ_in[`AMIResponse_data] = 512'b0;
+        //respOutQ_in[`AMIResponse_size] = 64; 
         // state control
-        next_state = current_state;
+        //next_state = current_state;
+
 
         case (current_state)
             INVALID : begin
                 // valid  request waiting to be serviced, but no valid block in the buffer
                 //if (!reqInQ_empty && reqInQ_out.valid)  begin
                 if (!reqInQ_empty && reqInQ_out[`AMIRequest_valid])  begin
+                    //$display("first case is true");
                     //reqOut0 = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out_addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
-                    reqOut0[`AMIRequest_valid] = 1;
-                    reqOut0[`AMIRequest_isWrite] = 1'b0;
-                    reqOut0[`AMIRequest_addr] = {reqInQ_out_addr[63:6],6'b00_0000};
-                    reqOut0[`AMIRequest_data] = 512'b0;
-                    reqOut0[`AMIRequest_size] = 64; // read port
+                    //reqOut0 = {7'd64, 512'b0, {reqInQ_out_addr[63:6],6'b00_0000}, 1'b0, 1'b1};
+                    //$display("Issuing read request of size %d at addr %h", 64, {reqInQ_out_addr[63:6],6'b00_0000});
+
+                    reqOut0[`AMIRequest_valid] <= 1'b1;
+                    reqOut0[`AMIRequest_isWrite] <= 1'b0;
+                    reqOut0[`AMIRequest_addr] <= {reqInQ_out_addr[63:6],6'b00_0000};
+                    reqOut0[`AMIRequest_data] <= 512'b0;
+                    reqOut0[`AMIRequest_size] <= 7'd64; // read port
                     if (reqOut0_grant == 1'b1) begin
+                        //$display("second case is true");
+
                         // block is being read
-                        new_block_index = reqInQ_out_addr[63:6];
-                        block_index_we  = 1'b1;
+                        current_block_index <= reqInQ_out_addr[63:6];
+                        //block_index_we  <= 1'b1;
                         // go to pending state
-                        next_state = PENDING;
+                        current_state <= PENDING;
                     end
                 end
-            end
+            end // case: INVALID
             PENDING : begin
                 // waiting for a block to be read from memory and into the block buffer
                 if (respIn0[`AMIResponse_valid]) begin
-                    inMuxSel = 1'b0; //rdInput
-                    wr_all_sectors  = 1'b1; // write every sector
-                    respIn0_grant = 1'b1; // accept the response
-                    next_state = CLEAN;
+                    inMuxSel <= 1'b0; //rdInput
+                    wr_all_sectors  <= 1'b1; // write every sector
+                    wr_specific_sector <= 1'b0;
+                    respIn0_grant <= 1'b1; // accept the response
+                    current_state <= CLEAN;
                 end
             end
             CLEAN : begin
@@ -473,34 +523,37 @@ module BlockBuffer
                     if (reqInQ_out_addr[63:6] == current_block_index) begin
                         // service a write operation
                         if (reqInQ_out[`AMIRequest_isWrite]) begin
-                            inMuxSel = 1'b1; // wrInput
-                            wr_specific_sector = 1'b1;
-                            reqInQ_deq = 1'b1;
-                            next_state = MODIFIED;
+                            inMuxSel <= 1'b1; // wrInput
+                            wr_all_sectors <= 1'b0;
+                            wr_specific_sector <= 1'b1;
+                            reqInQ_deq <= 1'b1;
+                            current_state <= MODIFIED;
                         // service a read operation
                         end else begin
-                            reqInQ_deq   = 1'b1;
-                            respOutQ_enq = 1'b1;
+                            reqInQ_deq   <= 1'b1;
+                            respOutQ_enq <= 1'b1;
                             //respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8};
-                            respOutQ_in[`AMIResponse_valid] = 1;
-                            respOutQ_in[`AMIResponse_data] = {448'b0,rd_output};
-                            respOutQ_in[`AMIResponse_size] = 8; 
+                            respOutQ_in[`AMIResponse_valid] <= 1'b1;
+                            respOutQ_in[`AMIResponse_data] <= {448'b0,rd_output};
+                            respOutQ_in[`AMIResponse_size] <= 6'd8; 
                         end
                     // a new block must be fetched, but this one does not need to be written back since it is CLEAN
                     end else begin
                         // fetch a different block
                         //reqOut0 = '{valid: 1, isWrite: 1'b0, addr: {reqInQ_out.addr[63:6],6'b00_0000} , data: 512'b0, size: 64}; // read port
-                        reqOut0[`AMIRequest_valid] = 1;
-                        reqOut0[`AMIRequest_isWrite] = 1'b0;
-                        reqOut0[`AMIRequest_addr] = {reqInQ_out_addr[63:6],6'b00_0000};
-                        reqOut0[`AMIRequest_data] = 512'b0;
-                        reqOut0[`AMIRequest_size] = 64; // read port
+                        //$display("Issuing read request of size %d at addr %h", 64, {reqInQ_out_addr[63:6],6'b00_0000});
+
+                        reqOut0[`AMIRequest_valid] <= 1;
+                        reqOut0[`AMIRequest_isWrite] <= 1'b0;
+                        reqOut0[`AMIRequest_addr] <= {reqInQ_out_addr[63:6],6'b00_0000};
+                        reqOut0[`AMIRequest_data] <= 512'b0;
+                        reqOut0[`AMIRequest_size] <= 7'd64; // read port
                         if (reqOut0_grant == 1'b1) begin
                             // block is being read
-                            new_block_index = reqInQ_out_addr[63:6];
-                            block_index_we  = 1'b1;
+                            current_block_index <= reqInQ_out_addr[63:6];
+                            //block_index_we  = 1'b1;
                             // go to pending state
-                            next_state = PENDING;
+                            current_state <= PENDING;
                         end
                     end
                 end
@@ -513,33 +566,37 @@ module BlockBuffer
                     if (reqInQ_out_addr[63:6] == current_block_index) begin
                         // service a write operation
                         if (reqInQ_out[`AMIRequest_isWrite]) begin
-                            inMuxSel = 1'b1; // wrInput
-                            wr_specific_sector = 1'b1;
-                            reqInQ_deq = 1'b1;
+                            inMuxSel <= 1'b1; // wrInput
+                            wr_all_sectors <= 1'b0;
+                            wr_specific_sector <= 1'b1;
+                            reqInQ_deq <= 1'b1;
                         // service a read operation
                         end else begin
-                            reqInQ_deq   = 1'b1;
-                            respOutQ_enq = 1'b1;
+                            reqInQ_deq   <= 1'b1;
+                            respOutQ_enq <= 1'b1;
                             //respOutQ_in  = '{valid: 1, data: {448'b0,rd_output}, size: 8};
-                            respOutQ_in[`AMIResponse_valid] = 1;
-                            respOutQ_in[`AMIResponse_data] = {448'b0,rd_output};
-                            respOutQ_in[`AMIResponse_size] = 8; 
+                            respOutQ_in[`AMIResponse_valid] <= 1;
+                            respOutQ_in[`AMIResponse_data] <= {448'b0,rd_output};
+                            respOutQ_in[`AMIResponse_size] <= 6'd8; 
                         end
                     // a new block must be fetched, but this one is DIRTY, so it must be written back first
                     end else begin
                         // issue a write and go to CLEAN state
                         //reqOut1 = '{valid: 1, isWrite: 1'b1, addr: {current_block_index,6'b00_0000} , data: wr_output, size: 64}; // write port
-                        reqOut1[`AMIRequest_valid] = 1;
-                        reqOut1[`AMIRequest_isWrite] = 1'b1;
-                        reqOut1[`AMIRequest_addr] = {current_block_index,6'b00_0000};
-                        reqOut1[`AMIRequest_data] = wr_output;
-                        reqOut1[`AMIRequest_size] = 64; // write port
+                        //$display("Issuing write request of size %d at addr %h", 64, {current_block_index,6'b00_0000});
+
+                        reqOut1[`AMIRequest_valid] <= 1;
+                        reqOut1[`AMIRequest_isWrite] <= 1'b1;
+                        reqOut1[`AMIRequest_addr] <= {current_block_index,6'b00_0000};
+                        reqOut1[`AMIRequest_data] <= wr_output;
+                        reqOut1[`AMIRequest_size] <= 7'd64; // write port
                         if (reqOut1_grant == 1'b1) begin
-                            next_state = CLEAN;
+                            current_state <= CLEAN;
                         end
                     end
                 end
             end
+           /**/
             default : begin
                 // should never be here
             end

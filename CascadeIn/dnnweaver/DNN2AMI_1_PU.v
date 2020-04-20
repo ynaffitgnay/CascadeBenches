@@ -364,50 +364,50 @@ module DNN2AMI_1_PU
     assign data_to_inbuf  = respQ_out_data[AXI_DATA_WIDTH-1:0];
 
 
-    // TODO: comment this out
-    // debug signals
-    always@(posedge clk) begin
-        if (macroRdQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
-        end
-    end
+    //// TODO: comment this out
+    //// debug signals
+    //always@(posedge clk) begin
+    //    if (macroRdQ_enq) begin
+    //        $display("DNN2AMI:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
+    //    end
+    //end
 
-    always@(posedge clk) begin
-        if (inbuf_full) begin
-            if ((tagQ_out[`DNNMicroRdTag_valid] && !tagQ_empty) && (respQ_out[`AMIResponse_valid] && !respQ_empty)) begin
-                $display("DNN2AMI::                                             inBuf is full AND data is ready to write into it");
-            end else begin
-                $display("DNN2AMI:                                              inBuf is full");
-            end
-        end
+    //always@(posedge clk) begin
+    //    if (inbuf_full) begin
+    //        if ((tagQ_out[`DNNMicroRdTag_valid] && !tagQ_empty) && (respQ_out[`AMIResponse_valid] && !respQ_empty)) begin
+    //            $display("DNN2AMI::                                             inBuf is full AND data is ready to write into it");
+    //        end else begin
+    //            $display("DNN2AMI:                                              inBuf is full");
+    //        end
+    //    end
+    //
+    //    if (merge_possible) begin
+    //        $display("DNN2AMI: Filling inBuf Size: %d",respQ_out[`AMIResponse_size]);
+    //    end
+    //
+    //end // always@ (posedge clk)
 
-        if (merge_possible) begin
-            $display("DNN2AMI: Filling inBuf Size: %d",respQ_out[`AMIResponse_size]);
-        end
+    //// Block Buffer interface
+    //// Responses
+    //always@(posedge clk) begin
+    //    if (respQ_enq) begin
+    //        $display("DNN2AMI: Receiving response back from the BlockBuffer Size: %d",respQ_in[`AMIResponse_size]);
+    //    end
+    //end
 
-    end // always@ (posedge clk)
+    //// Requests
+    //
+    //always@(posedge clk) begin
+    //    if (reqQ_enq) begin
+    //        $display("DNN2AMI: Queuing request to BB, addr: %h, size: %d isWrite: %h Valid: %h", reqQ_in[`AMIRequest_addr], reqQ_in[`AMIRequest_size], reqQ_in[`AMIRequest_isWrite], reqQ_in[`AMIRequest_valid]);
+    //    end
+    //end
 
-    // Block Buffer interface
-    // Responses
-    always@(posedge clk) begin
-        if (respQ_enq) begin
-            $display("DNN2AMI: Receiving response back from the BlockBuffer Size: %d",respQ_in[`AMIResponse_size]);
-        end
-    end
-
-    // Requests
-
-    always@(posedge clk) begin
-        if (reqQ_enq) begin
-            $display("DNN2AMI: Queuing request to BB, addr: %h, size: %d isWrite: %h Valid: %h", reqQ_in[`AMIRequest_addr], reqQ_in[`AMIRequest_size], reqQ_in[`AMIRequest_isWrite], reqQ_in[`AMIRequest_valid]);
-        end
-    end
-
-    always@(posedge clk) begin
-        if (reqQ_deq) begin
-            $display("DNN2AMI: BlockBuffer accepting request.");
-        end
-    end
+    //always@(posedge clk) begin
+    //    if (reqQ_deq) begin
+    //        $display("DNN2AMI: BlockBuffer accepting request.");
+    //    end
+    //end
 
     // Sequencer
     // Outputs:
@@ -585,20 +585,20 @@ module DNN2AMI_1_PU
     //assign rd_ready = !macroRdQ_full && !reqQ_full && !macro_req_active && !inbuf_full;    // TODO: double check this
     assign rd_ready = macroRdQ_empty && reqQ_empty && !macro_req_active && tagQ_empty;    // TODO: double check this
 
-    always@(posedge clk) begin
-        if (macro_req_active && reqQ_full) begin
-            $display("RD PATH: Unable to inssue another read request! reqQ_full");
-        end
-        if (macro_req_active && tagQ_full) begin
-            $display("RD PATH: Unable to inssue another read request! tagQ_full");
-        end
-        if (reqQ_enq) begin
-            $display("RD PATH: Enqueing read request %d", new_requests_left);
-        end
-        if (!tagQ_empty) begin
-            $display("RD PATH: tagQ has %d entries left, reqQ has %d entries left, respQ has %d entries left, wrValid %d",SoftFIFO_readtagQ.readtagQ.counter,SoftFIFO_reqQ.reqQ.counter,SoftFIFO_respQ.respQ.counter, wrReqValid);
-        end
-    end
+    //always@(posedge clk) begin
+    //    if (macro_req_active && reqQ_full) begin
+    //        $display("RD PATH: Unable to inssue another read request! reqQ_full");
+    //    end
+    //    if (macro_req_active && tagQ_full) begin
+    //        $display("RD PATH: Unable to inssue another read request! tagQ_full");
+    //    end
+    //    if (reqQ_enq) begin
+    //        $display("RD PATH: Enqueing read request %d", new_requests_left);
+    //    end
+    //    if (!tagQ_empty) begin
+    //        $display("RD PATH: tagQ has %d entries left, reqQ has %d entries left, respQ has %d entries left, wrValid %d",SoftFIFO_readtagQ.readtagQ.counter,SoftFIFO_reqQ.reqQ.counter,SoftFIFO_respQ.respQ.counter, wrReqValid);
+    //    end
+    //end
 
     // Output responses to the block buffer
     // Arbitrate between the reqQ (read requests) and requests from DNN1AMI_WRPath
@@ -620,9 +620,10 @@ module DNN2AMI_1_PU
             valid_final_arb = 1'b1;
             arbWinner = reqQ_out;
             if (mem_req_grant) begin
+                //$display("RD PATH: Won arb and dequeueing");
                 reqQ_deq = 1'b1;
             end else begin
-                $display("RD PATH: Won arb but no grant");
+                //$display("RD PATH: Won arb but no grant");
             end
         end
     end
@@ -634,12 +635,12 @@ module DNN2AMI_1_PU
     assign mem_req[`AMIRequest_data] = arbWinner[`AMIRequest_data];
     assign mem_req[`AMIRequest_size] = arbWinner[`AMIRequest_size];
     
-    always@(posedge clk) begin
-        if (valid_final_arb) begin
-            $display("DNN2AMI: A REQUEST IS BEING SENT to the block buffer");
-        end
-        $display("RDPATH: Read requests left: %d", requests_left);
-    end
+    //always@(posedge clk) begin
+    //    if (valid_final_arb) begin
+    //        $display("DNN2AMI: A REQUEST IS BEING SENT to the block buffer");
+    //    end
+    //    $display("RDPATH: Read requests left: %d", requests_left);
+    //end
     
 
 
