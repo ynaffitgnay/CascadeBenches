@@ -497,7 +497,7 @@ if (NUM_PU == 1) begin
     
     fifo_fwft #(
       .DATA_WIDTH               ( AXI_DATA_W               ),
-      .ADDR_WIDTH               ( 5                        )
+      .ADDR_WIDTH               ( 7                       )
     ) outbuf_owidth (
       .clk                      ( clk                      ),  //input
       .reset                    ( reset                    ),  //input
