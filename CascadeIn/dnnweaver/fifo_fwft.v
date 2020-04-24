@@ -83,6 +83,26 @@ fifo #(
         .fifo_count         ( fifo_count    )   //output
 );   
 
+
+    integer push_ctr = 0;
+    integer pop_ctr = 0;
+
+    always @(posedge clk) begin
+        if (push) begin
+            push_ctr <= push_ctr + 1;
+        end
+
+        if (pop) begin
+            pop_ctr <= pop_ctr + 1;
+        end
+
+        
+
+        $display("    fifo fwft push ctr: %d, pop ctr: %d, fifo_cnt: %d, fifo_empty: %d", push_ctr, pop_ctr, fifo_buffer.fifo_count, fifo_empty);
+
+    end
+
+
 endmodule
 
 
