@@ -39,13 +39,13 @@ module PU_tb;
   wire                                        pe_neuron_read_req;
 
   wire [ DATA_WIDTH           -1 : 0 ]        pu_data_out;
-  wire [ DATA_WIDTH           -1 : 0 ]        pu_data_in;
+  reg  [ DATA_WIDTH           -1 : 0 ]        pu_data_in;
   reg                                         pu_data_in_v;
   reg                                         start;
   wire [ SERDES_COUNT_W       -1 : 0 ]        pu_serdes_count;
   wire [ PE_CTRL_WIDTH        -1 : 0 ]        pe_ctrl;
   wire [ RD_ADDR_WIDTH        -1 : 0 ]        wb_read_addr;
-  wire read_req;
+  wire pu_rd_req;
   //-----------vectorgen-----------
   wire [ DATA_IN_WIDTH        -1 : 0 ]        vecgen_rd_data;
   wire                                        vecgen_rd_req;
@@ -72,29 +72,201 @@ module PU_tb;
 // ******************************************************************
  /** Driver for the PU tests
    * Generates inputs and tests output */
-  wire buffer_read_empty;
-  wire buffer_read_last;
-  wire [63:0] buffer_read_data_out;
+  reg [63:0] buffer_read_data_out;
+  reg buffer_read_empty;
+  reg buffer_read_data_valid;
+  reg buffer_read_last;
+  reg pass;
+  reg fail;
 
-  PU_tb_driver #(
-    .OP_WIDTH                 ( OP_WIDTH                 ),
-    .NUM_PE                   ( NUM_PE                   )
-  ) driver (
-    .clk                      ( clk                      ),
-    .reset                    ( reset                    ),
-    .buffer_read_data_valid   ( buffer_read_data_valid   ), //output
-    .buffer_read_data_out     ( buffer_read_data_out     ), //output
-    .buffer_read_empty        ( buffer_read_empty        ), //output
-    .buffer_read_req          ( buffer_read_req          ), //input
-    .buffer_read_last         ( buffer_read_last         ), //output
-    .pu_rd_req                ( read_req                 ),
-    .pu_rd_ready              ( pu_rd_ready              ),
-    .pu_wr_req                ( outBuf_push              ),
-    .pu_data_out              ( pu_data_out              ),
-    .pu_data_in               ( pu_data_in               ),
-    .pass                     ( pass                     ),
-    .fail                     ( fail                     )
-  );
+  
+  
+  //PU_tb_driver #(
+  //  .OP_WIDTH                 ( OP_WIDTH                 ),
+  //  .NUM_PE                   ( NUM_PE                   )
+  //) driver (
+  //  .clk                      ( clk                      ),
+  //  .reset                    ( reset                    ),
+  //  .buffer_read_data_valid   ( buffer_read_data_valid   ), //output
+  //  .buffer_read_data_out     ( buffer_read_data_out     ), //output
+  //  .buffer_read_empty        ( buffer_read_empty        ), //output
+  //  .buffer_read_req          ( buffer_read_req          ), //input
+  //  .buffer_read_last         ( buffer_read_last         ), //output
+  //  .pu_rd_req                ( pu_rd_req                 ),
+  //  .pu_rd_ready              ( pu_rd_ready              ),
+  //  .pu_wr_req                ( pu_wr_req              ),
+  //  .pu_data_out              ( pu_data_out              ),
+  //  .pu_data_in               ( pu_data_in               ),
+  //  .pass                     ( pass                     ),
+  //  .fail                     ( fail                     )
+  //);
+
+  /* Internal vars to PU_driver */
+  reg signed  [OP_WIDTH-1:0] data_in  [0:1<<20];
+  reg signed  [OP_WIDTH-1:0] weight   [0:1<<20];
+  reg signed  [OP_WIDTH-1:0] buffer   [0:1<<20];
+  reg signed  [OP_WIDTH-1:0] expected_out [0:1<<20];
+  reg signed  [OP_WIDTH-1:0] expected_pool_out [0:1<<20];
+  integer expected_writes;
+  integer output_fm_size;
+  reg signed [OP_WIDTH-1:0] norm_lut [1<<6:0];
+
+  integer lutstream = $fopen("input_files/dnnweaver/norm_lut.mif", "r");
+  integer idx = 0;
+  reg[OP_WIDTH-1:0] val = 0;
+
+  reg rd_ready;
+  integer max_data_in_count;
+  integer data_in_counter;
+  integer write_count;
+  integer delay_count;
+  
+
+  /* Init mem */
+  initial begin
+    //$readmemb ("hardware/include/norm_lut.vh", norm_lut);
+    for (idx = 0; idx < (1<<6); idx = idx + 1) begin
+      if (!($feof(lutstream))) begin
+        $fscanf(lutstream, "%b", val);
+        norm_lut[idx] = val;  
+      end 
+      else begin
+        norm_lut[idx] = 0;
+      end // else: !if(!($feof(lutstream)))
+    end // for (i = 0; i < ROM_DEPTH; i = i + 1)
+
+    data_in_counter = 0;
+    rd_ready = 0;
+    write_count = 0;
+    delay_count = 0;
+
+    buffer_read_data_valid = 0;
+    buffer_read_last = 1'b0;
+    buffer_read_empty = 1'b1;
+  end // initial begin
+  
+  /* Test config */
+  integer input_fm_dimensions  [3:0];
+  integer input_fm_size;
+  integer output_fm_dimensions [3:0];
+  integer pool_fm_dimensions [3:0];
+  integer weight_dimensions    [4:0];
+  integer buffer_dimensions[4:0];
+  reg pool_enabled;
+
+  /* expected_pooling_output vars */
+  integer epo_pool_w;  /* input */
+  integer epo_pool_h;  /* input */
+  integer epo_stride;  /* input */
+  integer epo_iw, epo_ih, epo_ic;
+  integer epo_ow, epo_oh;
+  integer epo_ii, epo_jj;
+  integer epo_kk, epo_ll;
+  integer epo_output_index, epo_input_index;
+  integer epo_max;
+  integer epo_in_w, epo_in_h;
+  integer epo_tmp;
+
+  /* print_pooled_output vars */
+  integer ppoo_w, ppoo_h;
+
+  /* print_pe_output vars */
+  integer ppeo_w, ppeo_h;
+
+  /* expected_output_fc vars */
+  integer eofc_input_channels;  /* input */
+  integer eofc_output_channels;  /* input */
+  integer eofc_max_threads;  /* input */
+  integer eofc_ic, eofc_oc;
+  integer eofc_input_index, eofc_output_index, eofc_kernel_index;
+  integer eofc_in;
+  reg signed [48-1:0] eofc_acc;
+
+  /* expected_output_norm vars */
+  integer eon_input_width;  /* input */
+  integer eon_input_height;  /* input */
+  integer eon_input_channels;  /* input */
+  integer eon_batchsize;  /* input */
+  integer eon_kernel_width;  /* input */
+  integer eon_kernel_height;  /* input */
+  integer eon_kernel_stride;  /* input */
+  integer eon_output_channels;  /* input */
+  integer eon_pad_w;  /* input */
+  integer eon_pad_r_s;  /* input */
+  integer eon_pad_r_e;  /* input */
+  integer eon_output_width;
+  integer eon_output_height;
+  integer eon_iw, eon_ih, eon_ic, eon_b, eon_kw, eon_kh, eon_ow, eon_oh;
+  integer eon_input_index, eon_output_index, eon_kernel_index;
+  integer eon_in, eon_in_w, eon_in_h;
+  reg [6-1:0] eon_lrn_weight_index;
+
+
+  /* expected_output vars */
+  integer eo_input_width;  /* input */
+  integer eo_input_height;  /* input */
+  integer eo_input_channels;  /* input */
+  integer eo_batchsize;  /* input */
+  integer eo_kernel_width;  /* input */
+  integer eo_kernel_height;  /* input */
+  integer eo_kernel_stride;  /* input */
+  integer eo_output_channels;  /* input */
+  integer eo_pad_w;  /* input */
+  integer eo_pad_r_s;  /* input */
+  integer eo_pad_r_e;  /* input */
+  integer eo_output_width;
+  integer eo_output_height;
+  integer eo_iw, eo_ih, eo_ic, eo_b, eo_kw, eo_kh, eo_ow, eo_oh;
+  integer eo_input_index, eo_output_index, eo_kernel_index;
+  integer eo_in, eo_in_w, eo_in_h;
+
+  /* initialize_weight_fc vars */
+  integer iwfc_input_channels;  /* input */
+  integer iwfc_output_channels;  /* input */
+  integer iwfc_i, iwfc_j, iwfc_k;
+  integer iwfc_idx, iwfc_val;
+  integer iwfc_width, iwfc_height;
+
+  /* initialize_input_fc vars */
+  integer iifc_input_channels;  /* input */
+  integer iifc_i, iifc_j, iifc_k, iifc_l;
+  integer iifc_index;
+
+  /* initialize_input vars */
+  integer ii_width;  /* input */
+  integer ii_height;  /* input */
+  integer ii_channels;  /* input */
+  integer ii_output_channels;  /* input */
+  integer ii_i, ii_j, ii_c;
+  integer ii_idx;
+
+  /* initialize_weight vars */
+  integer iw_width;  /* input */
+  integer iw_height;  /* input */
+  integer iw_input_channels;  /* input */
+  integer iw_output_channels;  /* input */
+  integer iw_i, iw_j, iw_k, iw_l;
+  integer iw_index;
+
+  /* pu_read vars */
+  integer pr_i;
+  integer pr_input_idx;
+  integer pr_tmp;
+
+  /* pu_write vars */
+  integer pw_i;
+  reg signed [OP_WIDTH-1:0] pw_tmp;
+  reg signed [OP_WIDTH-1:0] pw_exp_data;
+  integer pw_idx;
+
+  /* send_buffer_data vars */
+  integer sbd_num_buffer_reads;
+  integer sbd_num_data;
+  integer sbd_idx;
+  integer sbd_ii;
+
+  
+  
 // ******************************************************************
 
   reg  [ LAYER_PARAM_WIDTH    -1 : 0 ]        _kw, _kh, _ks;
@@ -118,6 +290,45 @@ module PU_tb;
   integer ii;
 
   integer conv_ic, conv_oc;
+
+  integer state_ctr;
+  reg[3:0] state;
+
+  initial begin
+    state_ctr <= 0;
+    state <= INIT_AND_START;
+  end
+  
+
+  parameter INIT_AND_START = 4'd0;  /* state 0 */
+  parameter CNTRLLR_STARTED = 4'd1;  /* state 1 */
+  parameter LAYER_OUTER_LOOP_INIT_TOP = 4'd2;  /* state 1.5 */
+  parameter INIT_LAYER_VALS = 4'd3;   /* state 2 */
+  parameter DO_WRITECOUNT = 4'd4;  /* state 4 */
+  parameter OUTER_CONV_LOOP_TOP = 4'd5;  /* state 4.3 */
+  parameter INNER_CONV_LOOP_TOP = 4'd6;  /* state 5 */
+  parameter WAIT_CONV_START_CHANGE = 4'd7;  /* state 6 */
+  parameter WAIT_CONV_FINISH = 4'd8;  /* state 7 */
+  parameter INNER_CONV_LOOP_END = 4'd9;  /* state 8 */
+  parameter WAIT_WRITES_NO_CONV = 4'd10;  /* state 4.7 */
+  parameter DELAY_AFTER_WRITES = 4'd11;  /* state 9 */
+  parameter WAIT_CNTRLLR_STATE_CHANGE  = 4'd12;  /* state 10 */
+  parameter WAIT_TEST_PASS = 4'd13;  /* state 11 */
+  
+  always @(posedge clk) begin
+    state_ctr <= state_ctr + 1;
+    pass <= 0;
+    fail <= 0;
+
+    case (state)
+      
+    end
+  
+      
+  end
+  
+  
+
 
   initial begin
     // State 0
@@ -258,7 +469,7 @@ module PU_tb;
 // ******************************************************************
   always @(posedge clk)
     pu_data_in_v <= pu_rd_req;
-  assign read_req = vecgen_rd_req;
+  assign pu_rd_req = vecgen_rd_req;
   PU #(
     // Parameters
     .OP_WIDTH                 ( OP_WIDTH                 ),
@@ -291,7 +502,7 @@ module PU_tb;
     .read_d_type              ( 2'b0                     ), //input
     .read_req                 ( pu_rd_req                ), //output
     .write_data               ( pu_data_out              ), //output
-    .write_req                ( outBuf_push              ), //output
+    .write_req                ( pu_wr_req                ), //output
     .write_ready              ( 1'b1                     )  //input
   );
 // ******************************************************************

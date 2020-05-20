@@ -138,11 +138,12 @@ module PU_tb;
     $display("**************************************************");
     $display ("Number of layers = %d", max_layers);
     $display("**************************************************");
-    $display;
+    $display;  /* Transition to state 1.5 */
 
     /* You do this state machine for each layer */
     for (ii=0; ii<max_layers; ii++)
     begin
+      /* State 2 */
       {_stride, _pool_iw, _pool_oh, _pool_kernel, _pool, l_type, _max_threads, _pad, _pad_row_start, _pad_row_end, _skip, _endrow_iw, _ic, _ih, _iw, _oc, _kh, _kw} =
         u_controller.cfg_rom[ii];
       $display("**************************************************");
@@ -167,8 +168,7 @@ module PU_tb;
 
       wait (u_controller.state == 1);  /* transition to state 2 */
 
-      /* State 2 */
-      @(negedge clk);
+      @(negedge clk);   /* If ctr == 0, then do this next part before transitioning (this should be a full clock cycle after the transition */ 
       /* Might be worthwhile to have a switch statement inside of pu_driver and an input that you add */
       /* Basically would just be like "state" input and "type/related var" input */
       if (l_type == 0) /* When state transitions, at beginning of next cycle you're here */
@@ -201,7 +201,7 @@ module PU_tb;
         driver.pool_enabled = 1'b0;
 
       /* Stage 4 */
-      if (l_type == 0)
+      if (l_type == 0)  /* If T, transition to 4.3, else transition to 4.7 */
       begin
         /* Maybe stage 4.3 is init values */
         for (conv_oc = 0; conv_oc <= _oc; conv_oc = conv_oc + 1)
@@ -216,10 +216,11 @@ module PU_tb;
             wait (u_controller.state == 4);  /* Transition to stage 6 */
 
             /* Stage 6 */
-            wait (u_controller.state != 4);
-            repeat(1000) @(negedge clk); /* Transition to stage 7 */
-
+            wait (u_controller.state != 4); /* Transition to stage 7 */
+            
             /* Stage 7 */
+            repeat(1000) @(negedge clk); 
+            
             $display ("Conv finished"); /* Transition to stage 5 */
             
           end // for (conv_ic = 0; conv_ic <= _ic; conv_ic = conv_ic + 1)
@@ -240,9 +241,16 @@ module PU_tb;
       end
       /* Count to 100, then wait for u_controller.state to not be 4 (can be in the same state), then*/
       /* Transition to stage 10 */
-    end
-    wait (u_controller.state != 4);
+      /* count to 100: when it reaches 0, that's 1 negedge clock before 1 posedge clk.
+         (i.e., when ctr is 1, that's 2 posedges)
+         then want counter to reach 98 (because on the 99th posedge, will get 100th negedge before 
+         transitioning to next state) */
+      /* If ii < max_layers, go to state 1.5, else go to state 10... */
+    end // for (ii=0; ii<max_layers; ii++)
+    /* state 10 */
+    wait (u_controller.state != 4); /* transition to state 11 */
 
+    /* state 11 */
     repeat (1000) @(negedge clk);
     driver.status.test_pass;
   end
