@@ -35,10 +35,26 @@ module PU_tb_driver
   reg signed  [OP_WIDTH-1:0] expected_pool_out [0:1<<20];
   integer expected_writes;
   integer output_fm_size;
-  reg signed [OP_WIDTH-1:0] norm_lut [0:1<<6];
+  reg signed [OP_WIDTH-1:0] norm_lut [1<<6:0];
 
-  initial
-  $readmemb ("hardware/include/norm_lut.vh", norm_lut);
+  integer lutstream = $fopen("input_files/dnnweaver/norm_lut.mif", "r");
+  integer idx = 0;
+  reg[OP_WIDTH-1:0] val = 0;
+
+  initial begin
+    //$readmemb ("hardware/include/norm_lut.vh", norm_lut);
+    for (idx = 0; idx < (1<<6); idx = idx + 1) begin
+      if (!($feof(lutstream))) begin
+        $fscanf(lutstream, "%b", val);
+        norm_lut[idx] <= val;  
+      end 
+      else begin
+        norm_lut[idx] <= 0;
+      end // else: !if(!($feof(lutstream)))
+    end // for (i = 0; i < ROM_DEPTH; i = i + 1)  
+  end
+
+  
 // ******************************************************************
 // Test Configuration
 // ******************************************************************

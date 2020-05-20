@@ -47,7 +47,7 @@ always @(posedge clk)
   else if (rd_count == 0)
     rd_valid <= m_packed_read_req;
 
-assign m_packed_read_req = rd_count == 0 && m_packed_read_ready;
+assign m_packed_read_req = (rd_count == 0) && m_packed_read_ready;
 
 always @(posedge clk)
   if (reset)
@@ -64,6 +64,16 @@ always @(posedge clk)
     data <= m_packed_read_data;
 
 assign m_unpacked_write_data = data[OUT_WIDTH-1:0];
+
+//initial begin
+//    $display("MAX_READS: %d, READ_COUNT_W: %d", MAX_READS, READ_COUNT_W);
+//    $finish();
+//end
+
+//always @(posedge clk) begin
+//    $display("     rd_count: %d", rd_count);
+//
+//end
 
 endmodule
 

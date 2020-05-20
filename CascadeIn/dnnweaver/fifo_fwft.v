@@ -95,11 +95,10 @@ fifo #(
         if (pop) begin
             pop_ctr <= pop_ctr + 1;
         end
+    end
 
-        
-
+    always @(*) begin        
         $display("    fifo fwft push ctr: %d, pop ctr: %d, fifo_cnt: %d, fifo_empty: %d", push_ctr, pop_ctr, fifo_buffer.fifo_count, fifo_empty);
-
     end
 
 

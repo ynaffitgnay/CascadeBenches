@@ -98,6 +98,17 @@ module dnnweaver_ami_top #(
         .respIn1_grant(mem_resp1_grant)
     );
 
+    //always @(posedge clk) begin
+    //    if (mem_req0[`AMIRequest_valid]) begin
+    //        $display("reqOut0: addr: %h, size %d", mem_req0[`AMIRequest_addr], mem_req0[`AMIRequest_size]);
+    //    end
+    //
+    //    if (mem_req1[`AMIRequest_valid]) begin
+    //        $display("reqOut0: addr: %h, size %d", mem_req1[`AMIRequest_addr], mem_req1[`AMIRequest_size]);
+    //    end
+    //end
+
+
     
     dnn_accelerator_ami #(
     // INPUT PARAMETERS

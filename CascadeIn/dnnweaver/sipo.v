@@ -73,6 +73,19 @@ module sipo
     .DOUT                     ( parallel_load_d          )
     );
 
+    //always @(posedge clk) begin
+    //    if (out_valid) begin
+    //        $display("SIPO OUT_VALID!!");
+    //
+    //        $finish(2);
+    //    end
+    //    else begin
+    //        $display("sipo out not valid: parallel_load_d: %d, parallel_load: %d", parallel_load_d, parallel_load);
+    //    end
+    //end
+
+
+
 endmodule
 
 `endif

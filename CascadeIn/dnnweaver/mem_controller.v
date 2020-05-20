@@ -587,7 +587,7 @@ end
   assign write_idx_max = wr_cfg_idx_max;
   assign write_idx_default = GND[WR_ROM_ADDR_W-1:0];
   //assign write_idx_inc = next_stream_write && stream_wr_count_inc;
-  assign write_idx_inc = wr_state == WR_WAIT_DONE && wr_done;
+  assign write_idx_inc = (wr_state == WR_WAIT_DONE) && wr_done;
   counter #(
     .COUNT_WIDTH              ( WR_ROM_ADDR_W               )
   )
@@ -654,6 +654,25 @@ end
     .UNDERFLOW                (                          ),  //output
     .COUNT                    ( wr_pu_id_count           )   //output
   );
+
+    //always @(posedge clk) begin
+    //    $display("wr_cfg_idx_max: %d, write_idx_count: %d, write_idx_overflow: %d, write_idx_inc: %d", wr_cfg_idx_max, write_idx_count, write_idx_overflow, write_idx_inc);
+    //    $display("wr_done: %d, wr_state: %d", wr_done, wr_state);
+    //
+    //    $display("  stream_max: %d, stream_wr_count_inc: %d, stream_wr_count: %d,  next_stream_write: %d", stream_wr_count_max, stream_wr_count_inc, stream_wr_count, next_stream_write);
+    //
+    //    if (wr_done) begin
+    //        $display();
+    //        $display();
+    //        $display();
+    //        $display("<<<<<<<<<<<<<<<<<WR_DONE!!! STATE: %d>>>>>>>>>>>>>>>>>>>>>>", wr_state);
+    //        $display();
+    //        $display();
+    //        $display();
+    //    end
+    //
+    //end
+
 
 endmodule
 

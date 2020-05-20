@@ -1,6 +1,7 @@
  /** This module tests the PU module
    * The testbench instantiates the driver
    * and the PU module */
+`include "common.vh"
 `include "dw_params.vh"
 module PU_tb;
 // ******************************************************************
@@ -119,13 +120,17 @@ module PU_tb;
   integer conv_ic, conv_oc;
 
   initial begin
+    // State 0
     driver.status.start;
     start = 0;
 
     @(negedge clk);
 
     start = 1;
-    wait (u_controller.state != 0);
+
+    wait (u_controller.state != 0);  // if, then transition to state 1
+
+    /* State 1 */
     start = 0;
 
     max_layers = u_controller.max_layers+1;
@@ -135,6 +140,7 @@ module PU_tb;
     $display("**************************************************");
     $display;
 
+    /* You do this state machine for each layer */
     for (ii=0; ii<max_layers; ii++)
     begin
       {_stride, _pool_iw, _pool_oh, _pool_kernel, _pool, l_type, _max_threads, _pad, _pad_row_start, _pad_row_end, _skip, _endrow_iw, _ic, _ih, _iw, _oc, _kh, _kw} =
@@ -158,12 +164,18 @@ module PU_tb;
       $display("Padding   : %4d", _pad);
       $display("Stride    : %4d", _stride);
       $display("**************************************************");
-      wait (u_controller.state == 1);
+
+      wait (u_controller.state == 1);  /* transition to state 2 */
+
+      /* State 2 */
       @(negedge clk);
-      if (l_type == 0)
+      /* Might be worthwhile to have a switch statement inside of pu_driver and an input that you add */
+      /* Basically would just be like "state" input and "type/related var" input */
+      if (l_type == 0) /* When state transitions, at beginning of next cycle you're here */
       begin
-        driver.initialize_input(input_width, _ih+1, 1, 1);
-        driver.initialize_weight(_kh+1, _kh+1, _ic+1, _oc+1);
+        driver.initialize_input(input_width, _ih+1, 1, 1);  /* you initialize the input */
+        driver.initialize_weight(_kh+1, _kh+1, _ic+1, _oc+1);  /* then you initialize the state */
+        /* I think these things happen sequentially bc they're between a begin/end */
         driver.expected_output(input_width,_ih+1,_ic+1,1, _kw+1,_kh+1,_stride, _oc+1, _pad, _pad_row_start, _pad_row_end);
       end
       else if (l_type == 2)
@@ -178,39 +190,56 @@ module PU_tb;
         driver.expected_output_fc(_ic+1,(_oc+1)*NUM_PE, _max_threads);
       end
       //driver.print_pe_output;
+      /* This needs to happen after each block of initialized input */
       if (_pool)
       begin
+        /* Can probably combine expected_pooling_output commands w print_pooled_output */
         driver.expected_pooling_output(_pool_kernel, _pool_kernel, 2);
         //driver.print_pooled_output;
       end
       else
         driver.pool_enabled = 1'b0;
+
+      /* Stage 4 */
       if (l_type == 0)
       begin
+        /* Maybe stage 4.3 is init values */
         for (conv_oc = 0; conv_oc <= _oc; conv_oc = conv_oc + 1)
         begin
+          /* Stage 5 */
           for (conv_ic = 0; conv_ic <= _ic; conv_ic = conv_ic + 1)
           begin
             $display ("OC (%d/%d) : IC (%d/%d)", conv_oc , _oc, conv_ic, _ic);
             driver.initialize_input(input_width, _ih+1, 1, 1);
             driver.initialize_weight(_kh+1, _kh+1, _ic+1, _oc+1);
             $display ("Conv Started");
-            wait (u_controller.state == 4);
+            wait (u_controller.state == 4);  /* Transition to stage 6 */
+
+            /* Stage 6 */
             wait (u_controller.state != 4);
-            repeat(1000) @(negedge clk);
-            $display ("Conv finished");
-          end
+            repeat(1000) @(negedge clk); /* Transition to stage 7 */
+
+            /* Stage 7 */
+            $display ("Conv finished"); /* Transition to stage 5 */
+            
+          end // for (conv_ic = 0; conv_ic <= _ic; conv_ic = conv_ic + 1)
+          /* If conv_ic <= _ic, transition to stage 5, else transition to stage 8 */
+
+          /* Stage 8 */
           //wait (driver.write_count/NUM_PE == driver.expected_writes);
           repeat(100) @(negedge clk);
           driver.write_count = 0;
-
+          /* If conv_oc <= _oc, transition to stage 4.5, else transition to stage 9 */
         end
-      end
-      else
-        wait (driver.write_count/NUM_PE == driver.expected_writes);
+      end // if (l_type == 0)
+      else /* Stage 4.7 */
+        wait (driver.write_count/NUM_PE == driver.expected_writes); /* Transition to stage 9 */
+      /* Stage 9 */
       repeat (100) begin
         @(negedge clk);
       end
+      /* Count to 100, then wait for u_controller.state to not be 4 (can be in the same state), then*/
+      /* Transition to stage 10 */
     end
     wait (u_controller.state != 4);
 
@@ -218,11 +247,11 @@ module PU_tb;
     driver.status.test_pass;
   end
 
-  initial
-  begin
-    $dumpfile("PU_tb.vcd");
-    $dumpvars(0,PU_tb);
-  end
+  //initial
+  //begin
+  //  $dumpfile("PU_tb.vcd");
+  //  $dumpvars(0,PU_tb);
+  //end
 
 // ******************************************************************
 // PU

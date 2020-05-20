@@ -92,6 +92,7 @@ begin
         next_state = 0;
     end
     2:begin
+      //if (m_write_req || (serdes_count != serdes_max))
       if (m_write_req)
         next_state = 0;
     end
@@ -247,6 +248,37 @@ sipo #(
 
 assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
+
+always @(*) begin
+    $display("SERDES: serdes_max: %d, IN_COUNT: %d, serializer_pop: %d, sipo_data_out_v: %d", serdes_max, IN_COUNT, serializer_pop, sipo_data_out_v);
+    $display("sipo_data_v: %d, serial_data_v: %d, state: %d, serdes_count: %d", sipo_data_v, serial_data_v, state, serdes_count);
+    //$display("shift_count: %d, NUM_SHIFTS: %d, parallel_load: %d, parallel_load_d: %d", sipo_output.shift_count, sipo_output.NUM_SHIFTS, sipo_output.parallel_load, sipo_output.parallel_load_d);
+    if (sipo_data_out_v) begin
+        $display("============================================================");
+        $display("============================================================");
+        $display("============================================================");
+        $display("");
+        $display("                    sipo_data_out_v!!!!!!!!");
+        $display("");
+        $display("============================================================");
+        $display("============================================================");
+        $display("============================================================");
+        //$finish(1);
+    end // if (sipo_data_out_v)
+    
+    if (serializer_pop) begin
+        $display("============================================================");
+        $display("============================================================");
+        $display("============================================================");
+        $display("");
+        $display("                    serializer_pop!!!!!!!!");
+        $display("");
+        $display("============================================================");
+        $display("============================================================");
+        $display("============================================================");
+        //$finish(1);
+    end
+end
 
 endmodule // serdes
 
