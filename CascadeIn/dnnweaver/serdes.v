@@ -278,8 +278,8 @@ sipo #(
 assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
 
-//always @(*) begin
-always @(posedge clk) begin    
+always @(*) begin
+//always @(posedge clk) begin    
     $display("SERDES: serdes_max: %d, IN_COUNT: %d, serializer_pop: %d, sipo_data_out_v: %d", serdes_max, IN_COUNT, serializer_pop, sipo_data_out_v);
     //$display("shift_count: %d, NUM_SHIFTS: %d, parallel_load: %d, parallel_load_d: %d", sipo_output.shift_count, sipo_output.NUM_SHIFTS, sipo_output.parallel_load, sipo_output.parallel_load_d);
     $display("state: %d, serdes_fifo_empty: %d, serdes_fifo_pop: %d", state, serdes_fifo_empty, serdes_fifo_pop);

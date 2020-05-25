@@ -479,25 +479,11 @@ endgenerate
     out_sel_d == `OUT_POOL ?
     pool_read_data : lrn_enable_local ? norm_out : pe_write_data;
 
+  always @(posedge clk) begin
   //always @(*) begin
-  //    $display("serdes_write_req: %d, pool_read_req: %d, lrn_enable_local: %d, norm_out_valid: %d, pe_write_req: %d", serdes_write_req, pool_read_req, lrn_enable_local, norm_out_valid, pe_write_req);
-  //    if (serdes_write_req) begin
-  //      $display("############################################################");
-  //      $display("############################################################");
-  //      $display("############################################################");
-  //      $display("");
-  //      $display("                    serdes_write_req!!!!!!!!");
-  //      $display("");
-  //      $display("############################################################");
-  //      $display("############################################################");
-  //      $display("############################################################");
-  //      //$finish(1);
-  //  end
-  //end // always @ (*)
-
-  always @(serdes_write_req) begin
-      if (serdes_write_req) begin
-        $display("serdes_write_req: %d, pool_read_req: %d, lrn_enable_local: %d, norm_out_valid: %d, pe_write_req: %d", serdes_write_req, pool_read_req, lrn_enable_local, norm_out_valid, pe_write_req);
+    $display("serdes_write_req: %d, out_sel_d: %d, OUT_POOL: %d, pool_read_req: %d,", serdes_write_req, out_sel_d, `OUT_POOL, pool_read_req);
+    //$display("lrn_enable_local: %d, norm_out_valid: %d, pe_write_req: %d", lrn_enable_local, norm_out_valid, pe_write_req);
+    if (serdes_write_req) begin
         $display("############################################################");
         $display("############################################################");
         $display("############################################################");
@@ -509,7 +495,23 @@ endgenerate
         $display("############################################################");
         //$finish(1);
     end
-  end
+  end // always @ (*)
+
+  //always @(serdes_write_req) begin
+  //    if (serdes_write_req) begin
+  //      $display("serdes_write_req: %d, pool_read_req: %d, lrn_enable_local: %d, norm_out_valid: %d, pe_write_req: %d", serdes_write_req, pool_read_req, lrn_enable_local, norm_out_valid, pe_write_req);
+  //      $display("############################################################");
+  //      $display("############################################################");
+  //      $display("############################################################");
+  //      $display("");
+  //      $display("                    serdes_write_req!!!!!!!!");
+  //      $display("");
+  //      $display("############################################################");
+  //      $display("############################################################");
+  //      $display("############################################################");
+  //      //$finish(1);
+  //  end
+  //end
 
 
   reg [SERDES_COUNT_W-1:0] pool_serdes_count;

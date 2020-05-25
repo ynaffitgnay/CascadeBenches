@@ -242,6 +242,12 @@ module pooling
     .out_valid                ( sipo_data_valid          )
   );
 
+  always @(posedge clk) begin
+  //always @(*) begin
+      $display("POOLING: pool_valid: %d, sipo.shift_count: %d", pool_valid, sipo_output.shift_count);
+  end
+    
+
   assign read_data = sipo_data_out;
   assign read_req = sipo_data_valid;
 
