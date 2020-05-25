@@ -130,6 +130,7 @@ fifo#(
 
 fifo#(
   .DATA_WIDTH               ( COUNT_W                  ),
+  .INIT                     ( "SERDES CFG FIFO"        ),  // Using this field to identify fifo owner in internal $display
   .ADDR_WIDTH               ( 5                        )
 ) cfg_fifo (
   .clk                      ( clk                      ),  //input
@@ -144,6 +145,28 @@ fifo#(
 );
 
 reg [COUNT_W-1:0] shift_count;
+
+initial begin
+    $display("initial cfg_fifo_count: %d, RAM_DEPTH: %d", cfg_fifo.fifo_count, (1 << 5));
+end
+    
+
+always @(posedge clk) begin
+    if (cfg_fifo_push) begin
+        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        $display("cfg_fifo_in: %d", cfg_fifo_in);
+        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    end
+    $display("CFG_FIFO_OUT: %d, cfg_fifo_empty: %d, cfg_fifo.count: %d", cfg_fifo_out, cfg_fifo_empty, cfg_fifo.fifo_count);
+end
+
+always @(serdes_max) begin
+    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    $display("serdes_max: %d, cfg_fifo_empty: %d", serdes_max, cfg_fifo_empty);
+    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+end
+    
+    
 
 always @(posedge clk)
 begin
@@ -163,7 +186,7 @@ wire serdes_clear;
 
 assign serdes_min = 'b0;
 assign serdes_default = 'b0;
-assign serdes_max = cfg_fifo_out;
+assign serdes_max = cfg_fifo_out; //count;
 assign serdes_inc = (state == 1);
 assign serdes_clear = (state == 0);
 
@@ -245,6 +268,12 @@ sipo #(
   .data_out                 ( sipo_data_out            ),
   .out_valid                ( sipo_data_out_v          )
 );
+
+//always @(posedge clk) begin
+//    $display("sipo NUM_SHIFTS: %d, shift_count: %d, parallel_load: %d", sipo_output.NUM_SHIFTS, sipo_output.shift_count, sipo_output.parallel_load);
+//    $display("       SERDES STATE: %d, ", state);
+//end
+    
 
 assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
