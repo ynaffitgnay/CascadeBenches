@@ -508,6 +508,16 @@ endgenerate
     out_sel_d == `OUT_POOL ?
     pool_serdes_count : pu_serdes_count;
 
+    //initial $display("OUT_POOL: %d, out_sel_d: %d", `OUT_POOL, out_sel_d);
+
+    always @(*) begin
+        $display("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        $display("serdes_count: %d, out_sel_d: %d, pool_serdes_count: %d, pu_serdes_count: %d", serdes_count, out_sel_d, pool_serdes_count, pu_serdes_count);
+        $display("serdes serdes_max: %d", u_serdes.serdes_max);
+        $display("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+    end
+    
+
   reg s_write_flush;
   reg m_write_ready;
 
@@ -528,6 +538,8 @@ endgenerate
     .m_write_req              ( pu_write_valid_local     ),
     .m_write_data             ( write_data               )
   );
+
+//    always @(posedge clk) $display("u_serdes IN_COUNT = %d", NUM_PE);
 
 assign write_req = pu_write_valid_local && !(lrn_enable && PU_ID != 0);
 

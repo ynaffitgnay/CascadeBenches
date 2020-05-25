@@ -278,7 +278,13 @@ always @(*) begin
         $display("============================================================");
         //$finish(1);
     end
-end
+end // always @ (*)
+
+//always @(serdes_max) begin
+//    $display("serdes_max: %d", serdes_max);
+//    $finish;
+//end
+    
 
 endmodule // serdes
 

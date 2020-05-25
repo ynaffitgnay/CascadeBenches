@@ -336,6 +336,14 @@ module PU_controller
       layer_params <= cfg_rom[l];
   end
 
+  always @(l) begin
+      $display("Getting layer params for layer: %d", l);
+      $display;
+      $display;
+      $display;
+  end
+    
+
   wire [ STRIDE_SIZE_W        -1 : 0 ]        param_conv_stride;
   reg  [STRIDE_SIZE_W-1:0] param_conv_stride_d;
   always @(posedge clk)
