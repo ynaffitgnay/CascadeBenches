@@ -311,6 +311,7 @@ module PU_controller
   integer pu_rom_idx = 0;
   reg[CFG_WIDTH-1:0] pucval = 0;
 
+    initial $display("SERDES_COUNT_W: %d, NUM_PE: %d", SERDES_COUNT_W, NUM_PE);
 
   initial begin
     max_layers = `max_layers;
@@ -322,10 +323,10 @@ module PU_controller
     for (pu_rom_idx = 0; pu_rom_idx < CFG_DEPTH; pu_rom_idx = pu_rom_idx + 1) begin
       if (!($feof(pucstream))) begin
         $fscanf(pucstream, "%b", pucval);
-        cfg_rom[pu_rom_idx] <= pucval;  
+        cfg_rom[pu_rom_idx] = pucval;  
       end 
       else begin
-        cfg_rom[pu_rom_idx] <= 0;
+        cfg_rom[pu_rom_idx] = 0;
       end // else: !if(!($feof(pucstream)))
     end
   end
@@ -455,6 +456,11 @@ wire buffer_read_done = buffer_read_last || buffer_read_last_sticky || l_type ==
   // Ready signal for PER-PU vecgen
   //assign vecgen_ready = (l_type == L_NORM) ? pu_vecgen_ready : vectorgen_ready;
   assign vecgen_ready = vectorgen_ready;
+
+//always @(posedge clk) begin
+//    $display("PU_controller state: %d", state);
+//end
+    
 
 always @*
 begin: FSM
@@ -1203,6 +1209,8 @@ wire next_iw;
     .DIN                      ( _pu_serdes_count_d       ),
     .DOUT                     ( pu_serdes_count          )
   );
+
+  //assign pu_serdes_count = 6'd4;
 // ==================================================================
 
 

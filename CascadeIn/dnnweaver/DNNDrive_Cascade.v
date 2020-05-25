@@ -346,7 +346,7 @@ module DNNDrive_Cascade #(
     end // always @ (posedge clk)
 
 
-/////* DEBUG: */
+///////* DEBUG: */
 //    always @(posedge clk) begin
 //        if (clk_counter > 800) $finish;
 //    end
