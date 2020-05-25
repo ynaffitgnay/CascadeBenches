@@ -346,10 +346,10 @@ module DNNDrive_Cascade #(
     end // always @ (posedge clk)
 
 
-///////* DEBUG: */
-//    always @(posedge clk) begin
-//        if (clk_counter > 800) $finish;
-//    end
+/////* DEBUG: */
+    always @(posedge clk) begin
+        if (clk_counter > 10) $finish;
+    end
     
 
 endmodule
