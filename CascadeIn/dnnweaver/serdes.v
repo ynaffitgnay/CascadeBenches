@@ -157,7 +157,7 @@ always @(posedge clk) begin
         $display("cfg_fifo_in: %d", cfg_fifo_in);
         $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     end
-    $display("CFG_FIFO_OUT: %d, cfg_fifo_empty: %d, cfg_fifo.count: %d", cfg_fifo_out, cfg_fifo_empty, cfg_fifo.fifo_count);
+    //$display("CFG_FIFO_OUT: %d, cfg_fifo_empty: %d, cfg_fifo.count: %d", cfg_fifo_out, cfg_fifo_empty, cfg_fifo.fifo_count);
 end
 
 always @(serdes_max) begin
