@@ -38,6 +38,8 @@ initial begin
     // don't do anything here!
     // Can initialize each entry in mem if you want...
   end
+  empty = 1;
+  full  = 0;
 end
 
 always @ (fifo_count)
@@ -48,14 +50,23 @@ end
 
 always @ (posedge clk)
 begin : FIFO_COUNTER
-  if (reset)
+  if (reset) begin
     fifo_count <= 0;
+    empty <= 1;
+    full <= 0;
+  end
+    
 
-  else if (push && (!pop||pop&&empty) && !full)
+  else if (push && (!pop||pop&&empty) && !full) begin
     fifo_count <= fifo_count + 1;
+    //$display("FIFO %s PUSH", INIT);
+  end    
 
-  else if (pop && (!push||push&&full) && !empty)
+  else if (pop && (!push||push&&full) && !empty) begin
+    //$display("FIFO %s POP", INIT);
     fifo_count <= fifo_count - 1;
+  end
+    
 end
 
 always @ (posedge clk)
