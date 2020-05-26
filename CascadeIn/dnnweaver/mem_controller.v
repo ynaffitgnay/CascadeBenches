@@ -49,8 +49,11 @@ module mem_controller
 // ******************************************************************
 localparam WR_IDLE = 0, WR_RD_CFG = 1, WR_BUSY = 2, WR_WAIT_DONE = 3;
 localparam integer STATE_W  = 3;
-localparam integer RD_ROM_WIDTH = 2 + (BASE_ADDR_W + 3*OFFSET_ADDR_W + 3*TX_SIZE_WIDTH +
-  2*RD_LOOP_W) * 2;
+localparam integer RD_ROM_WIDTH = 2 + 
+  (2 * TX_SIZE_WIDTH + BASE_ADDR_W + 3 * OFFSET_ADDR_W + 3*RD_LOOP_W) + 
+  (2 * TX_SIZE_WIDTH + BASE_ADDR_W + OFFSET_ADDR_W + RD_LOOP_W);
+//2 + (BASE_ADDR_W + 3*OFFSET_ADDR_W + 3*TX_SIZE_WIDTH +
+//  2*RD_LOOP_W) * 2;
 localparam integer WR_ROM_WIDTH = 2 + (BASE_ADDR_W + OFFSET_ADDR_W + TX_SIZE_WIDTH +
   RD_LOOP_W);
 localparam integer RD_ROM_DEPTH = 1<<RD_ROM_ADDR_W;
@@ -197,11 +200,21 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
 // ******************************************************************
   assign GND = 1024'd0;
 
+  initial begin
+      $display("RD_ROM_WIDTH: %d, WR_ROM_WIDTH: %d, BASE_ADDR_W: %d", RD_ROM_WIDTH, WR_ROM_WIDTH, BASE_ADDR_W);
+      $display("OFFSET_ADDR_W: %d, TX_SIZE_WIDTH: %d, RD_LOOP_W: %d", OFFSET_ADDR_W, TX_SIZE_WIDTH, RD_LOOP_W);
+  end
+    
+
   assign rd_req = stream_rd_loop0_inc || (buffer_rd_count_inc && rd_l_type != 2);
 
-  always @(posedge clk) begin
-      $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
-  end
+  //always @(posedge clk) begin
+  //    $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
+  //    // Components of buffer_rd_count_inc
+  //    $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
+  //    $display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
+  //    $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done,);
+  //end
     
 
   // Throttles the read to wait for write to finish
@@ -246,6 +259,15 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
     buffer_read_loop_max
   } = rd_cfg;
 
+always @(posedge clk) begin
+    $display("RD_CFG, RD_ROM_WIDTH: %d", RD_ROM_WIDTH);
+    $display("rd_l_type: %d, stm_rvalid_size: %d, stm_read_base_addr: 0x%h, stm_read_size: %d", rd_l_type, stream_rvalid_size, stream_read_base_addr, stream_read_size);
+    $display("stm_read_loop_0_offset: 0x%h, stm_read_loop_1_offset: 0x%h, stm_read_loop_2_offset: 0x%h", stream_read_loop_0_offset, stream_read_loop_1_offset, stream_read_loop_2_offset);
+    $display("stm_read_loop_0_max: %d, stm_read_loop_1_max: %d, stm_read_loop_2_max: %d", stream_read_loop_0_max, stream_read_loop_1_max, stream_read_loop_2_max);
+    $display("buffer_rvalid_size: %d, buffer_read_base_addr: 0x%h, buffer_read_size: %d", buffer_rvalid_size, buffer_read_base_addr, buffer_read_size);
+    $display("buffer_read_offset: 0x%h, buffer_read_loop_max: %d", buffer_read_offset, buffer_read_loop_max);
+end
+    
   // Counter to loop over multiple buffer reads.
   assign buffer_rd_count_default = GND[RD_LOOP_W-1:0];
   assign buffer_rd_count_inc = (rd_state == BUSY_BUFFER) && rd_ready && !(read_throttle_d);
@@ -504,6 +526,12 @@ end
 
   assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
 
+  always @(posedge clk) begin
+      $display("WR_CFG, WR_ROM_DEPTH: %d", WR_ROM_DEPTH);
+      $display("wr_l_type: %d, stream_write_base_addr: 0x%h, stream_write_size: %d", wr_l_type, stream_write_base_addr, stream_write_size);
+      $display("stream_write_offset: 0x%h, stream_write_loop_max: %d", stream_write_offset, stream_write_loop_max);
+  end
+    
 
 
   always @(posedge clk)
@@ -660,23 +688,23 @@ end
     .COUNT                    ( wr_pu_id_count           )   //output
   );
 
-    //always @(posedge clk) begin
-    //    $display("wr_cfg_idx_max: %d, write_idx_count: %d, write_idx_overflow: %d, write_idx_inc: %d", wr_cfg_idx_max, write_idx_count, write_idx_overflow, write_idx_inc);
-    //    $display("wr_done: %d, wr_state: %d", wr_done, wr_state);
-    //
-    //    $display("  stream_max: %d, stream_wr_count_inc: %d, stream_wr_count: %d,  next_stream_write: %d", stream_wr_count_max, stream_wr_count_inc, stream_wr_count, next_stream_write);
-    //
-    //    if (wr_done) begin
-    //        $display();
-    //        $display();
-    //        $display();
-    //        $display("<<<<<<<<<<<<<<<<<WR_DONE!!! STATE: %d>>>>>>>>>>>>>>>>>>>>>>", wr_state);
-    //        $display();
-    //        $display();
-    //        $display();
-    //    end
-    //
-    //end
+    always @(posedge clk) begin
+        $display("wr_cfg_idx_max: %d, write_idx_count: %d, write_idx_overflow: %d, write_idx_inc: %d", wr_cfg_idx_max, write_idx_count, write_idx_overflow, write_idx_inc);
+        $display("wr_done: %d, wr_state: %d", wr_done, wr_state);
+    
+        $display("  stream_max: %d, stream_wr_count_inc: %d, stream_wr_count: %d,  next_stream_write: %d", stream_wr_count_max, stream_wr_count_inc, stream_wr_count, next_stream_write);
+    
+        if (wr_done) begin
+            $display();
+            $display();
+            $display();
+            $display("<<<<<<<<<<<<<<<<<WR_DONE!!! STATE: %d>>>>>>>>>>>>>>>>>>>>>>", wr_state);
+            $display();
+            $display();
+            $display();
+        end
+    
+    end
 
 
 endmodule
