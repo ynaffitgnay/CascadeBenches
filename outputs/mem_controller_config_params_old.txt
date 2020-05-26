@@ -1,0 +1,320 @@
+>>> [33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in weight_buffer.v on line 40: for (ii = 0; (ii < (1 << WR_ADDR_WIDTH)); ii = (ii + 1)) begin
+[00m>>> [33m    	tmp = 0;
+[00m>>> [33m    	for (jj = (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH)); (jj > (-1)); jj = (jj - 1)) begin
+[00m>>> [33m    		tmp = ((tmp << RD_WIDTH) + ((ii * (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH))) + jj));
+[00m>>> [33m    		mem[ii] = tmp;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m  > In module declaration in weight_buffer.v on line 40: for (jj = (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH)); (jj > (-1)); jj = (jj - 1)) begin
+[00m>>> [33m    	tmp = ((tmp << RD_WIDTH) + ((ii * (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH))) + jj));
+[00m>>> [33m    	mem[ii] = tmp;
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in ROM.v on line 47: for (i = 0; (i < ROM_DEPTH); i = (i + 1)) begin
+[00m>>> [33m    	if ((!$feof(lutstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(lutstream,"%b",val);
+[00m>>> [33m    		end 
+[00m>>> [33m    		mem[i] <= val;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		mem[i] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in serdes.v on line 99: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in PU.v on line 207: PE_GENBLK[0].pe_write_valid
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m  > In module declaration in PU_controller.v on line 161: for (pu_rom_idx = 0; (pu_rom_idx < CFG_DEPTH); pu_rom_idx = (pu_rom_idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(pucstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(pucstream,"%b",pucval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		cfg_rom[pu_rom_idx] = pucval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		cfg_rom[pu_rom_idx] = 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in mem_controller.v on line 87: for (idx = 0; (idx < RD_ROM_DEPTH); idx = (idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(rmstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(rmstream,"%b",rval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		rd_cfg_rom[idx] <= rval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		rd_cfg_rom[idx] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m  > In module declaration in mem_controller.v on line 90: for (idx = 0; (idx < WR_ROM_DEPTH); idx = (idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(wmstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(wmstream,"%b",wval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		wr_cfg_rom[idx] <= wval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		wr_cfg_rom[idx] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: mem_controller #(.NUM_PE(NUM_PE),.NUM_PU(NUM_PU),.ADDR_W(ADDR_W),.BASE_ADDR_W(BASE_ADDR_W),.OFFSET_ADDR_W(OFFSET_ADDR_W),.RD_LOOP_W(RD_LOOP_W),.TX_SIZE_WIDTH(TX_SIZE_WIDTH),.D_TYPE_W(D_TYPE_W)) u_mem_ctrl(.clk(clk),.reset(reset),.start(start),.done(done),.rd_cfg_idx(rd_cfg_idx),.wr_cfg_idx(wr_cfg_idx),.pu_id(pu_id),.d_type(d_type),.rd_req(rd_req),.rd_ready(rd_ready),.rd_req_size(rd_req_size),.rd_rvalid_size(rd_rvalid_size),.rd_addr(rd_addr),.wr_req(wr_req),.wr_pu_id(wr_pu_id),.wr_ready(wr_ready),.wr_req_size(wr_req_size),.wr_addr(wr_addr),.wr_done(wr_done));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: mem_controller #(.NUM_PE(NUM_PE),.NUM_PU(NUM_PU),.ADDR_W(ADDR_W),.BASE_ADDR_W(BASE_ADDR_W),.OFFSET_ADDR_W(OFFSET_ADDR_W),.RD_LOOP_W(RD_LOOP_W),.TX_SIZE_WIDTH(TX_SIZE_WIDTH),.D_TYPE_W(D_TYPE_W)) u_mem_ctrl(.clk(clk),.reset(reset),.start(start),.done(done),.rd_cfg_idx(rd_cfg_idx),.wr_cfg_idx(wr_cfg_idx),.pu_id(pu_id),.d_type(d_type),.rd_req(rd_req),.rd_ready(rd_ready),.rd_req_size(rd_req_size),.rd_rvalid_size(rd_rvalid_size),.rd_addr(rd_addr),.wr_req(wr_req),.wr_pu_id(wr_pu_id),.wr_ready(wr_ready),.wr_req_size(wr_req_size),.wr_addr(wr_addr),.wr_done(wr_done));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: weight_buffer #(.RD_WIDTH(OP_WIDTH),.WR_WIDTH(AXI_DATA_WIDTH),.RD_ADDR_WIDTH(RD_ADDR_WIDTH),.WR_ADDR_WIDTH(WR_ADDR_WIDTH)) u_wb(.clk(clk),.reset(reset),.read_req(wb_read_req_d),.read_data(wb_read_data),.read_addr(wb_read_addr_d),.write_req(wb_write_req),.write_data(wb_write_data),.write_addr(wb_write_addr));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: weight_buffer #(.RD_WIDTH(OP_WIDTH),.WR_WIDTH(AXI_DATA_WIDTH),.RD_ADDR_WIDTH(RD_ADDR_WIDTH),.WR_ADDR_WIDTH(WR_ADDR_WIDTH)) u_wb(.clk(clk),.reset(reset),.read_req(wb_read_req_d),.read_data(wb_read_data),.read_addr(wb_read_addr_d),.write_req(wb_write_req),.write_data(wb_write_data),.write_addr(wb_write_addr));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: ROM #(.DATA_WIDTH(OP_WIDTH),.ADDR_WIDTH(11)) u_lrn_lut(.clk(clk),.reset(reset),.address(sqsum_ser),.enable(sqsum_ser_valid),.data_out(lrn_weight));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: PU_controller #(.NUM_PE(NUM_PE),.WEIGHT_ADDR_WIDTH(RD_ADDR_WIDTH),.PE_CTRL_W(PE_CTRL_WIDTH),.VECGEN_CTRL_W(VECGEN_CTRL_W),.TID_WIDTH(PU_TID_WIDTH),.PAD_WIDTH(PAD_WIDTH),.LAYER_PARAM_WIDTH(LAYER_PARAM_WIDTH)) u_controller(.clk(clk),.reset(reset),.start(start),.done(pu_done),.l_type(l_type),.dbg_kw(dbg_kw),.dbg_kh(dbg_kh),.dbg_iw(dbg_iw),.dbg_ih(dbg_ih),.dbg_ic(dbg_ic),.dbg_oc(dbg_oc),.state(pu_controller_state),.pe_ctrl(pe_ctrl),.lrn_enable(lrn_enable),.pu_serdes_count(pu_serdes_count),.pe_neuron_sel(pe_neuron_sel),.pe_neuron_bias(pe_neuron_bias),.pe_neuron_read_req(pe_neuron_read_req),.buffer_read_empty(buffer_read_empty),.buffer_read_req(buffer_read_req),.buffer_read_last(buffer_read_last),.vectorgen_ready(vecgen_ready),.pu_vecgen_ready(pu_vecgen_ready),.vectorgen_ctrl(vecgen_ctrl),.vectorgen_cfg(vecgen_cfg),.pe_piso_read_req(pe_piso_read_req),.wb_read_req(wb_read_req),.wb_read_addr(wb_read_addr),.pe_write_mask(vecgen_mask),.pool_cfg(pool_cfg),.pool_ctrl(pool_ctrl),.src_0_sel(src_0_sel),.src_1_sel(src_1_sel),.src_2_sel(src_2_sel),.bias_read_req(bias_read_req),.out_sel(out_sel),.dst_sel(dst_sel),.l_inc_out(l_inc));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m[00mstart
+>>> RD_ROM_WIDTH: 506, WR_ROM_WIDTH: 118, BASE_ADDR_W: 32
+>>> OFFSET_ADDR_W: 32, TX_SIZE_WIDTH: 20, RD_LOOP_W: 32
+>>> CTRL_WIDTH: 7, CFG_WIDTH: 3
+>>> initial cfg_fifo_count: 0, RAM_DEPTH: 32
+>>> SERDES_COUNT_W: 6, NUM_PE: 4
+>>> instantiated
+>>> SERDES: serdes_max: 0, IN_COUNT: 4, serializer_pop: 0, sipo_data_out_v: 0
+>>> state: 0, serdes_fifo_empty: 1, serdes_fifo_pop: 1
+>>> sipo_data_v: 0, serial_data_v: 0, state: 0, serdes_count: 0
+>>> SERDES: serdes_max: 0, IN_COUNT: 4, serializer_pop: 0, sipo_data_out_v: 0
+>>> state: 0, serdes_fifo_empty: 1, serdes_fifo_pop: 0
+>>> sipo_data_v: 0, serial_data_v: 0, state: 0, serdes_count: 0
+>>>     fifo fwft push ctr: 0, pop ctr: 0, fifo_cnt: 0, fifo_empty: 1
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 0, stm_read_base_addr: 0x00000000, stm_read_size: 0
+>>> stm_read_loop_0_offset: 0x00000000, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 0, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 0, buffer_read_base_addr: 0x00000000, buffer_read_size: 0
+>>> buffer_read_offset: 0x00000000, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x00000000, stream_write_size: 0
+>>> stream_write_offset: 0x00000000, stream_write_loop_max: 0
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 0
+>>>   stream_max: 0, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 1
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 0) || ((0 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 0
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 0
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 0) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 1
+>>> Cycle 1: Starting and transitioning to AWAIT_RESP
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 0
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 2
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 0
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 3
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 1
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 4
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 1
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 0,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 5
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 2
+>>>   stream_max: 19, stream_wr_count_inc: 1, stream_wr_count: 0,  next_stream_write: 0
+>>> DNN2AMI:============================================================ Accepting macro WRITE request ADDR: 000d6d00 Size: 36 
+>>> DNN2AMI: WR_req is being asserted
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 0
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 0
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 1, ri_state: 0
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 6
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 2
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 1,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 1
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 8
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 0, ri_state: 1
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 7
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 2
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 1,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 1
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 8
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 0, ri_state: 1
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 8
+>>> RD_CFG
+>>> rd_l_type: 0, stm_rvalid_size: 196, stm_read_base_addr: 0x000d66e0, stm_read_size: 196
+>>> stm_read_loop_0_offset: 0x00000620, stm_read_loop_1_offset: 0x00000000, stm_read_loop_2_offset: 0x00000000
+>>> stm_read_loop_0_max: 0, stm_read_loop_1_max: 19, stm_read_loop_2_max: 0
+>>> buffer_rvalid_size: 8, buffer_read_base_addr: 0x00000000, buffer_read_size: 8
+>>> buffer_read_offset: 0x00000040, buffer_read_loop_max: 0
+>>> WR_CFG
+>>> wr_l_type: 0, stream_write_base_addr: 0x000d6d00, stream_write_size: 36
+>>> stream_write_offset: 0x00000120, stream_write_loop_max: 19
+>>> wr_cfg_idx_max: 3, write_idx_count: 0, write_idx_overflow: 0, write_idx_inc: 0
+>>> wr_done: 0, wr_state: 2
+>>>   stream_max: 19, stream_wr_count_inc: 0, stream_wr_count: 1,  next_stream_write: 0
+>>> u_read_info stream_push: 0, inbuf_pop: 0, d_type: 1
+>>> rvalid_inc: 0, rvalid_count: 0, rvalid_max: 8
+>>> inbuf_empty: 1, output_fifo_full: 0, next_read: 0, ri_state: 1
+>>> _pool_valid: 0 = (0 || 0) && ((0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1)))
+>>> 
+>>> 
+>>> Cycle: 9
+>>> Goodbye!
