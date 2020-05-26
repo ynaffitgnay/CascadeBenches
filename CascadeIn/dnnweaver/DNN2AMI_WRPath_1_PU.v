@@ -250,7 +250,7 @@ module DNN2AMI_WRPath_1_PU
         end
     end
 
-    assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);  // wr_ready_reg;
+    assign wr_ready = (!macroWrQ_full && !macro_req_active && !reqQ_full);//(macroWrQ_empty && !macro_req_active && reqQ_empty);  // wr_ready_reg;
     assign wr_done  = wr_done_reg;
 
     wire not_macroWrQ_empty = !macroWrQ_empty;
@@ -377,6 +377,7 @@ module DNN2AMI_WRPath_1_PU
     always @(posedge clk) begin
     //always @(*) begin
         $display("wr_done: %d, prev_new_wr_done_reg: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, prev_new_wr_done_reg, new_wr_done_reg, requests_left);
+        $display("outbuf_empty: %d, reqQ_full: %d", outbuf_empty, reqQ_full);
     end
 
     // How the memory controller determines if a wr_request should be sent
