@@ -374,6 +374,22 @@ module PU_controller
     param_kh,
     param_kw} = layer_params;
 
+    //initial begin
+    //    $display("CFG_WIDTH: %d, SERDES_COUNT_W: %d, PARAM_C_WIDTH: %d, LAYER_PARAM_WIDTH: %d", CFG_WIDTH, SERDES_COUNT_W, PARAM_C_WIDTH, LAYER_PARAM_WIDTH);
+    //    $display("TID_WIDTH: %d, PAD_WIDTH: %d, L_TYPE_WIDTH: %d, STRIDE_SIZE_W: %d", TID_WIDTH, PAD_WIDTH, L_TYPE_WIDTH, STRIDE_SIZE_W);
+    //end
+
+    //CFG_WIDTH, SERDES_COUNT_W, 2*PARAM_C_WIDTH, 7* + 2 + 2 + STRIDE_SIZE_W
+    
+
+    //always @(posedge clk) begin
+    //    $display("layer params: serdes_count: %d, param_conv_stride: %d, param_pool_iw: %d" , serdes_count, param_conv_stride, param_pool_iw);
+    //    $display("param_oh: %d, pool_kernel: %d, param_pool_enable: %d, l_type: %d", param_oh, pool_kernel, param_pool_enable, l_type);
+    //    $display("max_threads: %d, pad_w: %d, pad_r_s: %d, pad_r_e: %d, skip: %d, endrow_iw: %d", max_threads, pad_w, pad_r_s, pad_r_e, skip, endrow_iw);
+    //    $display("param_ic: %d, param_ih: %d, param_iw: %d, param_oc: %d, param_kh: %d, param_kw: %d", param_ic, param_ih, param_iw, param_oc, param_kh, param_kw);
+    //end
+
+
   always @(posedge clk)
     if (reset)
       pool_enable <= 1'b0;
@@ -1855,6 +1871,15 @@ wire next_iw;
     ((pool_kernel == 3) ?
     (pool_ih_count[0] == 0 && pool_ih_count != 0) :
     (pool_ih_count[0] == 1)));
+
+  always @(posedge clk) begin
+      $display("_pool_valid: %d = (%d || %d) && ((%d == %d) || ((%d == 3) ? (%d == 0 && %d != 0) : (%d == 1)))", _pool_valid, _pool_in_shift, _pool_in_pop, pool_ih_count, pool_ih_max, pool_kernel, pool_ih_count[0], pool_ih_count, pool_ih_count[0]);
+      $display("_pool_in_pop: %d, stride_count: %d, pool_ready: %d, pool_enable: %d",_pool_in_pop, stride_count, pool_ready, pool_enable);
+      $display("p_count: %d, pad_iw: %d, pool_ready_last: %d", p_count, pad_iw, pool_ready_last);
+      //$display("_pool_in_shift: %d, _pool_in_pop: %d, pool_ih_count: %d, pool_ih_max: %d", _pool_in_shift, _pool_in_pop, pool_ih_count, pool_ih_max);
+      //$display("pool_kernel: %d, pool_ih_count[0]: %d, pool_ih_count: %d", pool_kernel, pool_ih_count[0], pool_ih_count);
+  end
+    
 
   assign pool_endrow = ((pool_iw_count == pool_iw_max) ||
                        (pool_iw_count == pe_iw_max)) &&

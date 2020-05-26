@@ -479,8 +479,8 @@ endgenerate
     out_sel_d == `OUT_POOL ?
     pool_read_data : lrn_enable_local ? norm_out : pe_write_data;
 
-  always @(posedge clk) begin
-  //always @(*) begin
+  //always @(posedge clk) begin
+  always @(*) begin
     $display("serdes_write_req: %d, out_sel_d: %d, OUT_POOL: %d, pool_read_req: %d,", serdes_write_req, out_sel_d, `OUT_POOL, pool_read_req);
     //$display("lrn_enable_local: %d, norm_out_valid: %d, pe_write_req: %d", lrn_enable_local, norm_out_valid, pe_write_req);
     if (serdes_write_req) begin
