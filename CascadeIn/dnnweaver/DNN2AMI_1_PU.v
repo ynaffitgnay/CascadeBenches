@@ -601,6 +601,11 @@ module DNN2AMI_1_PU
     //assign rd_ready = !macroRdQ_full && !reqQ_full && !macro_req_active && !inbuf_full;    // TODO: double check this
     assign rd_ready = macroRdQ_empty && reqQ_empty && !macro_req_active && tagQ_empty;    // TODO: double check this
 
+    always @(posedge clk) begin
+        $display("rd_ready: %d, macroRdQ_empty: %d, reqQ_empty: %d, macro_req_active: %d, tagQ_empty: %d", rd_ready, macroRdQ_empty, reqQ_empty, macro_req_active, tagQ_empty);
+    end
+    
+
     //always@(posedge clk) begin
     //    if (macro_req_active && reqQ_full) begin
     //        $display("RD PATH: Unable to inssue another read request! reqQ_full");
