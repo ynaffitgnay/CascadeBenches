@@ -207,16 +207,19 @@ module DNN2AMI_WRPath_1_PU
     assign reqQ_deq = reqOut_grant && reqValid;
 
     //// TODO: comment out
-    //always@(posedge clk) begin
-    //    if  (reqValid) begin
-    //        $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
-    //    end
-    //end
+    always@(posedge clk) begin
+        if  (reqValid) begin
+            $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
+        end
+    end
 
     // Two important output signals
+    reg wr_ready_reg;
     reg wr_done_reg;
 
+    reg new_wr_ready_reg;
     reg new_wr_done_reg;
+    reg prev_new_wr_done_reg;
     
     // Current macro request being sequenced (fractured into smaller operations)
     reg macro_req_active;
@@ -247,7 +250,7 @@ module DNN2AMI_WRPath_1_PU
         end
     end
 
-    assign wr_ready = (macroWrQ_empty && !macro_req_active && reqQ_empty);//wr_ready_reg;
+    assign wr_ready = wr_ready_reg;//(macroWrQ_empty && !macro_req_active && reqQ_empty);
     assign wr_done  = wr_done_reg;
 
     wire not_macroWrQ_empty = !macroWrQ_empty;
@@ -262,9 +265,9 @@ module DNN2AMI_WRPath_1_PU
         new_current_isWrite   = current_isWrite;
         new_current_pu_id     = current_pu_id;
     
-    
+        new_wr_ready_reg = (macroWrQ_empty && !macro_req_active && reqQ_empty);
         /* SOMETHING ABOUT THIS ASSIGNMENT CAUSES CASCADE TO HANG!!! */
-        new_wr_done_reg  = 1'b0;
+        //new_wr_done_reg  = 1'b0;
         
         reqQ_enq = 1'b0;
         reqQ_in[`AMIRequest_valid] = 1'b0;
@@ -289,15 +292,15 @@ module DNN2AMI_WRPath_1_PU
 
                     if ((requests_left - 1) == 0) begin
                         new_macro_req_active = 1'b0;
-                        new_wr_done_reg = 1'b1;
+                        //new_wr_done_reg = 1'b1;
                     end
                 end
             end
             // check if anything is left to issue
-            if (requests_left == 0) begin
-                new_macro_req_active = 1'b0;
-                new_wr_done_reg = 1'b1;
-            end
+            //if (requests_left == 0) begin
+            //    new_macro_req_active = 1'b0;
+            //    new_wr_done_reg = 1'b1;
+            //end
         end // if (macro_req_active)
         else begin
             // See if there is a new operation available
@@ -314,6 +317,25 @@ module DNN2AMI_WRPath_1_PU
             end
         end // else: !if(macro_req_active)
     end // always @ (*)
+
+    always @(*) begin
+      //$display("DO I EVER GET INTO HERE???");
+      //new_macro_req_active = macro_req_active;
+      new_wr_done_reg = 1'b0;
+      if (macro_req_active) begin
+          // check if anything is left to issue
+			  if (new_requests_left == 0) begin
+				  //new_macro_req_active = 1'b0;
+				  new_wr_done_reg = 1'b1;
+			  end
+      end
+    end
+
+    always @(*) begin
+        $display("new_wr_done_reg: %d, new_macro_req_active: %d, new_requests_left: %d", new_wr_done_reg, new_macro_req_active, new_requests_left);
+    end
+    
+  
 
 
 
@@ -342,10 +364,16 @@ module DNN2AMI_WRPath_1_PU
     //
     //end
 
+    always @(*) begin
+        $display("CHANGE REGARDING wr_ready: %d, new_wr_ready_reg: %d, macroWrQ_empty: %d, macro_req_active: %d, new_macro_req_active: %d, reqQ_empty: %d", wr_ready, new_wr_ready_reg, macroWrQ_empty, macro_req_active, new_macro_req_active, reqQ_empty);
+    end
+    
+
 
     //always @(posedge clk) begin
-    //    $display("wr_done: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, new_wr_done_reg, requests_left);
-    //end
+    always @(*) begin
+        $display("wr_done: %d, prev_new_wr_done_reg: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, prev_new_wr_done_reg, new_wr_done_reg, requests_left);
+    end
 
     // How the memory controller determines if a wr_request should be sent
     // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
@@ -354,9 +382,13 @@ module DNN2AMI_WRPath_1_PU
     // WR_DONE is asserted when all the PUs no writes remaining.
     always@(posedge clk) begin
         if (rst) begin
+            wr_ready_reg <= 1'b1;
+            prev_new_wr_done_reg <= 1'b0;
             wr_done_reg  <= 1'b0;
         end else begin
-            wr_done_reg  <= new_wr_done_reg;
+            wr_ready_reg <= new_wr_ready_reg;
+            prev_new_wr_done_reg  <= new_wr_done_reg;
+            wr_done_reg <= (prev_new_wr_done_reg && new_wr_done_reg);
         end
     end
     
