@@ -154,6 +154,11 @@ module vectorgen # (
 /** State machine
  * valid states: IDLE(Default), BUSY */
 
+  always @(posedge clk) begin
+      $display("vectorgen state: %d", state);
+  end
+    
+
   wire test_ready;
 
   assign test_ready = state == READY || state == LAST;//reads_remaining == 0;
