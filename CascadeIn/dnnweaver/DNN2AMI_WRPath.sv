@@ -156,15 +156,15 @@ module DNN2AMI_WRPath
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
-    always@(posedge clk) begin
-        if (macroWrQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
-        end
-        if (wr_req) begin
-            //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
-            $display("DNN2AMI: WR_req is being asserted");
-        end    
-    end    
+    //always@(posedge clk) begin
+    //    if (macroWrQ_enq) begin
+    //        $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
+    //    end
+    //    if (wr_req) begin
+    //        //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
+    //        $display("DNN2AMI: WR_req is being asserted");
+    //    end    
+    //end    
     
     // reqOut queue to simplify the sequencing logic
     wire             reqQ_empty;

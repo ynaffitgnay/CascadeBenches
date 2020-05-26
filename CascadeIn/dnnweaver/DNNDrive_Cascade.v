@@ -143,9 +143,9 @@ module DNNDrive_Cascade #(
 
 
     always @(posedge clk) begin
-        $display();
-        $display();
-        $display("Cycle: %d", clk_counter);
+        //$display();
+        //$display();
+        //$display("Cycle: %d", clk_counter);
     end
 
 
@@ -168,7 +168,7 @@ module DNNDrive_Cascade #(
             
                     // Signify start
                     initiate_start <= 1'b1;
-                    $display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
+                    //$display("Cycle %d: Starting and transitioning to AWAIT_RESP", clk_counter);
             
                     // Go to await state
                     current_state <= AWAIT_RESP;
@@ -179,7 +179,7 @@ module DNNDrive_Cascade #(
                     //if (dnn_done == 1'b1 || (lhc_enable[0] ? l_inc : 1'b0)) begin
                     if (dnn_done == 1'b1) begin
                         end_cycle <= clk_counter;
-                        $display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
+                        //$display("Cycle %d: DNNWeaver DONE. Total Cycles: %d", clk_counter, (clk_counter - start_cycle));
 
 
                         // TODO
@@ -241,14 +241,13 @@ module DNNDrive_Cascade #(
             if (dnn_read_req[`AMIRequest_valid]) begin
                 //// Mark the request as accepted
                 //dnn_read_req_grant <= 1'b1;
-                $display("Read request. Addr: %h, Size: %d", dnn_read_req[`AMIRequest_addr], dnn_read_req[`AMIRequest_size]);
+                //$display("Read request. Addr: %h, Size: %d", dnn_read_req[`AMIRequest_addr], dnn_read_req[`AMIRequest_size]);
                 
                 r_count <= r_count + 1;  // Should this only happen if !isWrite?
                 
                 if (dnn_read_req[`AMIRequest_isWrite]) begin
-                    $display("Write request sent to read port. Ignored.");
+                    //$display("Write request sent to read port. Ignored.");
                 end else begin
-                    // TODO: use variable offset
                     $fseek(instream, read_addr, 0);
                     $fread(instream, read_data);
                     
@@ -286,17 +285,16 @@ module DNNDrive_Cascade #(
             w_count <= 0;
         end else begin
             if (dnn_write_req[`AMIRequest_valid]) begin
-                $display("Write request. Addr: %h, Size: %d", dnn_write_req[`AMIRequest_addr], dnn_write_req[`AMIRequest_size]);
+                //$display("Write request. Addr: %h, Size: %d", dnn_write_req[`AMIRequest_addr], dnn_write_req[`AMIRequest_size]);
 
                 w_count <= w_count + 1;
 
                 if (!dnn_write_req[`AMIRequest_isWrite]) begin
-                    $display("Read request sent to write port. Ignored.");
+                    //$display("Read request sent to write port. Ignored.");
                 end else begin
-                    // TODO: use variable offset
                     $fseek(outstream, write_addr, 0);
                     if (dnn_write_req[`AMIRequest_size] % 8 != 0) begin
-                        $display("Write request size not a multiple of 8 bytes...");
+                        //$display("Write request size not a multiple of 8 bytes...");
                     end
 
                     case (dnn_write_req[`AMIRequest_size])
@@ -333,7 +331,7 @@ module DNNDrive_Cascade #(
                       end
 
                       default : begin
-                          $display("Write request for unexpected number of bytes");
+                          //$display("Write request for unexpected number of bytes");
                       end                      
                     endcase // case (dnn_write_req[`AMIRequest_size])
 

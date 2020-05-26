@@ -98,7 +98,7 @@ fifo #(
     end
 
     always @(*) begin        
-        $display("    fifo fwft push ctr: %d, pop ctr: %d, fifo_cnt: %d, fifo_empty: %d", push_ctr, pop_ctr, fifo_buffer.fifo_count, fifo_empty);
+        //$display("    fifo fwft push ctr: %d, pop ctr: %d, fifo_cnt: %d, fifo_empty: %d", push_ctr, pop_ctr, fifo_buffer.fifo_count, fifo_empty);
     end
 
 

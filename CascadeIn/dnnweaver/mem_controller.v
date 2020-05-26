@@ -208,16 +208,16 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
 
   assign rd_req = stream_rd_loop0_inc || (buffer_rd_count_inc && rd_l_type != 2);
 
-  always @(posedge clk) begin
-      //$display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
-      //// Components of buffer_rd_count_inc
-      $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
-      //$display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
-      $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done);
-      $display("wait_for_wr_done: %d, stream_wr_count_inc: %d, stream_wr_count: %d, stream_wr_count_max: %d, next_stream_write: %d", wait_for_wr_done, stream_wr_count_inc, stream_wr_count, stream_wr_count_max, next_stream_write);
-      $display("wr_req: %d, wr_done: %d, wr_ready: %d, wr_state: %d", wr_req, wr_done, wr_ready, wr_state);
-      //$display("stream_wr_count: %d, stream_wr_count_max: %d", stream_wr_count, stream_wr_count_max);
-  end
+//  always @(posedge clk) begin
+//      //$display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
+//      //// Components of buffer_rd_count_inc
+//      $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
+//      //$display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
+//      $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done);
+//      $display("wait_for_wr_done: %d, stream_wr_count_inc: %d, stream_wr_count: %d, stream_wr_count_max: %d, next_stream_write: %d", wait_for_wr_done, stream_wr_count_inc, stream_wr_count, stream_wr_count_max, next_stream_write);
+//      $display("wr_req: %d, wr_done: %d, wr_ready: %d, wr_state: %d", wr_req, wr_done, wr_ready, wr_state);
+//      //$display("stream_wr_count: %d, stream_wr_count_max: %d", stream_wr_count, stream_wr_count_max);
+//  end
     
 
   // Throttles the read to wait for write to finish
@@ -529,9 +529,9 @@ end
 
   assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
 
-  always @(wr_req) begin
-      $display("MEM_CONTROLLER: wr_req: %d, wr_ready: %d", wr_req, wr_ready);
-  end
+//  always @(wr_req) begin
+//      $display("MEM_CONTROLLER: wr_req: %d, wr_ready: %d", wr_req, wr_ready);
+//  end
     
 
   //always @(posedge clk) begin

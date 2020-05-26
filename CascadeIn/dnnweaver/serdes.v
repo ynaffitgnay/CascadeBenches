@@ -146,25 +146,25 @@ fifo#(
 
 reg [COUNT_W-1:0] shift_count;
 
-initial begin
-    $display("initial cfg_fifo_count: %d, RAM_DEPTH: %d", cfg_fifo.fifo_count, (1 << 5));
-end
+//initial begin
+//    $display("initial cfg_fifo_count: %d, RAM_DEPTH: %d", cfg_fifo.fifo_count, (1 << 5));
+//end
     
 
-always @(posedge clk) begin
-    if (cfg_fifo_push) begin
-        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-        $display("cfg_fifo_in: %d", cfg_fifo_in);
-        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-    end
-    //$display("CFG_FIFO_OUT: %d, cfg_fifo_empty: %d, cfg_fifo.count: %d", cfg_fifo_out, cfg_fifo_empty, cfg_fifo.fifo_count);
-end
+//always @(posedge clk) begin
+//    if (cfg_fifo_push) begin
+//        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+//        $display("cfg_fifo_in: %d", cfg_fifo_in);
+//        $display("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+//    end
+//    //$display("CFG_FIFO_OUT: %d, cfg_fifo_empty: %d, cfg_fifo.count: %d", cfg_fifo_out, cfg_fifo_empty, cfg_fifo.fifo_count);
+//end
 
-always @(serdes_max) begin
-    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-    $display("serdes_max: %d, cfg_fifo_empty: %d", serdes_max, cfg_fifo_empty);
-    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-end
+//always @(serdes_max) begin
+//    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//    $display("serdes_max: %d, cfg_fifo_empty: %d", serdes_max, cfg_fifo_empty);
+//    $display("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+//end
     
     
 
@@ -278,38 +278,38 @@ sipo #(
 assign m_write_data = serdes_max == IN_COUNT ? serdes_fifo_out : sipo_data_out;
 assign m_write_req = serdes_max == IN_COUNT ? serializer_pop: sipo_data_out_v;
 
-always @(*) begin
-//always @(posedge clk) begin    
-    $display("SERDES: serdes_max: %d, IN_COUNT: %d, serializer_pop: %d, sipo_data_out_v: %d", serdes_max, IN_COUNT, serializer_pop, sipo_data_out_v);
-    //$display("shift_count: %d, NUM_SHIFTS: %d, parallel_load: %d, parallel_load_d: %d", sipo_output.shift_count, sipo_output.NUM_SHIFTS, sipo_output.parallel_load, sipo_output.parallel_load_d);
-    $display("state: %d, serdes_fifo_empty: %d, serdes_fifo_pop: %d", state, serdes_fifo_empty, serdes_fifo_pop);
-    $display("sipo_data_v: %d, serial_data_v: %d, state: %d, serdes_count: %d", sipo_data_v, serial_data_v, state, serdes_count);
-    if (sipo_data_out_v) begin
-        $display("============================================================");
-        $display("============================================================");
-        $display("============================================================");
-        $display("");
-        $display("                    sipo_data_out_v!!!!!!!!");
-        $display("");
-        $display("============================================================");
-        $display("============================================================");
-        $display("============================================================");
-        //$finish(1);
-    end // if (sipo_data_out_v)
-    
-    if (serializer_pop) begin
-        $display("============================================================");
-        $display("============================================================");
-        $display("============================================================");
-        $display("");
-        $display("                    serializer_pop!!!!!!!!");
-        $display("");
-        $display("============================================================");
-        $display("============================================================");
-        $display("============================================================");
-        //$finish(1);
-    end
-end // always @ (*)
+//always @(*) begin
+////always @(posedge clk) begin    
+//    $display("SERDES: serdes_max: %d, IN_COUNT: %d, serializer_pop: %d, sipo_data_out_v: %d", serdes_max, IN_COUNT, serializer_pop, sipo_data_out_v);
+//    //$display("shift_count: %d, NUM_SHIFTS: %d, parallel_load: %d, parallel_load_d: %d", sipo_output.shift_count, sipo_output.NUM_SHIFTS, sipo_output.parallel_load, sipo_output.parallel_load_d);
+//    $display("state: %d, serdes_fifo_empty: %d, serdes_fifo_pop: %d", state, serdes_fifo_empty, serdes_fifo_pop);
+//    $display("sipo_data_v: %d, serial_data_v: %d, state: %d, serdes_count: %d", sipo_data_v, serial_data_v, state, serdes_count);
+//    if (sipo_data_out_v) begin
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("");
+//        $display("                    sipo_data_out_v!!!!!!!!");
+//        $display("");
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("============================================================");
+//        //$finish(1);
+//    end // if (sipo_data_out_v)
+//    
+//    if (serializer_pop) begin
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("");
+//        $display("                    serializer_pop!!!!!!!!");
+//        $display("");
+//        $display("============================================================");
+//        $display("============================================================");
+//        $display("============================================================");
+//        //$finish(1);
+//    end
+//end // always @ (*)
 
 //always @(serdes_max) begin
 //    $display("serdes_max: %d", serdes_max);

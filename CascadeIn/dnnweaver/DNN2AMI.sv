@@ -367,13 +367,13 @@ module DNN2AMI
     assign data_to_inbuf  = respQ_out_data[AXI_DATA_WIDTH-1:0];
 
 
-    // TODO: comment this out
-    // debug signals
-    always@(posedge clk) begin
-        if (macroRdQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
-        end
-    end
+//    // TODO: comment this out
+//    // debug signals
+//    always@(posedge clk) begin
+//        if (macroRdQ_enq) begin
+//            $display("DNN2AMI:============================================================ Accepting macro READ request ADDR: %h Size: %d ",rd_addr,rd_req_size);
+//        end
+//    end
 /*
     always@(posedge clk) begin
         if (inbuf_full) begin
@@ -532,7 +532,7 @@ module DNN2AMI
             // issue write requests
             if (current_isWrite == 1'b1) begin
                 if (!outbuf_empty[current_pu_id] && write_valid) begin // TODO: Not sure about this write_valid signal
-                    $display("DNN2AMI: ZZZZZZZZZZZZZZ THIS SHOULD NEVER EXECUTE ZZZZZZZZZZZZZZZZZZZZZ");
+//                    $display("DNN2AMI: ZZZZZZZZZZZZZZ THIS SHOULD NEVER EXECUTE ZZZZZZZZZZZZZZZZZZZZZ");
                     //outbuf_pop[current_pu_id] = 1'b1;
                     //reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
                     reqQ_enq = 1'b1;

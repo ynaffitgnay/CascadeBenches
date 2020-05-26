@@ -122,7 +122,7 @@ module pooling
     pop,
     shift} = ctrl;
 
-    initial $display("CTRL_WIDTH: %d, CFG_WIDTH: %d", CTRL_WIDTH, CFG_WIDTH);
+    //initial $display("CTRL_WIDTH: %d, CFG_WIDTH: %d", CTRL_WIDTH, CFG_WIDTH);
 
   assign pool_fifo_pop = pop && !pool_pad_row;
 
@@ -245,9 +245,9 @@ module pooling
   );
 
   //always @(posedge clk) begin
-  always @(*) begin
-      $display("POOLING: pool_valid: %d, sipo.shift_count: %d", pool_valid, sipo_output.shift_count);
-  end
+  //always @(*) begin
+  //    $display("POOLING: pool_valid: %d, sipo.shift_count: %d", pool_valid, sipo_output.shift_count);
+  //end
     
 
   assign read_data = sipo_data_out;

@@ -536,7 +536,7 @@ module DNN2AMI_1_PU
             // issue write requests
             if (current_isWrite == 1'b1) begin
                 if (!outbuf_empty && write_valid) begin // TODO: Not sure about this write_valid signal
-                    $display("DNN2AMI: ZZZZZZZZZZZZZZ THIS SHOULD NEVER EXECUTE ZZZZZZZZZZZZZZZZZZZZZ");
+                    //$display("DNN2AMI: ZZZZZZZZZZZZZZ THIS SHOULD NEVER EXECUTE ZZZZZZZZZZZZZZZZZZZZZ");
                     //outbuf_pop[current_pu_id] = 1'b1;
                     //reqQ_in  = '{valid: 1'b1, isWrite: 1'b1, addr: {{32{1'b0}},current_address} , data: pu_outbuf_data[current_pu_id], size: 8}; // double check this size
                     reqQ_enq = 1'b1;

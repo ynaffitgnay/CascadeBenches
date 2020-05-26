@@ -145,15 +145,15 @@ module DNN2AMI_WRPath_1_PU
     assign macroWrQ_enq = wr_req && !macroWrQ_full;        
 
     // Debug  // TODO: comment this out
-    always@(posedge clk) begin
-        if (macroWrQ_enq) begin
-            $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
-        end
-        if (wr_req) begin
-            //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
-            $display("DNN2AMI: WR_req is being asserted");
-        end    
-    end    
+    //always@(posedge clk) begin
+    //    if (macroWrQ_enq) begin
+    //        $display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
+    //    end
+    //    if (wr_req) begin
+    //        //$display("DNN2AMI: WR_req is being asserted, macroWrQ_enq: %d, macroWrQ_deq: %d", macroWrQ_enq, macroWrQ_deq);
+    //        $display("DNN2AMI: WR_req is being asserted");
+    //    end    
+    //end    
     
     // reqOut queue to simplify the sequencing logic
     wire             reqQ_empty;
@@ -207,11 +207,11 @@ module DNN2AMI_WRPath_1_PU
     assign reqQ_deq = reqOut_grant && reqValid;
 
     //// TODO: comment out
-    always@(posedge clk) begin
-        if  (reqValid) begin
-            $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
-        end
-    end
+    //always@(posedge clk) begin
+    //    if  (reqValid) begin
+    //        $display("WR PATH: Req valid and size of reqQ is %d, grant: %d, reqQ_deq:  %d", SoftFIFO_reqQ.reqQ.counter,reqOut_grant,reqQ_deq);
+    //    end
+    //end
 
     // Two important output signals
     //reg wr_ready_reg;
@@ -331,9 +331,9 @@ module DNN2AMI_WRPath_1_PU
     //  end
     //end
 
-    always @(*) begin
-        $display("new_wr_done_reg: %d, new_macro_req_active: %d, new_requests_left: %d", new_wr_done_reg, new_macro_req_active, new_requests_left);
-    end
+    //always @(*) begin
+    //    $display("new_wr_done_reg: %d, new_macro_req_active: %d, new_requests_left: %d", new_wr_done_reg, new_macro_req_active, new_requests_left);
+    //end
     
   
 
@@ -368,16 +368,16 @@ module DNN2AMI_WRPath_1_PU
     //    $display("CHANGE REGARDING wr_ready: %d, new_wr_ready_reg: %d, macroWrQ_empty: %d, macro_req_active: %d, new_macro_req_active: %d, reqQ_empty: %d", wr_ready, new_wr_ready_reg, macroWrQ_empty, macro_req_active, new_macro_req_active, reqQ_empty);
     //end
 
-    always @(posedge clk) begin
-        $display("wr_ready: %d, macroWrQ_empty: %d, macro_req_active: %d, new_macro_req_active: %d, reqQ_empty: %d", wr_ready, macroWrQ_empty, macro_req_active, new_macro_req_active, reqQ_empty);
-    end
+    //always @(posedge clk) begin
+    //    $display("wr_ready: %d, macroWrQ_empty: %d, macro_req_active: %d, new_macro_req_active: %d, reqQ_empty: %d", wr_ready, macroWrQ_empty, macro_req_active, new_macro_req_active, reqQ_empty);
+    //end
     
 
 
-    always @(posedge clk) begin
-    //always @(*) begin
-        $display("wr_done: %d, prev_new_wr_done_reg: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, prev_new_wr_done_reg, new_wr_done_reg, requests_left);
-    end
+    //always @(posedge clk) begin
+    ////always @(*) begin
+    //    $display("wr_done: %d, prev_new_wr_done_reg: %d, new_wr_done_reg: %d, requests_left: %d", wr_done, prev_new_wr_done_reg, new_wr_done_reg, requests_left);
+    //end
 
     // How the memory controller determines if a wr_request should be sent
     // assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
