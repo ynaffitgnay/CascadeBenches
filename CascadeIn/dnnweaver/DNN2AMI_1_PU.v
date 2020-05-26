@@ -360,10 +360,10 @@ module DNN2AMI_1_PU
     assign tagQ_deq       = merge_possible;
     assign respQ_deq      = merge_possible;
 
-    always @(posedge clk) begin
-        $display("merge_possible: %d, inbuf_full: %d, tagQ_out[`DNNMicroRdTag_valid]: %d, tagQ_empty: %d", merge_possible, inbuf_full, tagQ_out[`DNNMicroRdTag_valid], tagQ_empty);
-        $display("respQ_out[`AMIResponse_valid]: %d, respQ_empty: %d,", respQ_out[`AMIResponse_valid], respQ_empty);
-    end
+    //always @(posedge clk) begin
+    //    $display("merge_possible: %d, inbuf_full: %d, tagQ_out[`DNNMicroRdTag_valid]: %d, tagQ_empty: %d", merge_possible, inbuf_full, tagQ_out[`DNNMicroRdTag_valid], tagQ_empty);
+    //    $display("respQ_out[`AMIResponse_valid]: %d, respQ_empty: %d,", respQ_out[`AMIResponse_valid], respQ_empty);
+    //end
     
 
 
@@ -586,35 +586,35 @@ module DNN2AMI_1_PU
                 new_current_isWrite = macro_arbiter_output[`DNNWeaverMemReq_isWrite];
                 new_current_pu_id   = macro_arbiter_output[`DNNWeaverMemReq_pu_id];
             end
-            else $display("MACRORDQ_EMPTY!!!");
+            //else $display("MACRORDQ_EMPTY!!!");
         end
     end // always @ (*)
 
-    always @(posedge clk) begin
-        if (tagQ_enq) begin
-            $display("ENQUEUING TO TAGQ!!!");
-        end
-    end
+    //always @(posedge clk) begin
+    //    if (tagQ_enq) begin
+    //        $display("ENQUEUING TO TAGQ!!!");
+    //    end
+    //end
     
 
     // Signals back to the memory controller
     //assign rd_ready = !macroRdQ_full && !reqQ_full && !macro_req_active && !inbuf_full;    // TODO: double check this
     assign rd_ready = macroRdQ_empty && reqQ_empty && !macro_req_active && tagQ_empty;    // TODO: double check this
 
-    always@(posedge clk) begin
-        if (macro_req_active && reqQ_full) begin
-            $display("RD PATH: Unable to inssue another read request! reqQ_full");
-        end
-        if (macro_req_active && tagQ_full) begin
-            $display("RD PATH: Unable to inssue another read request! tagQ_full");
-        end
-        if (reqQ_enq) begin
-            $display("RD PATH: Enqueing read request %d", new_requests_left);
-        end
-        if (!tagQ_empty) begin
-            $display("RD PATH: tagQ has %d entries left, reqQ has %d entries left, respQ has %d entries left, wrValid %d",SoftFIFO_readtagQ.readtagQ.counter,SoftFIFO_reqQ.reqQ.counter,SoftFIFO_respQ.respQ.counter, wrReqValid);
-        end
-    end
+    //always@(posedge clk) begin
+    //    if (macro_req_active && reqQ_full) begin
+    //        $display("RD PATH: Unable to inssue another read request! reqQ_full");
+    //    end
+    //    if (macro_req_active && tagQ_full) begin
+    //        $display("RD PATH: Unable to inssue another read request! tagQ_full");
+    //    end
+    //    if (reqQ_enq) begin
+    //        $display("RD PATH: Enqueing read request %d", new_requests_left);
+    //    end
+    //    if (!tagQ_empty) begin
+    //        $display("RD PATH: tagQ has %d entries left, reqQ has %d entries left, respQ has %d entries left, wrValid %d",SoftFIFO_readtagQ.readtagQ.counter,SoftFIFO_reqQ.reqQ.counter,SoftFIFO_respQ.respQ.counter, wrReqValid);
+    //    end
+    //end
 
     // Output responses to the block buffer
     // Arbitrate between the reqQ (read requests) and requests from DNN1AMI_WRPath
