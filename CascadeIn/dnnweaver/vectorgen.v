@@ -152,12 +152,7 @@ module vectorgen # (
 
 //====================================================
 /** State machine
- * valid states: IDLE(Default), BUSY */
-
-  always @(posedge clk) begin
-      $display("vectorgen state: %d", state);
-  end
-    
+ * valid states: IDLE(Default), BUSY */    
 
   wire test_ready;
 

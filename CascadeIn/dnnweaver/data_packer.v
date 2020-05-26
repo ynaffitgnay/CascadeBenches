@@ -29,6 +29,8 @@ localparam integer DATA_COUNT_W = `C_LOG_2(OUT_NUM_DATA) + 1;
 
 assign s_write_ready = m_write_ready;
 
+//    initial $display("data_packer OUT_NUM_DATA: %d", OUT_NUM_DATA);
+
 genvar g;
 generate
   if (OUT_NUM_DATA == 1)
