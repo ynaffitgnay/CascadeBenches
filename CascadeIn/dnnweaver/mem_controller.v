@@ -200,21 +200,24 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
 // ******************************************************************
   assign GND = 1024'd0;
 
-  initial begin
-      $display("RD_ROM_WIDTH: %d, WR_ROM_WIDTH: %d, BASE_ADDR_W: %d", RD_ROM_WIDTH, WR_ROM_WIDTH, BASE_ADDR_W);
-      $display("OFFSET_ADDR_W: %d, TX_SIZE_WIDTH: %d, RD_LOOP_W: %d", OFFSET_ADDR_W, TX_SIZE_WIDTH, RD_LOOP_W);
-  end
+  //initial begin
+  //    $display("RD_ROM_WIDTH: %d, WR_ROM_WIDTH: %d, BASE_ADDR_W: %d", RD_ROM_WIDTH, WR_ROM_WIDTH, BASE_ADDR_W);
+  //    $display("OFFSET_ADDR_W: %d, TX_SIZE_WIDTH: %d, RD_LOOP_W: %d", OFFSET_ADDR_W, TX_SIZE_WIDTH, RD_LOOP_W);
+  //end
     
 
   assign rd_req = stream_rd_loop0_inc || (buffer_rd_count_inc && rd_l_type != 2);
 
-  //always @(posedge clk) begin
-  //    $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
-  //    // Components of buffer_rd_count_inc
-  //    $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
-  //    $display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
-  //    $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done,);
-  //end
+  always @(posedge clk) begin
+      $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
+      // Components of buffer_rd_count_inc
+      $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
+      $display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
+      $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done);
+      $display("wait_for_wr_done: %d, stream_wr_count_inc: %d, next_stream_write: %d", wait_for_wr_done, stream_wr_count_inc, next_stream_write);
+      $display("wr_req: %d, wr_done: %d, wr_ready: %d, wr_state: %d", wr_req, wr_done, wr_ready, wr_state);
+      $display("stream_wr_count: %d, stream_wr_count_max: %d", stream_wr_count, stream_wr_count_max);
+  end
     
 
   // Throttles the read to wait for write to finish
@@ -259,14 +262,14 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
     buffer_read_loop_max
   } = rd_cfg;
 
-always @(posedge clk) begin
-    $display("RD_CFG, RD_ROM_WIDTH: %d", RD_ROM_WIDTH);
-    $display("rd_l_type: %d, stm_rvalid_size: %d, stm_read_base_addr: 0x%h, stm_read_size: %d", rd_l_type, stream_rvalid_size, stream_read_base_addr, stream_read_size);
-    $display("stm_read_loop_0_offset: 0x%h, stm_read_loop_1_offset: 0x%h, stm_read_loop_2_offset: 0x%h", stream_read_loop_0_offset, stream_read_loop_1_offset, stream_read_loop_2_offset);
-    $display("stm_read_loop_0_max: %d, stm_read_loop_1_max: %d, stm_read_loop_2_max: %d", stream_read_loop_0_max, stream_read_loop_1_max, stream_read_loop_2_max);
-    $display("buffer_rvalid_size: %d, buffer_read_base_addr: 0x%h, buffer_read_size: %d", buffer_rvalid_size, buffer_read_base_addr, buffer_read_size);
-    $display("buffer_read_offset: 0x%h, buffer_read_loop_max: %d", buffer_read_offset, buffer_read_loop_max);
-end
+//always @(posedge clk) begin
+//    $display("RD_CFG, RD_ROM_WIDTH: %d", RD_ROM_WIDTH);
+//    $display("rd_l_type: %d, stm_rvalid_size: %d, stm_read_base_addr: 0x%h (%d), stm_read_size: %d", rd_l_type, stream_rvalid_size, stream_read_base_addr, stream_read_base_addr, stream_read_size);
+//    $display("stm_read_loop_0_offset: 0x%h (%d), stm_read_loop_1_offset: %d, stm_read_loop_2_offset: %d", stream_read_loop_0_offset, stream_read_loop_0_offset, stream_read_loop_1_offset, stream_read_loop_2_offset);
+//    $display("stm_read_loop_0_max: %d, stm_read_loop_1_max: %d, stm_read_loop_2_max: %d", stream_read_loop_0_max, stream_read_loop_1_max, stream_read_loop_2_max);
+//    $display("buffer_rvalid_size: %d, buffer_read_base_addr: 0x%h (%d), buffer_read_size: %d", buffer_rvalid_size, buffer_read_base_addr, buffer_read_base_addr, buffer_read_size);
+//    $display("buffer_read_offset: 0x%h (%d), buffer_read_loop_max: %d", buffer_read_offset, buffer_read_offset, buffer_read_loop_max);
+//end
     
   // Counter to loop over multiple buffer reads.
   assign buffer_rd_count_default = GND[RD_LOOP_W-1:0];
@@ -526,11 +529,16 @@ end
 
   assign wr_req = !wr_done && (wr_ready) && wr_state == WR_BUSY; //stream_wr_count_inc;
 
-  always @(posedge clk) begin
-      $display("WR_CFG, WR_ROM_DEPTH: %d", WR_ROM_DEPTH);
-      $display("wr_l_type: %d, stream_write_base_addr: 0x%h, stream_write_size: %d", wr_l_type, stream_write_base_addr, stream_write_size);
-      $display("stream_write_offset: 0x%h, stream_write_loop_max: %d", stream_write_offset, stream_write_loop_max);
+  always @(wr_req) begin
+      $display("MEM_CONTROLLER: wr_req: %d, wr_ready: %d", wr_req, wr_ready);
   end
+    
+
+  //always @(posedge clk) begin
+  //    $display("WR_CFG, WR_ROM_DEPTH: %d", WR_ROM_DEPTH);
+  //    $display("wr_l_type: %d, stream_write_base_addr: 0x%h (%d), stream_write_size: %d", wr_l_type, stream_write_base_addr, stream_write_base_addr, stream_write_size);
+  //    $display("stream_write_offset: 0x%h (%d), stream_write_loop_max: %d", stream_write_offset, stream_write_offset, stream_write_loop_max);
+  //end
     
 
 
