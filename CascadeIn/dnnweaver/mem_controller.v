@@ -199,6 +199,11 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
 
   assign rd_req = stream_rd_loop0_inc || (buffer_rd_count_inc && rd_l_type != 2);
 
+  always @(posedge clk) begin
+      $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
+  end
+    
+
   // Throttles the read to wait for write to finish
   // assign read_throttle =
   //   rd_l_type == 1 ?
