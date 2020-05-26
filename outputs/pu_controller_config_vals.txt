@@ -1,0 +1,205 @@
+>>> [33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in weight_buffer.v on line 40: for (ii = 0; (ii < (1 << WR_ADDR_WIDTH)); ii = (ii + 1)) begin
+[00m>>> [33m    	tmp = 0;
+[00m>>> [33m    	for (jj = (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH)); (jj > (-1)); jj = (jj - 1)) begin
+[00m>>> [33m    		tmp = ((tmp << RD_WIDTH) + ((ii * (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH))) + jj));
+[00m>>> [33m    		mem[ii] = tmp;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m  > In module declaration in weight_buffer.v on line 40: for (jj = (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH)); (jj > (-1)); jj = (jj - 1)) begin
+[00m>>> [33m    	tmp = ((tmp << RD_WIDTH) + ((ii * (1 << (RD_ADDR_WIDTH - WR_ADDR_WIDTH))) + jj));
+[00m>>> [33m    	mem[ii] = tmp;
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in ROM.v on line 47: for (i = 0; (i < ROM_DEPTH); i = (i + 1)) begin
+[00m>>> [33m    	if ((!$feof(lutstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(lutstream,"%b",val);
+[00m>>> [33m    		end 
+[00m>>> [33m    		mem[i] <= val;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		mem[i] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in serdes.v on line 99: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in PU.v on line 207: PE_GENBLK[0].pe_write_valid
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m  > In module declaration in PU_controller.v on line 161: for (pu_rom_idx = 0; (pu_rom_idx < CFG_DEPTH); pu_rom_idx = (pu_rom_idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(pucstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(pucstream,"%b",pucval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		cfg_rom[pu_rom_idx] = pucval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		cfg_rom[pu_rom_idx] = 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in mem_controller.v on line 87: for (idx = 0; (idx < RD_ROM_DEPTH); idx = (idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(rmstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(rmstream,"%b",rval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		rd_cfg_rom[idx] <= rval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		rd_cfg_rom[idx] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m  > In module declaration in mem_controller.v on line 90: for (idx = 0; (idx < WR_ROM_DEPTH); idx = (idx + 1)) begin
+[00m>>> [33m    	if ((!$feof(wmstream))) begin
+[00m>>> [33m    		begin
+[00m>>> [33m    			$__get(wmstream,"%b",wval);
+[00m>>> [33m    		end 
+[00m>>> [33m    		wr_cfg_rom[idx] <= wval;
+[00m>>> [33m    	end 
+[00m>>> [33m    	else begin
+[00m>>> [33m    		wr_cfg_rom[idx] <= 0;
+[00m>>> [33m    	end 
+[00m>>> [33m    end 
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module declaration in <unknown location --- please contact developers> on line 0: STDOUT
+[00m>>> [33m    Found reference to unresolvable identifier, this may result in an error during instantiation
+[00m>>> [33m[00m[33mTypechecker Warning:
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: mem_controller #(.NUM_PE(NUM_PE),.NUM_PU(NUM_PU),.ADDR_W(ADDR_W),.BASE_ADDR_W(BASE_ADDR_W),.OFFSET_ADDR_W(OFFSET_ADDR_W),.RD_LOOP_W(RD_LOOP_W),.TX_SIZE_WIDTH(TX_SIZE_WIDTH),.D_TYPE_W(D_TYPE_W)) u_mem_ctrl(.clk(clk),.reset(reset),.start(start),.done(done),.rd_cfg_idx(rd_cfg_idx),.wr_cfg_idx(wr_cfg_idx),.pu_id(pu_id),.d_type(d_type),.rd_req(rd_req),.rd_ready(rd_ready),.rd_req_size(rd_req_size),.rd_rvalid_size(rd_rvalid_size),.rd_addr(rd_addr),.wr_req(wr_req),.wr_pu_id(wr_pu_id),.wr_ready(wr_ready),.wr_req_size(wr_req_size),.wr_addr(wr_addr),.wr_done(wr_done));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: mem_controller #(.NUM_PE(NUM_PE),.NUM_PU(NUM_PU),.ADDR_W(ADDR_W),.BASE_ADDR_W(BASE_ADDR_W),.OFFSET_ADDR_W(OFFSET_ADDR_W),.RD_LOOP_W(RD_LOOP_W),.TX_SIZE_WIDTH(TX_SIZE_WIDTH),.D_TYPE_W(D_TYPE_W)) u_mem_ctrl(.clk(clk),.reset(reset),.start(start),.done(done),.rd_cfg_idx(rd_cfg_idx),.wr_cfg_idx(wr_cfg_idx),.pu_id(pu_id),.d_type(d_type),.rd_req(rd_req),.rd_ready(rd_ready),.rd_req_size(rd_req_size),.rd_rvalid_size(rd_rvalid_size),.rd_addr(rd_addr),.wr_req(wr_req),.wr_pu_id(wr_pu_id),.wr_ready(wr_ready),.wr_req_size(wr_req_size),.wr_addr(wr_addr),.wr_done(wr_done));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: weight_buffer #(.RD_WIDTH(OP_WIDTH),.WR_WIDTH(AXI_DATA_WIDTH),.RD_ADDR_WIDTH(RD_ADDR_WIDTH),.WR_ADDR_WIDTH(WR_ADDR_WIDTH)) u_wb(.clk(clk),.reset(reset),.read_req(wb_read_req_d),.read_data(wb_read_data),.read_addr(wb_read_addr_d),.write_req(wb_write_req),.write_data(wb_write_data),.write_addr(wb_write_addr));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: weight_buffer #(.RD_WIDTH(OP_WIDTH),.WR_WIDTH(AXI_DATA_WIDTH),.RD_ADDR_WIDTH(RD_ADDR_WIDTH),.WR_ADDR_WIDTH(WR_ADDR_WIDTH)) u_wb(.clk(clk),.reset(reset),.read_req(wb_read_req_d),.read_data(wb_read_data),.read_addr(wb_read_addr_d),.write_req(wb_write_req),.write_data(wb_write_data),.write_addr(wb_write_addr));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: ROM #(.DATA_WIDTH(OP_WIDTH),.ADDR_WIDTH(11)) u_lrn_lut(.clk(clk),.reset(reset),.address(sqsum_ser),.enable(sqsum_ser_valid),.data_out(lrn_weight));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m  > In module instantiation in <unknown location --- please contact developers> on line 0: PU_controller #(.NUM_PE(NUM_PE),.WEIGHT_ADDR_WIDTH(RD_ADDR_WIDTH),.PE_CTRL_W(PE_CTRL_WIDTH),.VECGEN_CTRL_W(VECGEN_CTRL_W),.TID_WIDTH(PU_TID_WIDTH),.PAD_WIDTH(PAD_WIDTH),.LAYER_PARAM_WIDTH(LAYER_PARAM_WIDTH)) u_controller(.clk(clk),.reset(reset),.start(start),.done(pu_done),.l_type(l_type),.dbg_kw(dbg_kw),.dbg_kh(dbg_kh),.dbg_iw(dbg_iw),.dbg_ih(dbg_ih),.dbg_ic(dbg_ic),.dbg_oc(dbg_oc),.state(pu_controller_state),.pe_ctrl(pe_ctrl),.lrn_enable(lrn_enable),.pu_serdes_count(pu_serdes_count),.pe_neuron_sel(pe_neuron_sel),.pe_neuron_bias(pe_neuron_bias),.pe_neuron_read_req(pe_neuron_read_req),.buffer_read_empty(buffer_read_empty),.buffer_read_req(buffer_read_req),.buffer_read_last(buffer_read_last),.vectorgen_ready(vecgen_ready),.pu_vecgen_ready(pu_vecgen_ready),.vectorgen_ctrl(vecgen_ctrl),.vectorgen_cfg(vecgen_cfg),.pe_piso_read_req(pe_piso_read_req),.wb_read_req(wb_read_req),.wb_read_addr(wb_read_addr),.pe_write_mask(vecgen_mask),.pool_cfg(pool_cfg),.pool_ctrl(pool_ctrl),.src_0_sel(src_0_sel),.src_1_sel(src_1_sel),.src_2_sel(src_2_sel),.bias_read_req(bias_read_req),.out_sel(out_sel),.dst_sel(dst_sel),.l_inc_out(l_inc));
+[00m>>> [33m    Cascade attempts to statically unroll all loop statements and may hang if it is not possible to do so, see previous warnings for more information
+[00m>>> [33m[00mstart
+>>> CTRL_WIDTH: 7, CFG_WIDTH: 3
+>>> initial cfg_fifo_count: 0, RAM_DEPTH: 32
+>>> SERDES_COUNT_W: 6, NUM_PE: 4
+>>> CFG_WIDTH: 142, SERDES_COUNT_W: 6, PARAM_C_WIDTH: 16, LAYER_PARAM_WIDTH: 10
+>>> TID_WIDTH: 16, PAD_WIDTH: 3, L_TYPE_WIDTH: 2, STRIDE_SIZE_W: 3
+>>> instantiated
+>>> SERDES: serdes_max: 0, IN_COUNT: 4, serializer_pop: 0, sipo_data_out_v: 0
+>>> state: 0, serdes_fifo_empty: 1, serdes_fifo_pop: 1
+>>> sipo_data_v: 0, serial_data_v: 0, state: 0, serdes_count: 0
+>>> SERDES: serdes_max: 0, IN_COUNT: 4, serializer_pop: 0, sipo_data_out_v: 0
+>>> state: 0, serdes_fifo_empty: 1, serdes_fifo_pop: 0
+>>> sipo_data_v: 0, serial_data_v: 0, state: 0, serdes_count: 0
+>>>     fifo fwft push ctr: 0, pop ctr: 0, fifo_cnt: 0, fifo_empty: 1
+>>> layer params: serdes_count: 0, param_conv_stride: 0, param_pool_iw: 0
+>>> param_oh: 0, pool_kernel: 0, param_pool_enable: 0, l_type: 0
+>>> max_threads: 0, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 0, endrow_iw: 0
+>>> param_ic: 0, param_ih: 0, param_iw: 0, param_oc: 0, param_kh: 0, param_kw: 0
+>>> _pool_valid: 0 = (0 || 0) && (0 == 0) || ((0 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 0
+>>> pool_kernel: 0, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 0
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 0) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 0
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 1
+>>> Cycle 1: Starting and transitioning to AWAIT_RESP
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 2
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 3
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 4
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 5
+>>> DNN2AMI:============================================================ Accepting macro WRITE request ADDR: 000d6d00 Size: 36 
+>>> DNN2AMI: WR_req is being asserted
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 6
+>>> layer params: serdes_count: 4, param_conv_stride: 1, param_pool_iw: 5
+>>> param_oh: 23, pool_kernel: 2, param_pool_enable: 1, l_type: 0
+>>> max_threads: 24, pad_w: 0, pad_r_s: 0, pad_r_e: 0, skip: 1, endrow_iw: 6
+>>> param_ic: 0, param_ih: 27, param_iw: 5, param_oc: 19, param_kh: 4, param_kw: 4
+>>> _pool_valid: 0 = (0 || 0) && (0 == 23) || ((2 == 3) ? (0 == 0 && 0 != 0) : (0 == 1))
+>>> _pool_in_shift: 0, _pool_in_pop: 0, pool_ih_count: 0, pool_ih_max: 23
+>>> pool_kernel: 2, pool_ih_count[0]: 0, pool_ih_count: 0
+>>> 
+>>> 
+>>> Cycle: 7
+>>> Goodbye!
