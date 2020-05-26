@@ -14,7 +14,7 @@ module file_cfg (
 integer lutstream = $fopen("input_files/nonexistent_file.txt");
 integer outstream = $fopen("input_files/other_file.txt");
 integer instream = $fopen("input_files/other_file.txt", "r");
-integer wmstream = $fopen("wr_mem_controller.mif", "r");
+integer wmstream = $fopen("input_files/dnnweaver/wr_mem_controller.mif", "r");
 reg[118 - 1:0] wval;
 integer i = 0;
 integer idx = 0;
