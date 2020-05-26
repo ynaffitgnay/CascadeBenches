@@ -209,14 +209,14 @@ localparam integer IDLE = 0, RD_CFG_BUFFER = 1, RD_CFG_STREAM = 2,
   assign rd_req = stream_rd_loop0_inc || (buffer_rd_count_inc && rd_l_type != 2);
 
   always @(posedge clk) begin
-      $display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
-      // Components of buffer_rd_count_inc
-      $display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
-      $display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
+      //$display("rd_req: %d, stream_rd_loop0_inc: %d, buffer_rd_count_inc: %d, rd_l_type: %d", rd_req, stream_rd_loop0_inc, buffer_rd_count_inc, rd_l_type);
+      //// Components of buffer_rd_count_inc
+      //$display("rd_state: %d, rd_ready: %d, read_throttle_d: %d", rd_state, rd_ready, read_throttle_d);
+      //$display("rd_cfg_idx: %d, next_stream_loop_3: %d, stream_rd_loop2_inc: %d", rd_cfg_idx, next_stream_loop_3, stream_rd_loop2_inc);
       $display("wr_cfg_idx: %d, wr_state: %d, wr_done: %d", wr_cfg_idx, wr_state, wr_done);
-      $display("wait_for_wr_done: %d, stream_wr_count_inc: %d, next_stream_write: %d", wait_for_wr_done, stream_wr_count_inc, next_stream_write);
+      $display("wait_for_wr_done: %d, stream_wr_count_inc: %d, stream_wr_count: %d, stream_wr_count_max: %d, next_stream_write: %d", wait_for_wr_done, stream_wr_count_inc, stream_wr_count, stream_wr_count_max, next_stream_write);
       $display("wr_req: %d, wr_done: %d, wr_ready: %d, wr_state: %d", wr_req, wr_done, wr_ready, wr_state);
-      $display("stream_wr_count: %d, stream_wr_count_max: %d", stream_wr_count, stream_wr_count_max);
+      //$display("stream_wr_count: %d, stream_wr_count_max: %d", stream_wr_count, stream_wr_count_max);
   end
     
 
@@ -696,23 +696,25 @@ end
     .COUNT                    ( wr_pu_id_count           )   //output
   );
 
-    always @(posedge clk) begin
-        $display("wr_cfg_idx_max: %d, write_idx_count: %d, write_idx_overflow: %d, write_idx_inc: %d", wr_cfg_idx_max, write_idx_count, write_idx_overflow, write_idx_inc);
-        $display("wr_done: %d, wr_state: %d", wr_done, wr_state);
-    
-        $display("  stream_max: %d, stream_wr_count_inc: %d, stream_wr_count: %d,  next_stream_write: %d", stream_wr_count_max, stream_wr_count_inc, stream_wr_count, next_stream_write);
-    
-        if (wr_done) begin
-            $display();
-            $display();
-            $display();
-            $display("<<<<<<<<<<<<<<<<<WR_DONE!!! STATE: %d>>>>>>>>>>>>>>>>>>>>>>", wr_state);
-            $display();
-            $display();
-            $display();
-        end
-    
-    end
+
+/* TODO: BRING THIS ONE BACK! After you deal with wr_ready */
+    //always @(posedge clk) begin
+    //    $display("wr_cfg_idx_max: %d, write_idx_count: %d, write_idx_overflow: %d, write_idx_inc: %d", wr_cfg_idx_max, write_idx_count, write_idx_overflow, write_idx_inc);
+    //    //$display("wr_done: %d, wr_state: %d", wr_done, wr_state);
+    //
+    //    //$display("  stream_max: %d, stream_wr_count_inc: %d, stream_wr_count: %d,  next_stream_write: %d", stream_wr_count_max, stream_wr_count_inc, stream_wr_count, next_stream_write);
+    //
+    //    if (wr_done) begin
+    //        $display();
+    //        $display();
+    //        $display();
+    //        $display("<<<<<<<<<<<<<<<<<WR_DONE!!! STATE: %d>>>>>>>>>>>>>>>>>>>>>>", wr_state);
+    //        $display();
+    //        $display();
+    //        $display();
+    //    end
+    //
+    //end
 
 
 endmodule
