@@ -223,7 +223,7 @@ module fpu_mul(
     end
   end // always @ (posedge clk)
 
-  always @(*) product_shift <= msb ? (105 - msb) : (product ? 105 : 106);
+  always @(*) product_shift = msb ? (105 - msb) : (product ? 105 : 106);
 
   fpu_pri_encoder fe(product, msb);
 

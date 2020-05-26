@@ -306,8 +306,8 @@ module fpu_div(
       enable_reg_2 <= 1;
   end
 
-  always @(*) dividend_shift <= msb_A ? (51 - msb_A) : (dividend_a ? 51 : 52);
-  always @(*) divisor_shift <= msb_B ? (51 - msb_B) : (divisor_b ? 51 : 52);
+  always @(*) dividend_shift = msb_A ? (51 - msb_A) : (dividend_a ? 51 : 52);
+  always @(*) divisor_shift = msb_B ? (51 - msb_B) : (divisor_b ? 51 : 52);
 
   fpu_pri_encoder#(.WIDTH( WIDTH ), .WIDTH_LOG( WIDTH_LOG )) fe_A( dividend_a, msb_A );
   fpu_pri_encoder#(.WIDTH( WIDTH ), .WIDTH_LOG( WIDTH_LOG )) fe_B( divisor_b, msb_B );

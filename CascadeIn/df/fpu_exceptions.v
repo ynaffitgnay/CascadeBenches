@@ -45,13 +45,13 @@ module fpu_exceptions(
                        exponent_in, 
                        mantissa_in, 
                        fpu_op, 
-                       out, 
-                       ex_enable, 
-                       underflow, 
-                       overflow, 
-                       inexact, 
-                       exception, 
-                       invalid
+                       out_w, 
+                       ex_enable_w, 
+                       underflow_w, 
+                       overflow_w, 
+                       inexact_w, 
+                       exception_w, 
+                       invalid_w
                        );
 
   input wire clk;
@@ -64,14 +64,29 @@ module fpu_exceptions(
   input wire [11:0] exponent_in;
   input wire [1:0] mantissa_in;
   input wire [2:0] fpu_op;
-  output reg [63:0] out;
-  output reg ex_enable;
-  output reg underflow;
-  output reg overflow;
-  output reg inexact;
-  output reg exception;
-  output reg invalid;
+  output wire [63:0] out_w;
+  output wire ex_enable_w;
+  output wire underflow_w;
+  output wire overflow_w;
+  output wire inexact_w;
+  output wire exception_w;
+  output wire invalid_w;
 
+  reg out;
+  reg ex_enable;
+  reg underflow;
+  reg overflow;
+  reg inexact;
+  reg exception;
+  reg invalid;
+  assign out_w = out;
+  assign ex_enable_w = ex_enable;
+  assign underflow_w = underflow;
+  assign overflow_w = overflow;
+  assign inexact_w = inexact;
+  assign exception_w = exception;
+  assign invalid_w = invalid;
+  
   reg in_et_zero;
   reg opa_et_zero;
   reg opb_et_zero;

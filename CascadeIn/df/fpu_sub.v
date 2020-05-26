@@ -165,7 +165,7 @@ module fpu_sub(
   end
 
   // Calculate diff_shift  
-  always @(*) diff_shift <= msb ? (54 - msb) : (diff ? 54 : 55);
+  always @(*) diff_shift = msb ? (54 - msb) : (diff ? 54 : 55);
 
 
   fpu_pri_encoder#(.WIDTH( WIDTH ), .WIDTH_LOG( WIDTH_LOG )) fe(diff, msb);

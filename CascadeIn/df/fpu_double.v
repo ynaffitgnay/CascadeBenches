@@ -107,7 +107,7 @@ module fpu(
   reg sub_enable; 
   reg mul_enable; 
   reg div_enable;
-  reg except_enable;
+  wire except_enable;
   wire [55:0] sum_out;
   wire [55:0] diff_out;
   reg [55:0] addsub_out;
@@ -162,9 +162,9 @@ module fpu(
   fpu_exceptions u6(.clk(clk),.rst(rst),.enable(op_enable),.rmode(rmode_reg),
                     .opa(opa_reg),.opb(opb_reg),
                     .in_except(out_round), .exponent_in(exponent_post_round),
-                    .mantissa_in(mantissa_round[1:0]),.fpu_op(fpu_op_reg),.out(out_except),
-                    .ex_enable(except_enable),.underflow(underflow_0),.overflow(overflow_0),
-                    .inexact(inexact_0),.exception(exception_0),.invalid(invalid_0));
+                    .mantissa_in(mantissa_round[1:0]),.fpu_op(fpu_op_reg),.out_w(out_except),
+                    .ex_enable_w(except_enable),.underflow_w(underflow_0),.overflow_w(overflow_0),
+                    .inexact_w(inexact_0),.exception_w(exception_0),.invalid_w(invalid_0));
   
   
   always @(posedge clk) begin

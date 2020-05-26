@@ -59,9 +59,12 @@ module fpu_tb( clk );
   wire exception;
   wire invalid;
 
+  (*non_volatile*)
   reg [31:0] ctr;
+  (*non_volatile*)
   reg [31:0] test_ctr;
-
+  
+  (*non_volatile*)
   reg [63:0] out_reg;
 
   parameter TESTS_TO_RUN = 1000000000;
@@ -1229,6 +1232,8 @@ module fpu_tb( clk );
       ctr <= 0;  // reset ctr for another iteration through tests
       //$display(test_ctr);
     end
+    
+    if (ctr > 2400) $yield;
 
   end // always @ (posedge clk)
 
