@@ -345,18 +345,18 @@ module DNNDrive_Cascade #(
 
 
 /////* DEBUG: */
-    always @(posedge clk) begin
-        if (clk_counter > 6000) $finish;
-    end
+//    always @(posedge clk) begin
+//        if (clk_counter > 6000) $finish;
+//    end
     
 
 endmodule
 
-initial $display("start");
+//initial $display("start");
 
 reg rst;
 
 
 DNNDrive_Cascade dnnc(clock.val, rst);
 
-initial $display("instantiated");
+//initial $display("instantiated");
