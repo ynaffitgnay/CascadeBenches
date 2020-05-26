@@ -359,6 +359,13 @@ module DNN2AMI_1_PU
     assign tagQ_deq       = merge_possible;
     assign respQ_deq      = merge_possible;
 
+    always @(posedge clk) begin
+        $display("merge_possible: %d, inbuf_full: %d, tagQ_out[`DNNMicroRdTag_valid]: %d, tagQ_empty: %d", merge_possible, inbuf_full, tagQ_out[`DNNMicroRdTag_valid], tagQ_empty);
+        $display("respQ_out[`AMIResponse_valid]: %d, respQ_empty: %d,", respQ_out[`AMIResponse_valid], respQ_empty);
+    end
+    
+
+
     wire[`AMI_DATA_WIDTH - 1:0] respQ_out_data;
     assign respQ_out_data = respQ_out[`AMIResponse_data];
     assign data_to_inbuf  = respQ_out_data[AXI_DATA_WIDTH-1:0];

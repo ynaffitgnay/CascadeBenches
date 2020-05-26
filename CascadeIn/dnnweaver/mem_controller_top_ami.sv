@@ -827,6 +827,17 @@ begin
     axi_rd_buffer_data_out_d <= axi_rd_buffer_data_out;
 end
 
+always @(posedge clk) begin
+    $display("u_read_info stream_push: %d, inbuf_pop: %d, d_type: %d", stream_push, u_read_info.inbuf_pop, u_read_info.d_type);
+    $display("rvalid_inc: %d, rvalid_count: %d, rvalid_max: %d", u_read_info.rvalid_inc, u_read_info.rvalid_count, u_read_info.rvalid_max);
+    $display("inbuf_empty: %d, output_fifo_full: %d, next_read: %d, ri_state: %d", u_read_info.inbuf_empty, u_read_info.output_fifo_full, u_read_info.next_read, u_read_info.state);
+end 
+
+
+//always @(u_read_info.rvalid_max) begin
+//    $display("RVALID MAX CHANGED TO: %d", u_read_info.rvalid_max);
+//end
+    
 
 // ==================================================================
 

@@ -520,6 +520,11 @@ module dnn_accelerator_ami #(
     .write_data               ( vecgen_wr_data           ),
     .write_valid              ( vecgen_wr_valid          )
     );
+
+  //always @(posedge clk) begin
+  //    $display("vecgen state: %d, reads_remaining: %d, read_req: %d, read_ready: %d", vecgen_state, vecgen.reads_remaining, vecgen.read_req, vecgen.read_ready);
+  //end
+    
   // ==================================================================
 
   // ==================================================================

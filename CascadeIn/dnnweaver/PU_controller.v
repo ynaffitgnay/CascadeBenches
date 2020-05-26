@@ -1880,10 +1880,12 @@ wire next_iw;
       //$display("pool_kernel: %d, pool_ih_count[0]: %d, pool_ih_count: %d", pool_kernel, pool_ih_count[0], pool_ih_count);
       //$display("_pool_in_pop: %d, stride_count: %d, pool_ready: %d, pool_enable: %d",_pool_in_pop, stride_count, pool_ready, pool_enable);
       //$display("pool_ready: %d, p_count: %d, pad_iw: %d, pool_ready_last: %d", pool_ready, p_count, pad_iw, pool_ready_last);
+      
       //$display("p_dec: %d, p_inc: %d, pe_write_valid: %d, out_sel: %d", p_dec, p_inc, pe_write_valid, out_sel);
       //$display("p_inc: %d, _pe_write_valid: %d, kh_dec: %d, kh: %d, ic_is_max: %d", p_inc, _pe_write_valid, kh_dec, kh, ic_is_max);
-      $display("_pe_write_valid: %d, kh_dec: %d, kw_inc: %d, next_kh: %d", _pe_write_valid, kh_dec, kw_inc, next_kh);
-      $display("data_stall: %d, vecgen_ready: %d, vectorgen_pop: %d", data_stall, vecgen_ready, vectorgen_pop);
+      
+      //$display("_pe_write_valid: %d, kh_dec: %d, kw_inc: %d, next_kh: %d", _pe_write_valid, kh_dec, kw_inc, next_kh);
+      //$display("data_stall: %d, vecgen_ready: %d, vectorgen_pop: %d", data_stall, vecgen_ready, vectorgen_pop);
   end
     
 
